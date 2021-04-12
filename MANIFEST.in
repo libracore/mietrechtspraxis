@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include mietrechtspraxis *.css
+recursive-include mietrechtspraxis *.csv
+recursive-include mietrechtspraxis *.html
+recursive-include mietrechtspraxis *.ico
+recursive-include mietrechtspraxis *.js
+recursive-include mietrechtspraxis *.json
+recursive-include mietrechtspraxis *.md
+recursive-include mietrechtspraxis *.png
+recursive-include mietrechtspraxis *.py
+recursive-include mietrechtspraxis *.svg
+recursive-include mietrechtspraxis *.txt
+recursive-exclude mietrechtspraxis *.pyc
