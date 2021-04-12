@@ -1,0 +1,39 @@
+{
+ "creation": "2021-04-12 11:54:10.721950",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "magazines_recipient",
+  "magazines_qty_mr"
+ ],
+ "fields": [
+  {
+   "description": "(MR)",
+   "fieldname": "magazines_recipient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Magazines Recipient",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "magazines_qty_mr",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Magazines Quantity (MR)",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-04-12 11:54:10.721950",
+ "modified_by": "Administrator",
+ "module": "mietrechtspraxis",
+ "name": "mp Abo Recipient",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

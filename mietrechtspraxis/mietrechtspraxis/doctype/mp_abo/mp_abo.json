@@ -1,0 +1,128 @@
+{
+ "autoname": "Abo-.#####",
+ "creation": "2021-04-12 11:49:35.841988",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_general",
+  "type",
+  "status",
+  "magazines_qty_total",
+  "cb_1",
+  "start_date",
+  "end_date",
+  "section_owner",
+  "invoice_recipient",
+  "cb_2",
+  "magazines_qty_ir",
+  "section_recipient",
+  "recipient"
+ ],
+ "fields": [
+  {
+   "description": "(IR)",
+   "fieldname": "invoice_recipient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Invoice Recipient",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "magazines_qty_ir",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Magazines Quantity (IR)",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Jahres-Abo\nGratis-Abo\nProbe-Abo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Aktiv\nAktiv gek\u00fcndigt\nInaktiv",
+   "reqd": 1
+  },
+  {
+   "fieldname": "recipient",
+   "fieldtype": "Table",
+   "label": "Recipient",
+   "options": "mp Abo Recipient"
+  },
+  {
+   "fieldname": "section_general",
+   "fieldtype": "Section Break",
+   "label": "General"
+  },
+  {
+   "default": "1",
+   "description": "(Total QTY IR + MR)",
+   "fieldname": "magazines_qty_total",
+   "fieldtype": "Int",
+   "label": "Magazines Quantity (Total)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_owner",
+   "fieldtype": "Section Break",
+   "label": "Owner"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_recipient",
+   "fieldtype": "Section Break",
+   "label": "Recipient"
+  }
+ ],
+ "modified": "2021-04-12 12:55:04.259359",
+ "modified_by": "Administrator",
+ "module": "mietrechtspraxis",
+ "name": "mp Abo",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

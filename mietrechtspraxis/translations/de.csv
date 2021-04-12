@@ -1,0 +1,11 @@
+Module: mietrechtspraxis,Customers Search Mask,Kunden Suchmaske
+DocType: Customers Search Mask,Firstname,Vorname
+DocType: Customers Search Mask,Lastname,Nachname
+DocType: Customers Search Mask,Search Details,Suchdetails
+DocType: mp Abo,Magazines Quantity (Total),Anzahl Exemplare (Total)
+DocType: mp Abo,(Total QTY IR + MR),(Total Anzahl IR + MR)
+DocType: mp Abo,Invoice Recipient,"Rechnungsempfänger"
+DocType: mp Abo,Magazines Quantity (IR),Anzahl Exemplare (IR)
+DocType: mp Abo,Magazines Recipient,"Magazin Empfänger"
+DocType: mp Abo,Magazines Quantity (MR),Anzahl Exemplare (MR)
+DocType: mp Abo,Go to Customers Search Mask,"Öffne die Kunden Suchmaske"
