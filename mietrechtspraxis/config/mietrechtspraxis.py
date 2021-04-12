@@ -12,6 +12,12 @@ def get_data():
                        "name": "mp Abo",
                        "label": _("mp Abo"),
                        "description": _("mp Abo")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "mp Abo Settings",
+                       "label": _("mp Abo Settings"),
+                       "description": _("mp Abo Settings")
                    }
             ]
         },

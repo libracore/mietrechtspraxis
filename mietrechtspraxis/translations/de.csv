@@ -1,4 +1,5 @@
 Module: mietrechtspraxis,Customers Search Mask,Kunden Suchmaske
+Module: mietrechtspraxis,mp Abo Settings,mp Abo Einstellungen
 DocType: Customers Search Mask,Firstname,Vorname
 DocType: Customers Search Mask,Lastname,Nachname
 DocType: Customers Search Mask,Search Details,Suchdetails
@@ -9,3 +10,6 @@ DocType: mp Abo,Magazines Quantity (IR),Anzahl Exemplare (IR)
 DocType: mp Abo,Magazines Recipient,"Magazin Empfänger"
 DocType: mp Abo,Magazines Quantity (MR),Anzahl Exemplare (MR)
 DocType: mp Abo,Go to Customers Search Mask,"Öffne die Kunden Suchmaske"
+DocType: mp Abo Settings,Corresponding Item for Type Jahres-Abo,Artikel für Abo-Typ Jahres-Abo
+DocType: mp Abo Settings,Corresponding Item for Type Gratis-Abo,Artikel für Abo-Typ Gratis-Abo
+DocType: mp Abo Settings,Corresponding Item for Type Probe-Abo,Artikel für Abo-Typ Probe-Abo

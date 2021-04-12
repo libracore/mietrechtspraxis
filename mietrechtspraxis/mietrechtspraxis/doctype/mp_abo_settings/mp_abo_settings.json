@@ -1,0 +1,65 @@
+{
+ "creation": "2021-04-12 14:13:33.924962",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_abo_type_item",
+  "jahres_abo",
+  "gratis_abo",
+  "probe_abo"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_abo_type_item",
+   "fieldtype": "Section Break",
+   "label": "Abo Type &lt;&gt; Item"
+  },
+  {
+   "description": "Corresponding Item for Type Jahres-Abo",
+   "fieldname": "jahres_abo",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Jahres-Abo",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "description": "Corresponding Item for Type Gratis-Abo",
+   "fieldname": "gratis_abo",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Gratis-Abo",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "description": "Corresponding Item for Type Probe-Abo",
+   "fieldname": "probe_abo",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Probe-Abo",
+   "options": "Item",
+   "reqd": 1
+  }
+ ],
+ "issingle": 1,
+ "modified": "2021-04-12 14:13:33.924962",
+ "modified_by": "Administrator",
+ "module": "mietrechtspraxis",
+ "name": "mp Abo Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
