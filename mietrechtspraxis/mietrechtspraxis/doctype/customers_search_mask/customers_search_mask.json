@@ -85,7 +85,7 @@
   {
    "fieldname": "result_html",
    "fieldtype": "HTML",
-   "options": "<p>No results found.</p>\n<p>Please fill in the form above and click Search on top right.</p>"
+   "options": "<p>No results found.</p><p>Please fill in the form above and click Search on top right.</p>"
   },
   {
    "fieldname": "cb_1",
@@ -94,7 +94,7 @@
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2021-04-12 13:22:39.670649",
+ "modified": "2021-04-12 14:38:57.224581",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Customers Search Mask",

@@ -14,6 +14,8 @@
   "end_date",
   "section_owner",
   "invoice_recipient",
+  "recipient_contact",
+  "recipient_address",
   "cb_2",
   "magazines_qty_ir",
   "section_recipient",
@@ -101,9 +103,25 @@
    "fieldname": "section_recipient",
    "fieldtype": "Section Break",
    "label": "Recipient"
+  },
+  {
+   "depends_on": "eval:doc.invoice_recipient",
+   "fieldname": "recipient_contact",
+   "fieldtype": "Link",
+   "label": "Recipient Contact",
+   "options": "Contact",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.invoice_recipient",
+   "fieldname": "recipient_address",
+   "fieldtype": "Link",
+   "label": "Recipient Address",
+   "options": "Address",
+   "reqd": 1
   }
  ],
- "modified": "2021-04-12 12:55:04.259359",
+ "modified": "2021-04-13 11:15:47.344493",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo",

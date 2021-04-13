@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('mp Abo', {
 	refresh: function(frm) {
+        // add custom buttons
         frm.add_custom_button(__("Go to Customers Search Mask"), function() {
             go_to_customers_search_mask(frm);
         });
@@ -11,6 +12,42 @@ frappe.ui.form.on('mp Abo', {
                 create_user_login(frm);
             });
         }
+        
+        // apply filter to links fields
+        cur_frm.fields_dict['recipient_contact'].get_query = function(doc) {
+          return {
+            filters: {
+        	  "link_doctype": "Customer",
+        	  "link_name": frm.doc.invoice_recipient
+            }
+          }
+        };
+        cur_frm.fields_dict['recipient_address'].get_query = function(doc) {
+          return {
+            filters: {
+        	  "link_doctype": "Customer",
+        	  "link_name": frm.doc.invoice_recipient
+            }
+          }
+        };
+        cur_frm.fields_dict.recipient.grid.get_field('recipient_contact').get_query = function(doc, cdt, cdn) {
+          var child = locals[cdt][cdn];
+          return {
+            filters: {
+        	  "link_doctype": "Customer",
+        	  "link_name": child.magazines_recipient
+            }
+          }
+        };
+        cur_frm.fields_dict.recipient.grid.get_field('recipient_address').get_query = function(doc, cdt, cdn) {
+          var child = locals[cdt][cdn];
+          return {
+            filters: {
+        	  "link_doctype": "Customer",
+        	  "link_name": child.magazines_recipient
+            }
+          }
+        };
 	}
 });
 
