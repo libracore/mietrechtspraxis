@@ -18,7 +18,7 @@
   "city",
   "country",
   "section_results",
-  "result_html"
+  "search_result_html"
  ],
  "fields": [
   {
@@ -83,18 +83,17 @@
    "label": "Search Results"
   },
   {
-   "fieldname": "result_html",
-   "fieldtype": "HTML",
-   "options": "<p>No results found.</p><p>Please fill in the form above and click Search on top right.</p>"
-  },
-  {
    "fieldname": "cb_1",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "search_result_html",
+   "fieldtype": "HTML"
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2021-04-12 14:38:57.224581",
+ "modified": "2021-04-14 11:48:40.526059",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Customers Search Mask",
