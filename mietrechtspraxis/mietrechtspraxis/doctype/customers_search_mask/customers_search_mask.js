@@ -4,6 +4,9 @@ frappe.provide("erpnext.utils");
 
 frappe.ui.form.on('Customers Search Mask', {
 	refresh: function(frm) {
+        // set intro
+        cur_frm.set_intro(__('You can use two wildcards:<br>The percent sign (%) represents zero, one, or multiple characters<br>The underscore sign (_) represents one, single character'));
+        
         // change button from "Save" to "Search"
         $('[data-label="' + __("Save") + '"]')[0].innerHTML = __('Search');
         

@@ -1,0 +1,88 @@
+{% if(!search_results.length) { %}
+<p class="text-muted">{%= __("No results found.") %}</p>
+<p class="text-muted">{%= __("Please fill in the form above and click Search on top right.") %}</p>
+{% } %}
+
+<div class="clearfix"></div>
+{% for(var i=0, l=search_results.length; i<l; i++) { %}
+	<div class="address-box">
+		<p class="h6">
+			{%= search_results[i].first_name %} {%= search_results[i].last_name %}{% if (search_results[i].customer_link) { %}<span class="text-muted">({%= search_results[i].customer_link %})</span>{% endif %}
+            {% if (search_results[i].customer_link) { %}
+                <a href="#Form/Customer/{%= encodeURIComponent(search_results[i].customer_link) %}"
+                    class="btn btn-xs btn-default pull-right"
+                    style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
+                    {%= __("Edit Customer") %}
+                </a>
+            {% endif %}
+            {% if (search_results[i].contact_name) { %}
+                <a href="#Form/Contact/{%= encodeURIComponent(search_results[i].contact_name) %}"
+                    class="btn btn-xs btn-default pull-right"
+                    style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
+                    {%= __("Edit Contact") %}
+                </a>
+            {% endif %}
+            {% if (search_results[i].address_name) { %}
+                <a href="#Form/Address/{%= encodeURIComponent(search_results[i].address_name) %}"
+                    class="btn btn-xs btn-default pull-right"
+                    style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
+                    {%= __("Edit Address") %}
+                </a>
+            {% endif %}
+            <a class="btn btn-xs btn-default pull-right"
+                style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
+                {%= __("Show Subscriptions") %}
+            </a>
+            <a class="btn btn-xs btn-default pull-right"
+                style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
+                {%= __("Create Subscription") %}
+            </a>
+		</p>
+        <div class="row">
+            <div class="col-xs-4">
+            {% if(search_results[i].email_id) { %}
+                <p>
+                    {%= __("Email") %}: {%= search_results[i].email_id %}<span class="text-muted"> ({%= __("Primary") %})</span>
+                    {% if(search_results[i].other_mails) { %}
+                        {% for(var ii=0, ll=search_results[i].other_mails.split(",").length; ii<ll; ii++) { %}
+                            <br>{%= __("Email") %}: {%= search_results[i].other_mails.split(",")[ii] %}
+                        {% } %}
+                    {% endif %}
+                </p>
+            {% endif %}
+            {% if(search_results[i].phone || search_results[i].mobile_no || search_results[i].other_phones) { %}
+                <p>
+                    {% if(search_results[i].phone) { %}
+                        {%= __("Phone") %}: {%= search_results[i].phone %}<span class="text-muted"> ({%= __("Primary") %})</span><br>
+                    {% endif %}
+                    {% if(search_results[i].mobile_no) { %}
+                        {%= __("Mobile") %}: {%= search_results[i].mobile_no %}<span class="text-muted"> ({%= __("Primary") %})</span><br>
+                    {% endif %}
+                    {% if(search_results[i].other_phones) { %}
+                        {% for(var iii=0, lll=search_results[i].other_phones.split(",").length; iii<lll; iii++) { %}
+                            {%= __("Phone") %}: {%= search_results[i].other_phones.split(",")[iii] %}<br>
+                        {% } %}
+                    {% endif %}
+                </p>
+            {% endif %}
+            </div>
+            <div class="col-xs-8">
+                <p>
+                    {% if(search_results[i].address_line1) { %}
+                        {%= search_results[i].address_line1 %}<br>
+                    {% endif %}
+                    {% if(search_results[i].address_line2) { %}
+                        {%= search_results[i].address_line2 %}<br>
+                    {% endif %}
+                    {% if(search_results[i].pincode || search_results[i].city) { %}
+                        {% if(search_results[i].pincode) { %}{%= search_results[i].pincode %} {% endif %}
+                        {% if(search_results[i].city) { %}{%= search_results[i].city %}{% endif %}<br>
+                    {% endif %}
+                    {% if(search_results[i].country) { %}
+                        {%= search_results[i].country %}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+	</div>
+{% } %}
