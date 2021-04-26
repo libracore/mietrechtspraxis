@@ -1,13 +1,13 @@
 {% if(!search_results.length) { %}
 <p class="text-muted">{%= __("No results found.") %}</p>
-<p class="text-muted">{%= __("Please fill in the form above and click Search on top right.") %}</p>
+<p class="text-muted">{%= __("Please fill in the form above and click Search on top right or create a new Customer.") %}</p>
 {% } %}
 
 <div class="clearfix"></div>
 {% for(var i=0, l=search_results.length; i<l; i++) { %}
 	<div class="address-box">
 		<p class="h6">
-			{%= search_results[i].first_name %} {%= search_results[i].last_name %}{% if (search_results[i].customer_link) { %}<span class="text-muted">({%= search_results[i].customer_link %})</span>{% endif %}
+			{%= search_results[i].first_name %} {%= search_results[i].last_name %}{% if (search_results[i].customer_link) { %}<span class="text-muted"> ({%= search_results[i].customer_link %})</span>{% endif %}
             {% if (search_results[i].customer_link) { %}
                 <a href="#Form/Customer/{%= encodeURIComponent(search_results[i].customer_link) %}"
                     class="btn btn-xs btn-default pull-right"

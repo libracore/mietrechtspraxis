@@ -19,7 +19,7 @@ class CustomersSearchMask(Document):
         if self.email:
             filters.append("""(`customers_search_mask`.`email_id` LIKE '%{email_id}%' OR `customers_search_mask`.`other_mails` LIKE '%{email_id}%')""".format(email_id=self.email))
         if self.phone:
-            filters.append("""AND (`customers_search_mask`.`phone` LIKE '%{phone}%' OR `customers_search_mask`.`other_phones` LIKE '%{phone}%')""".format(phone=self.phone))
+            filters.append("""(`customers_search_mask`.`phone` LIKE '%{phone}%' OR `customers_search_mask`.`other_phones` LIKE '%{phone}%')""".format(phone=self.phone))
         if self.mobile:
             filters.append("""(`customers_search_mask`.`mobile_no` LIKE '%{mobile_no}%' OR `customers_search_mask`.`other_phones` LIKE '%{mobile_no}%')""".format(mobile_no=self.mobile))
         
@@ -138,3 +138,75 @@ class CustomersSearchMask(Document):
     def onload(self):
         self.get("__onload")['search_results'] = self.search()
     pass
+
+@frappe.whitelist()
+def create_customer(firstname, lastname, email, phone, mobile, address_line1, address_line2, plz, city, country):
+    fullname = firstname if firstname != '!' else '-'
+    fullname += ' '
+    fullname += lastname if lastname != '!' else '-'
+    
+    # create customer
+    customer = frappe.get_doc({
+        "doctype": "Customer",
+        "customer_type": "Individual",
+        "customer_name": fullname
+    })
+    customer.insert()
+    
+    # create address
+    address = frappe.get_doc({
+        "doctype": "Address",
+        "address_type": "Billing",
+        "address_line1": address_line1,
+        "address_line2": address_line2 if address_line2 != '!' else '',
+        "city": city,
+        "country": country if country != '!' else '',
+        "pincode": plz,
+        "links": [
+            {
+                "link_doctype": "Customer",
+                "link_name": customer.name
+            }
+        ]
+        
+    })
+    address.insert()
+    
+    # create contact
+    numbers = []
+    if phone != '!':
+        primary_phone = {
+                            "phone": phone,
+                            "is_primary_phone": 1
+                        }
+        numbers.append(primary_phone)
+    if mobile != '!':
+        primary_mobile = {
+                            "phone": mobile,
+                            "is_primary_mobile_no": 1
+                        }
+        numbers.append(primary_mobile)
+    
+    contact = frappe.get_doc({
+        "doctype": "Contact",
+        "first_name": firstname if firstname != '!' else '-',
+        "last_name": lastname if lastname != '!' else '-',
+        "address": address.name,
+        "email_ids": [
+            {
+                "email_id": email,
+                "is_primary": 1
+            }
+        ] if email != '!' else [],
+        "phone_nos": numbers,
+        "links": [
+            {
+                "link_doctype": "Customer",
+                "link_name": customer.name
+            }
+        ]
+        
+    })
+    contact.insert()
+
+    return customer.name
