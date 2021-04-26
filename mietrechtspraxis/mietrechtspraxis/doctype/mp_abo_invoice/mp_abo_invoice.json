@@ -1,0 +1,40 @@
+{
+ "creation": "2021-04-26 09:54:32.725064",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "sales_invoice"
+ ],
+ "fields": [
+  {
+   "fetch_from": "sales_invoice.posting_date",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-04-26 09:55:43.723687",
+ "modified_by": "Administrator",
+ "module": "mietrechtspraxis",
+ "name": "mp Abo Invoice",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

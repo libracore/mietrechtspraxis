@@ -12,6 +12,7 @@
   "cb_1",
   "start_date",
   "end_date",
+  "sales_invoices",
   "section_owner",
   "invoice_recipient",
   "recipient_contact",
@@ -119,9 +120,15 @@
    "label": "Recipient Address",
    "options": "Address",
    "reqd": 1
+  },
+  {
+   "fieldname": "sales_invoices",
+   "fieldtype": "Table",
+   "label": "Sales Invoices",
+   "options": "mp Abo Invoice"
   }
  ],
- "modified": "2021-04-13 11:15:47.344493",
+ "modified": "2021-04-26 09:55:10.031639",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo",
