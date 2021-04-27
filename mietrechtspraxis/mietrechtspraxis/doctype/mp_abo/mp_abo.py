@@ -23,6 +23,9 @@ class mpAbo(Document):
                 self.status = "Inactive"
         else:
             self.status = "Active"
+        
+        # set customer link for dashboard
+        self.customer = self.invoice_recipient
     pass
 
 @frappe.whitelist()
@@ -48,3 +51,14 @@ def get_address_html(customer, contact, address):
         html = 'tbd'
     
     return html
+
+@frappe.whitelist()
+def get_abo_list(customer):
+    data = {}
+    data["owner"] = frappe.db.sql("""SELECT * FROM `tabmp Abo` WHERE `invoice_recipient` = '{customer}'""".format(customer=customer), as_dict=True)
+    data["recipient"] = frappe.db.sql("""SELECT
+                                            *
+                                        FROM `tabmp Abo`
+                                        INNER JOIN `tabmp Abo Recipient` ON `tabmp Abo`.`name` = `tabmp Abo Recipient`.`parent`
+                                        WHERE `tabmp Abo Recipient`.`magazines_recipient` = '{customer}'""".format(customer=customer), as_dict=True)
+    return data
