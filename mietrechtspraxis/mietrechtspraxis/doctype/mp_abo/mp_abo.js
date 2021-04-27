@@ -8,9 +8,12 @@ frappe.ui.form.on('mp Abo', {
             go_to_customers_search_mask(frm);
         });
         if (!frm.doc.__islocal) {
-           frm.add_custom_button(__("Create User-Login"), function() {
+           frm.add_custom_button(__("User Login"), function() {
                 create_user_login(frm);
-            });
+            }, __("Create"));
+            frm.add_custom_button(__("Sales Invoice"), function() {
+                create_sales_invice(frm);
+            }, __("Create"));
         }
         
         // apply filter to links fields
@@ -48,7 +51,30 @@ frappe.ui.form.on('mp Abo', {
             }
           }
         };
-	}
+        
+        // set address html
+        if (!frm.doc.__islocal) {
+           fetch_address(frm);
+        }
+	},
+    invoice_recipient: function(frm) {
+        // set address html
+        fetch_address(frm);
+        
+        // clear link fields
+        if (!cur_frm.doc.invoice_recipient) {
+            cur_frm.set_value('recipient_contact', '');
+            cur_frm.set_value('recipient_address', '');
+        }
+    },
+    recipient_contact: function(frm) {
+        // set address html
+        fetch_address(frm);
+    },
+    recipient_address: function(frm) {
+        // set address html
+        fetch_address(frm);
+    }
 });
 
 function go_to_customers_search_mask(frm) {
@@ -58,4 +84,36 @@ function go_to_customers_search_mask(frm) {
 function create_user_login(frm) {
     //tbd
     frappe.msgprint("tbd");
+}
+
+function create_sales_invice(frm) {
+    //tbd
+    frappe.msgprint("tbd");
+}
+
+// set address html
+function fetch_address(frm) {
+    if (cur_frm.doc.invoice_recipient && cur_frm.doc.recipient_contact && cur_frm.doc.recipient_address) {
+        frappe.call({
+            "method": "mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.get_address_html",
+            "args": {
+                "customer": cur_frm.doc.invoice_recipient,
+                "contact": cur_frm.doc.recipient_contact,
+                "address": cur_frm.doc.recipient_address
+            },
+            "async": false,
+            "callback": function(response) {
+                var html = response.message;
+                if (cur_frm.get_field("invoice_recipient_address_html").df.options != html) {
+                    cur_frm.set_df_property('invoice_recipient_address_html','options', html);
+                    cur_frm.refresh();
+                }
+            }
+        });
+    } else {
+        if (cur_frm.get_field("invoice_recipient_address_html").df.options != '<p></p>') {
+            cur_frm.set_df_property('invoice_recipient_address_html','options', '<p></p>');
+            cur_frm.refresh();
+        }
+    }
 }

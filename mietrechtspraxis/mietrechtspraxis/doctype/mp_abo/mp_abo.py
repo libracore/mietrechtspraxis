@@ -24,3 +24,27 @@ class mpAbo(Document):
         else:
             self.status = "Active"
     pass
+
+@frappe.whitelist()
+def get_address_html(customer, contact, address):
+    customer = frappe.get_doc("Customer", customer)
+    contact = frappe.get_doc("Contact", contact)
+    address = frappe.get_doc("Address", address)
+    
+    html = ''
+    
+    if customer.customer_type == 'Individual':
+        # contact
+        salutation = contact.salutation + "<br>" if contact.salutation else ''
+        first_name = contact.first_name + ' ' if contact.first_name != '-' else ''
+        last_name = contact.last_name if contact.last_name != '-' else ''
+        html += salutation + first_name + last_name + "<br>"
+        
+        # address
+        address_line2 = address.address_line2 + "<br>" if address.address_line2 else ''
+        html += str(address.address_line1) + "<br>" + address_line2 + str(address.pincode) + " " + str(address.city) + "<br>" + str(address.country)
+    else:
+        #tbd"
+        html = 'tbd'
+    
+    return html

@@ -38,6 +38,7 @@ function clear_search_fields(frm) {
     cur_frm.set_value('plz', '');
     cur_frm.set_value('city', '');
     cur_frm.set_value('country', '');
+    remove_mandatory(frm);
 }
 
 function create_new_customer(frm) {
