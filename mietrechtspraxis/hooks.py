@@ -111,6 +111,11 @@ doctype_js = {
 # 		"mietrechtspraxis.tasks.monthly"
 # 	]
 # }
+scheduler_events = {
+	"daily": [
+		"mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.set_inactive_status"
+	]
+}
 
 # Testing
 # -------
