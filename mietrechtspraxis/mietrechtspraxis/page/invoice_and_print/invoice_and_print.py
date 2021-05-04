@@ -43,3 +43,37 @@ def get_show_data(sel_type):
             'jahres_qty': jahres_qty,
             'probe_qty': probe_qty
         }
+
+@frappe.whitelist()
+def create_invoices(date):
+    abos = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `type` = 'Jahres-Abo' AND `status` = 'Active'""", as_dict=True)
+    for _abo in abos:
+        abo = frappe.get_doc("mp Abo", _abo.name)
+        sinv = create_invoice(abo.name, date)
+        row = abo.append('sales_invoices', {})
+        row.sales_invoice = sinv
+        abo.save()
+        
+def create_invoice(abo, date):
+    abo = frappe.get_doc("mp Abo", abo)
+    
+    new_sinv = frappe.get_doc({
+        "doctype": "Sales Invoice",
+        "set_posting_time": 1,
+        "posting_date": date,
+        "posting_time": "00:00:00",
+        "customer": abo.invoice_recipient,
+        "customer_address": abo.recipient_address,
+        "contact_person": abo.recipient_contact,
+        "items": [
+            {
+                "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
+                "qty": abo.magazines_qty_total
+            }
+        ]
+    })
+    new_sinv.insert()
+    new_sinv.submit()
+    frappe.db.commit()
+    
+    return new_sinv.name

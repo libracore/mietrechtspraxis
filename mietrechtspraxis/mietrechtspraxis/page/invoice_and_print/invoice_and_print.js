@@ -118,7 +118,17 @@ frappe.invoice_and_print = {
     create_data: function() {
         var date = $("#date").val();
         if (date) {
-            
+            frappe.call({
+                "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_invoices",
+                "args": {
+                    "date": date
+                },
+                "async": false,
+                "callback": function(response) {
+                    var data = response.message;
+                    frappe.msgprint("done");
+                }
+            });
         } else {
             frappe.throw(__("Please choose date first"));
         }
