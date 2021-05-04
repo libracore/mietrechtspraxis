@@ -118,17 +118,25 @@ frappe.invoice_and_print = {
     create_data: function() {
         var date = $("#date").val();
         if (date) {
-            frappe.call({
-                "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_invoices",
-                "args": {
-                    "date": date
+            frappe.confirm(
+                __('Are you sure to create invoices with porsting date') + " " + date,
+                function(){
+                    frappe.call({
+                        "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_invoices",
+                        "args": {
+                            "date": date
+                        },
+                        "async": false,
+                        "callback": function(response) {
+                            var data = response.message;
+                            frappe.msgprint("done");
+                        }
+                    });
                 },
-                "async": false,
-                "callback": function(response) {
-                    var data = response.message;
-                    frappe.msgprint("done");
+                function(){
+                    show_alert('Create Invoices cancelled!');
                 }
-            });
+            )
         } else {
             frappe.throw(__("Please choose date first"));
         }
@@ -136,7 +144,15 @@ frappe.invoice_and_print = {
     print_data: function() {
         var date = $("#date").val();
         if (date) {
-            
+            frappe.confirm(
+                __('Are you sure to print/send all correspondence with porsting date') + " " + date,
+                function(){
+                    // tbd
+                },
+                function(){
+                    show_alert('Print/Send correspondence cancelled!');
+                }
+            )
         } else {
             frappe.throw(__("Please choose date first"));
         }
