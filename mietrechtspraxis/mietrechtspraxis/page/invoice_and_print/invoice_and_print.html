@@ -1,0 +1,28 @@
+ <div class="row">
+    <div class="col-xs-1"></div>
+    <div class="col-xs-10">
+         <form class="form-inline">
+            <label for="sel_type">{{ __("Select type") }}:</label>
+            <select class="form-control" id="sel_type">
+                <option value="all">{{ __("All") }}</option>
+                <option value="inv_incl">{{ __("Invoices including magazine") }}</option>
+                <option value="inv_excl">{{ __("Invoices exclusive magazine") }}</option>
+                <option value="only_mag">{{ __("Magazine exclusive bills") }}</option>
+            </select>
+            <label for="date">{{ __("Invoice Date") }}:</label>
+            <input type="date" class="form-control" id="date">
+            <button type="button" class="btn btn-info" id="show_data">{{ __("Show Data") }}</button>
+            <button type="button" class="btn btn-danger" id="create_data">{{ __("Create Data") }}</button>
+            <button type="button" class="btn btn-warning" id="print_data">{{ __("Print/Send Data") }}</button>
+        </form>
+    </div>
+    <div class="col-xs-1"></div>
+</div>
+<div class="row">
+    <div class="col-xs-4"></div>
+    <div class="col-xs-4">
+        <div id="chart_area"></div>
+    </div>
+    <div class="col-xs-4"></div>
+</div>
+

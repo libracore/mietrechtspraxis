@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2021-05-04 09:49:54.779833",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2021-05-04 09:49:54.779833",
+ "modified_by": "Administrator",
+ "module": "mietrechtspraxis",
+ "name": "invoice_and_print",
+ "owner": "Administrator",
+ "page_name": "invoice_and_print",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Invoice run and collective printing"
+}

@@ -30,6 +30,12 @@ def get_data():
                        "name": "Customers Search Mask",
                        "label": _("Customers Search Mask"),
                        "description": _("Customers Search Mask")
+                   },
+                   {
+                       "type": "page",
+                       "name": "invoice_and_print",
+                       "label": _("Invoice run and collective printing"),
+                       "description": _("Invoice run and collective printing")
                    }
             ]
         },
