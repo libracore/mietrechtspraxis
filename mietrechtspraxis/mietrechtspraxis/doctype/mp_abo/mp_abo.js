@@ -14,6 +14,9 @@ frappe.ui.form.on('mp Abo', {
             frm.add_custom_button(__("Sales Invoice"), function() {
                 create_sales_invice(frm);
             }, __("Create"));
+            frm.add_custom_button(__("Sammel PDF"), function() {
+                create_sammel_pdf(frm);
+            }, __("Create"));
         }
         
         // apply filter to links fields
@@ -89,6 +92,19 @@ function create_user_login(frm) {
 function create_sales_invice(frm) {
     //tbd
     frappe.msgprint("tbd");
+}
+
+function create_sammel_pdf(frm) {
+    frappe.prompt([
+        {'fieldname': 'sinv', 'fieldtype': 'Link', 'label': __("Sales Invoice"), 'reqd': 1, 'options': 'Sales Invoice'}  
+    ],
+    function(values){
+        //tbd
+        frappe.msgprint("tbd");
+    },
+    __('Select Invoice'),
+    __('Print')
+    );
 }
 
 // set address html
