@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils.data import today
+from frappe.utils.data import today, getdate
 
 class mpAbo(Document):
     def validate(self):
@@ -17,7 +17,7 @@ class mpAbo(Document):
         
         # check status
         if self.end_date:
-            if self.end_date >= today():
+            if self.end_date >= getdate(today()):
                 self.status = "Actively terminated"
             else:
                 self.status = "Inactive"
@@ -69,3 +69,36 @@ def set_inactive_status():
         abo = frappe.get_doc("mp Abo", _abo.name)
         abo.status = "Inactive"
         abo.save()
+
+@frappe.whitelist()
+def create_invoice(abo):
+    abo = frappe.get_doc("mp Abo", abo)
+    sinv = _create_invoice(abo.name)
+    row = abo.append('sales_invoices', {})
+    row.sales_invoice = sinv
+    abo.save()
+    return sinv
+        
+def _create_invoice(abo):
+    abo = frappe.get_doc("mp Abo", abo)
+    
+    new_sinv = frappe.get_doc({
+        "doctype": "Sales Invoice",
+        "set_posting_time": 1,
+        "posting_date": today(),
+        "posting_time": "00:00:00",
+        "customer": abo.invoice_recipient,
+        "customer_address": abo.recipient_address,
+        "contact_person": abo.recipient_contact,
+        "items": [
+            {
+                "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
+                "qty": abo.magazines_qty_total
+            }
+        ]
+    })
+    new_sinv.insert()
+    new_sinv.submit()
+    frappe.db.commit()
+    
+    return new_sinv.name

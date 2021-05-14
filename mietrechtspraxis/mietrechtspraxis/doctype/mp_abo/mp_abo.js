@@ -11,9 +11,11 @@ frappe.ui.form.on('mp Abo', {
            frm.add_custom_button(__("User Login"), function() {
                 create_user_login(frm);
             }, __("Create"));
-            frm.add_custom_button(__("Sales Invoice"), function() {
-                create_sales_invice(frm);
-            }, __("Create"));
+            if (cur_frm.doc.type == 'Jahres-Abo') {
+                frm.add_custom_button(__("Sales Invoice"), function() {
+                    create_sales_invoice(frm);
+                }, __("Create"));
+            }
             frm.add_custom_button(__("Sammel PDF"), function() {
                 create_sammel_pdf(frm);
             }, __("Create"));
@@ -89,9 +91,18 @@ function create_user_login(frm) {
     frappe.msgprint("tbd");
 }
 
-function create_sales_invice(frm) {
-    //tbd
-    frappe.msgprint("tbd");
+function create_sales_invoice(frm) {
+    frappe.call({
+        "method": "mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.create_invoice",
+        "args": {
+            "abo": cur_frm.doc.name
+        },
+        "async": false,
+        "callback": function(response) {
+            cur_frm.reload_doc();
+            frappe.msgprint("Die Rechnung (" + response.message + ") wurde erstellt und der Rechnungstabelle hinzugefügt.");
+        }
+    });
 }
 
 function create_sammel_pdf(frm) {
