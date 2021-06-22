@@ -9,6 +9,7 @@
   "type",
   "status",
   "magazines_qty_total",
+  "user_login_createt",
   "cb_1",
   "start_date",
   "end_date",
@@ -147,9 +148,16 @@
    "fieldtype": "Data",
    "label": "Recipient Name",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "user_login_createt",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "User Login Createt"
   }
  ],
- "modified": "2021-05-04 09:27:06.539702",
+ "modified": "2021-06-22 14:51:18.246149",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo",

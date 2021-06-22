@@ -4,8 +4,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "year",
   "date",
-  "sales_invoice"
+  "sales_invoice",
+  "status"
  ],
  "fields": [
   {
@@ -24,10 +26,24 @@
    "label": "Sales Invoice",
    "options": "Sales Invoice",
    "reqd": 1
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Jahr",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Status",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2021-04-26 09:55:43.723687",
+ "modified": "2021-06-22 16:03:24.256190",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo Invoice",

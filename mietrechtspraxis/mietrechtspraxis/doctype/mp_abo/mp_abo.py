@@ -8,6 +8,11 @@ from frappe.model.document import Document
 from frappe.utils.data import today, getdate
 
 class mpAbo(Document):
+    def onload(self):
+        for sinv_row in self.sales_invoices:
+            sinv = frappe.get_doc("Sales Invoice", sinv_row.sales_invoice)
+            sinv_row.status = sinv.status
+        
     def validate(self):
         # calc qty
         total_qty = self.magazines_qty_ir
@@ -17,7 +22,7 @@ class mpAbo(Document):
         
         # check status
         if self.end_date:
-            if self.end_date >= getdate(today()):
+            if getdate(self.end_date) >= getdate(today()):
                 self.status = "Actively terminated"
             else:
                 self.status = "Inactive"
@@ -26,6 +31,11 @@ class mpAbo(Document):
         
         # set customer link for dashboard
         self.customer = self.invoice_recipient
+        
+        # check optional receipients
+        if self.type == 'Probe-Abo':
+            if len(self.recipient) >= 1:
+                frappe.throw("Ein Probe-Abo kann nicht mehrere Empfänger haben.")
     pass
 
 @frappe.whitelist()
@@ -66,9 +76,22 @@ def get_abo_list(customer):
 def set_inactive_status():
     abos = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `status` = 'Actively terminated' AND `end_date` < '{today}'""".format(today=today()), as_dict=True)
     for _abo in abos:
+        # set status
         abo = frappe.get_doc("mp Abo", _abo.name)
         abo.status = "Inactive"
         abo.save()
+        # reset mp user login
+        if abo.recipient_contact:
+            contact = frappe.get_doc("Contact", abo.recipient_contact)
+            contact.mp_username = ''
+            contact.mp_password = ''
+            contact.save()
+        for recipient in abo.recipient:
+            if recipient.recipient_contact:
+                contact = frappe.get_doc("Contact", recipient.recipient_contact)
+                contact.mp_username = ''
+                contact.mp_password = ''
+                contact.save()
 
 @frappe.whitelist()
 def create_invoice(abo):
@@ -76,6 +99,7 @@ def create_invoice(abo):
     sinv = _create_invoice(abo.name)
     row = abo.append('sales_invoices', {})
     row.sales_invoice = sinv
+    row.year = abo.start_date.strftime("%Y")
     abo.save()
     return sinv
         
@@ -102,3 +126,40 @@ def _create_invoice(abo):
     frappe.db.commit()
     
     return new_sinv.name
+
+@frappe.whitelist()
+def create_batch_pdf(abo):
+    abo = frappe.get_doc("mp Abo", abo)
+    # tbd
+
+@frappe.whitelist()
+def create_user_login(abo):
+    abo = frappe.get_doc("mp Abo", abo)
+    if abo.recipient_contact:
+        contact = frappe.get_doc("Contact", abo.recipient_contact)
+        contact.mp_username = abo.name
+        contact.mp_password = create_random_pw()
+        contact.save()
+    for recipient in abo.recipient:
+        if recipient.recipient_contact:
+            contact = frappe.get_doc("Contact", recipient.recipient_contact)
+            contact.mp_username = abo.name
+            contact.mp_password = create_random_pw()
+            contact.save()
+    abo.user_login_createt = 1
+    abo.save()
+            
+def create_random_pw():
+    import random
+    import string
+
+    # get random password length 8 with letters, digits, and symbols
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(random.choice(characters) for i in range(8))
+    
+    # check if pw already exist
+    existing_check = frappe.db.sql("""SELECT COUNT(`name`) FROM `tabContact` WHERE `mp_password` = '{password}'""".format(password=password), as_list=True)[0][0]
+    if existing_check > 0:
+        create_random_pw()
+    else:
+        return password

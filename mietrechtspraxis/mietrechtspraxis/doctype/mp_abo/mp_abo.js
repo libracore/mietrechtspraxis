@@ -2,23 +2,50 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('mp Abo', {
-	refresh: function(frm) {
+	setup: function(frm) {
+        frm.set_indicator_formatter('sales_invoice',
+			function(doc) { 
+                return (doc.status != 'Paid') ? "red" : "green" ;
+            }
+        );
+    },
+    refresh: function(frm) {
         // add custom buttons
         frm.add_custom_button(__("Go to Customers Search Mask"), function() {
             go_to_customers_search_mask(frm);
         });
         if (!frm.doc.__islocal) {
-           frm.add_custom_button(__("User Login"), function() {
-                create_user_login(frm);
-            }, __("Create"));
-            if (cur_frm.doc.type == 'Jahres-Abo') {
-                frm.add_custom_button(__("Sales Invoice"), function() {
-                    create_sales_invoice(frm);
+           if (!cur_frm.doc.user_login_createt) {
+               frm.add_custom_button(__("User Login"), function() {
+                    if (!cur_frm.is_dirty()) {
+                        create_user_login(frm);
+                    } else {
+                        frappe.msgprint("Bitte speichern Sie den Datensatz zuerst.");
+                    }
                 }, __("Create"));
             }
-            frm.add_custom_button(__("Sammel PDF"), function() {
-                create_sammel_pdf(frm);
-            }, __("Create"));
+            if (cur_frm.doc.type == 'Jahres-Abo') {
+                if (!exist_initial_sinv(frm)) {
+                    frm.add_custom_button(__("Initial Rechnung"), function() {
+                        if (!cur_frm.is_dirty()) {
+                            create_sales_invoice(frm);
+                        } else {
+                            frappe.msgprint("Bitte speichern Sie den Datensatz zuerst.");
+                        }
+                    }, __("Create"));
+                }
+            }
+            if (exist_initial_sinv(frm)||cur_frm.doc.type != 'Jahres-Abo') {
+                if (cur_frm.doc.user_login_createt) {
+                    frm.add_custom_button(__("Sammel PDF"), function() {
+                        if (!cur_frm.is_dirty()) {
+                            create_sammel_pdf(frm);
+                        } else {
+                            frappe.msgprint("Bitte speichern Sie den Datensatz zuerst.");
+                        }
+                    }, __("Create"));
+                }
+            }
         }
         
         // apply filter to links fields
@@ -87,8 +114,17 @@ function go_to_customers_search_mask(frm) {
 }
 
 function create_user_login(frm) {
-    //tbd
-    frappe.msgprint("tbd");
+    frappe.call({
+        "method": "mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.create_user_login",
+        "args": {
+            "abo": cur_frm.doc.name
+        },
+        "async": false,
+        "callback": function(response) {
+            cur_frm.reload_doc();
+            frappe.msgprint("Das/Die User Logins(s) wurde(n) erstellt.");
+        }
+    });
 }
 
 function create_sales_invoice(frm) {
@@ -106,16 +142,65 @@ function create_sales_invoice(frm) {
 }
 
 function create_sammel_pdf(frm) {
-    frappe.prompt([
-        {'fieldname': 'sinv', 'fieldtype': 'Link', 'label': __("Sales Invoice"), 'reqd': 1, 'options': 'Sales Invoice'}  
-    ],
-    function(values){
-        //tbd
-        frappe.msgprint("tbd");
-    },
-    __('Select Invoice'),
-    __('Print')
-    );
+    if (cur_frm.doc.type != 'Jahres-Abo') {
+        // tbd
+    } else {
+        frappe.prompt([
+            {'fieldname': 'sinv', 'fieldtype': 'Link', 'label': __("Sales Invoice"), 'reqd': 1, 'options': 'Sales Invoice', 'default': get_initial_sinv(frm), get_query: function(doc) {
+                  return {
+                    filters: {
+                        "name": ["in", get_linked_sinvs(frm)]
+                    }
+                  }
+                }
+            }  
+        ],
+        function(values){
+            //tbd
+            frappe.msgprint("tbd");
+        },
+        __('Select Invoice'),
+        __('Create')
+        );
+    }
+}
+
+// get linked sinvs as array
+function get_linked_sinvs(frm) {
+    var data = [];
+    var sinv_tbl = cur_frm.doc.sales_invoices;
+    for (var i=0; i<sinv_tbl.length; i++) {
+        data.push(sinv_tbl[i].sales_invoice);
+    }
+    return data
+}
+
+// check linked sinvs for initial sinv
+function exist_initial_sinv(frm) {
+    var check = false;
+    var sinv_tbl = cur_frm.doc.sales_invoices;
+    for (var i=0; i<sinv_tbl.length; i++) {
+        var d = new Date(cur_frm.doc.start_date);
+        var year = d.getFullYear();
+        if (sinv_tbl[i].year == year) {
+            check = true;
+        }
+    }
+    return check
+}
+
+// get initial sinv
+function get_initial_sinv(frm) {
+    var sinv = '';
+    var sinv_tbl = cur_frm.doc.sales_invoices;
+    for (var i=0; i<sinv_tbl.length; i++) {
+        var d = new Date(cur_frm.doc.start_date);
+        var year = d.getFullYear();
+        if (sinv_tbl[i].year == year) {
+            sinv = sinv_tbl[i].sales_invoice;
+        }
+    }
+    return sinv
 }
 
 // set address html
