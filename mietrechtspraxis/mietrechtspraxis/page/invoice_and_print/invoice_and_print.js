@@ -1,7 +1,7 @@
 frappe.pages['invoice_and_print'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Invoice run and collective printing',
+		title: 'Rechnungslauf und Massendruck',
 		single_column: true
 	});
 
@@ -9,6 +9,9 @@ frappe.pages['invoice_and_print'].on_page_load = function(wrapper) {
 	
 	// add the application reference
 	frappe.breadcrumbs.add("mietrechtspraxis");
+    setTimeout(function(){
+        frappe.invoice_and_print.get_show_data();
+    }, 1000);
 }
 
 frappe.invoice_and_print = {
@@ -75,11 +78,11 @@ frappe.invoice_and_print = {
 
         const chart = new frappe.Chart("#chart", {  // or a DOM element,
                                                     // new Chart() in case of ES6 module with above usage
-            title: __("Magazine type overview"),
+            title: __("Magazine Typen Übersicht"),
             data: data,
             type: 'donut', // or 'axis-mixed', 'bar', 'line', 'scatter', 'pie', 'percentage'
             height: 250,
-            colors: ['#7cd6fd', '#743ee2']
+            colors: ['#7cd6fd', '#743ee2', '#ffa3ef']
         })
     },
     show_donut_rest: function(_data) {
@@ -104,7 +107,7 @@ frappe.invoice_and_print = {
 
             const chart = new frappe.Chart("#chart", {  // or a DOM element,
                                                         // new Chart() in case of ES6 module with above usage
-                title: __("Magazine type overview"),
+                title: __("Magazine Typen Übersicht"),
                 data: data,
                 type: 'bar', // or 'axis-mixed', 'bar', 'line', 'scatter', 'pie', 'percentage'
                 height: 250,
@@ -112,33 +115,43 @@ frappe.invoice_and_print = {
             })
         } else {
             $("#chart_area").empty();
-            $('<p>' + __("No results found") + '</p>').appendTo($("#chart_area"));
+            $('<p>' + __("Keine Resultate gefunden") + '</p>').appendTo($("#chart_area"));
         }
     },
     create_data: function() {
         var date = $("#date").val();
         if (date) {
             frappe.confirm(
-                __('Are you sure to create invoices with porsting date') + " " + date,
+                __('Wollen Sie die Rechnungen mit dem Datum ') + frappe.datetime.obj_to_user(date) + " erstellen?",
                 function(){
-                    frappe.call({
-                        "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_invoices",
-                        "args": {
-                            "date": date
-                        },
-                        "async": false,
-                        "callback": function(response) {
-                            var data = response.message;
-                            frappe.msgprint("done");
-                        }
-                    });
+                    frappe.prompt([
+                        {'fieldname': 'year', 'fieldtype': 'Int', 'label': 'Invoice Year', 'reqd': 1, 'default': new Date().getFullYear()}  
+                    ],
+                    function(values){
+                        frappe.call({
+                            "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_invoices",
+                            "args": {
+                                "date": date,
+                                "year": values.year
+                            },
+                            "async": false,
+                            "callback": function(response) {
+                                var data = response.message;
+                                $(frappe.render_template('invoice_table', {'data': data})).appendTo($("#invoice_area"));
+                                show_alert('Rechnungen erstellt');
+                            }
+                        });
+                    },
+                    'Erstellung Rechnungen',
+                    'Erstellen'
+                    )
                 },
                 function(){
-                    show_alert('Create Invoices cancelled!');
+                    show_alert('Rechnungserstellung abgebrochen');
                 }
             )
         } else {
-            frappe.throw(__("Please choose date first"));
+            frappe.throw(__("Bittte wählen Sie zuerst ein Datum aus"));
         }
     },
     print_data: function() {
@@ -147,14 +160,14 @@ frappe.invoice_and_print = {
             frappe.confirm(
                 __('Are you sure to print/send all correspondence with porsting date') + " " + date,
                 function(){
-                    // tbd
+                    show_alert('Print/Send correspondence will be startet!');
                 },
                 function(){
                     show_alert('Print/Send correspondence cancelled!');
                 }
             )
         } else {
-            frappe.throw(__("Please choose date first"));
+            frappe.throw(__("Bittte wählen Sie zuerst ein Datum aus"));
         }
     }
 }

@@ -24,7 +24,9 @@
   "magazines_qty_ir",
   "invoice_recipient_address_html",
   "section_recipient",
-  "recipient"
+  "recipient",
+  "section_begleitschreiben",
+  "begleittext"
  ],
  "fields": [
   {
@@ -155,9 +157,20 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "User Login Createt"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_begleitschreiben",
+   "fieldtype": "Section Break",
+   "label": "Begleitschreiben"
+  },
+  {
+   "fieldname": "begleittext",
+   "fieldtype": "Text Editor",
+   "label": "Begleittext"
   }
  ],
- "modified": "2021-06-22 14:51:18.246149",
+ "modified": "2021-07-13 19:49:10.154933",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo",

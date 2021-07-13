@@ -1,0 +1,20 @@
+<table style="width: 100%;">
+    <thead>
+    <tr>
+        <th>Abo</th>
+        <th>Inhaber</th>
+        <th style="text-align: center;">Anz. Exemplare</th>
+        <th>Rechnung</th>
+    </tr>
+    </thead>
+    <tbody>
+{% for abo in data %}
+    <tr>
+        <td><a href="/desk#Form/mp Abo/{{ abo.abo }}">{{ abo.abo }}</a></td>
+        <td><a href="/desk#Form/Customer/{{ abo.invoice_recipient }}">{{ abo.recipient }}</a></td>
+        <td style="text-align: center;">{{ abo.magazines_qty_total }}</td>
+        <td><a href="/desk#Form/Sales Invoice/{{ abo.sinv }}">{{ abo.sinv }}</a></td>
+    </tr>
+{% endfor %}
+    </tbody>
+</table>

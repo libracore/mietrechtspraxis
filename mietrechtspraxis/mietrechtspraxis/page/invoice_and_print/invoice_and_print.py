@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils.data import today
+from frappe import publish_progress
+from frappe import _
 
 @frappe.whitelist()
 def get_show_data(sel_type):
@@ -35,9 +37,9 @@ def get_show_data(sel_type):
         }
     # all
     else:
-        gratis_qty = frappe.db.sql("""SELECT SUM(`magazines_qty_ir`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Gratis-Abo' AND `status` = 'Active'""", as_dict=True)[0].qty
-        jahres_qty = frappe.db.sql("""SELECT SUM(`magazines_qty_ir`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Jahres-Abo' AND `status` = 'Active'""", as_dict=True)[0].qty
-        probe_qty = frappe.db.sql("""SELECT SUM(`magazines_qty_ir`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Probe-Abo' AND `end_date` >= '{today}'""".format(today=today()), as_dict=True)[0].qty
+        gratis_qty = frappe.db.sql("""SELECT SUM(`magazines_qty_total`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Gratis-Abo' AND `status` = 'Active'""", as_dict=True)[0].qty
+        jahres_qty = frappe.db.sql("""SELECT SUM(`magazines_qty_total`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Jahres-Abo' AND `status` = 'Active'""", as_dict=True)[0].qty
+        probe_qty = frappe.db.sql("""SELECT SUM(`magazines_qty_total`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Probe-Abo' AND `end_date` >= '{today}'""".format(today=today()), as_dict=True)[0].qty
         return {
             'gratis_qty': gratis_qty,
             'jahres_qty': jahres_qty,
@@ -45,14 +47,28 @@ def get_show_data(sel_type):
         }
 
 @frappe.whitelist()
-def create_invoices(date):
+def create_invoices(date, year):
+    data = []
     abos = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `type` = 'Jahres-Abo' AND `status` = 'Active'""", as_dict=True)
+    count = 0
     for _abo in abos:
+        count += 1
         abo = frappe.get_doc("mp Abo", _abo.name)
         sinv = create_invoice(abo.name, date)
         row = abo.append('sales_invoices', {})
         row.sales_invoice = sinv
+        row.year = year
         abo.save()
+        _data = {}
+        _data['abo'] = abo.name
+        _data['recipient'] = abo.recipient_name
+        _data['invoice_recipient'] = abo.invoice_recipient
+        _data['magazines_qty_total'] = abo.magazines_qty_total
+        _data['sinv'] = sinv
+        data.append(_data)
+        progress = (100 / len(abos)) * count
+        publish_progress(percent=progress, title="Creating Invoices...")
+    return data
         
 def create_invoice(abo, date):
     abo = frappe.get_doc("mp Abo", abo)

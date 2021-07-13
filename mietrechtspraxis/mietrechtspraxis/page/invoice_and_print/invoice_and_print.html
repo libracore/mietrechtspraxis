@@ -1,22 +1,30 @@
  <div class="row" style="margin-top: 15px;">
-    <div class="col-xs-1"></div>
-    <div class="col-xs-10">
+    <div class="col-xs-2"></div>
+    <div class="col-xs-8 text-center">
          <form class="form-inline">
-            <label for="sel_type">{{ __("Select type") }}:</label>
+            <label for="sel_type">{{ __("Abo Typ") }}:</label>
             <select class="form-control" id="sel_type">
                 <option value="all">{{ __("All") }}</option>
-                <option value="inv_incl">{{ __("Invoices including magazine") }}</option>
-                <option value="inv_excl">{{ __("Invoices exclusive magazine") }}</option>
-                <option value="only_mag">{{ __("Magazine exclusive bills") }}</option>
+                <option value="inv_incl">{{ __("Rechnungen inkl. Magazine") }}</option>
+                <option value="inv_excl">{{ __("Rechnungen exkl. Magazine") }}</option>
+                <option value="only_mag">{{ __("Nur Magazine") }}</option>
             </select>
-            <label for="date">{{ __("Invoice Date") }}:</label>
+            <label for="date">{{ __("Rechnungsdatum") }}:</label>
             <input type="date" class="form-control" id="date">
-            <button type="button" class="btn btn-info" id="show_data">{{ __("Show Data") }}</button>
-            <button type="button" class="btn btn-danger" id="create_data">{{ __("Create Invoices") }}</button>
-            <button type="button" class="btn btn-warning" id="print_data">{{ __("Print/Send Correspondence") }}</button>
         </form>
     </div>
-    <div class="col-xs-1"></div>
+    <div class="col-xs-2"></div>
+</div>
+<div class="row" style="margin-top: 15px;">
+    <div class="col-xs-2"></div>
+    <div class="col-xs-8 text-center">
+        <form class="form-inline">
+            <button type="button" class="btn btn-info" id="show_data">{{ __("Daten aktualisieren") }}</button>
+            <button type="button" class="btn btn-danger" id="create_data">{{ __("Rechnungen erstellen") }}</button>
+            <button type="button" class="btn btn-warning" id="print_data">{{ __("Drucken/Senden der Korrespondenz") }}</button>
+        </form>
+    </div>
+    <div class="col-xs-2"></div>
 </div>
 <div class="row" style="margin-top: 15px;">
     <div class="col-xs-4"></div>
@@ -24,5 +32,10 @@
         <div id="chart_area"></div>
     </div>
     <div class="col-xs-4"></div>
+</div>
+<div class="row" style="margin-top: 15px;">
+    <div class="col-xs-12">
+        <div id="invoice_area"></div>
+    </div>
 </div>
 
