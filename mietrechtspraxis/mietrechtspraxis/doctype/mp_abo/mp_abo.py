@@ -151,15 +151,18 @@ def create_user_login(abo):
             
 def create_random_pw():
     import random
-    import string
-
-    # get random password length 8 with letters, digits, and symbols
-    characters = string.ascii_letters + string.digits + string.punctuation
-    password = ''.join(random.choice(characters) for i in range(8))
+    conso = ['b','c','d','f','g','h','j','k','l','m','n','p','r','s','t','v','w','x','y','z']
+    vocal = ['a','e','i','o','u']
+    spchars = ['*','-','+','?']
+    numbers = ['1','2','3','4','5','6','7','8','9']
     
-    # check if pw already exist
-    existing_check = frappe.db.sql("""SELECT COUNT(`name`) FROM `tabContact` WHERE `mp_password` = '{password}'""".format(password=password), as_list=True)[0][0]
-    if existing_check > 0:
-        create_random_pw()
-    else:
-        return password
+    def get_covoco_block():
+        return ''.join([random.choice(conso).upper(), random.choice(vocal), random.choice(conso)])
+        
+    password = ''.join([
+        get_covoco_block(),
+        random.choice(spchars),
+        ''.join([random.choice(numbers), random.choice(numbers)]),
+        random.choice(spchars),
+        get_covoco_block()])
+    return password
