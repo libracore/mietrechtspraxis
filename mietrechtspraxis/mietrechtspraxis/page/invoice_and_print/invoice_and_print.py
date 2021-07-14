@@ -51,14 +51,14 @@ def create_invoices(date, year):
     data = []
     qty_one = 0
     qty_multi = 0
-    abos = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `type` = 'Jahres-Abo' AND `status` = 'Active'""", as_dict=True)
+    abos = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `type` = 'Jahres-Abo' AND `status` = 'Active' AND `name` NOT IN (SELECT `parent` FROM `tabmp Abo Invoice` WHERE `year` = '{year}')""".format(year=year), as_dict=True)
     count = 0
     for _abo in abos:
         count += 1
         abo = frappe.get_doc("mp Abo", _abo.name)
         sinv = create_invoice(abo.name, date)
         row = abo.append('sales_invoices', {})
-        row.sales_invoice = sinv
+        row.sales_invoice = sinv['sinv']
         row.year = year
         abo.save()
         _data = {}
@@ -66,12 +66,16 @@ def create_invoices(date, year):
         _data['recipient'] = abo.recipient_name
         _data['invoice_recipient'] = abo.invoice_recipient
         _data['magazines_qty_total'] = abo.magazines_qty_total
-        _data['sinv'] = sinv
+        _data['sinv'] = sinv['sinv']
+        _data['send_as_mail'] = sinv['send_as_mail']
+        _data['mail'] = sinv['mail']
         data.append(_data)
-        if abo.magazines_qty_total == 1:
-            qty_one += 1
-        else:
-            qty_multi += 1
+        
+        if not sinv['send_as_mail']:
+            if abo.magazines_qty_total == 1:
+                qty_one += 1
+            else:
+                qty_multi += 1
         progress = (100 / len(abos)) * count
         publish_progress(percent=progress, title="Creating Invoices...")
     return {
@@ -102,4 +106,29 @@ def create_invoice(abo, date):
     new_sinv.submit()
     frappe.db.commit()
     
-    return new_sinv.name
+    customer = frappe.get_doc("Customer", abo.invoice_recipient)
+    if customer.korrespondenz == 'E-Mail':
+        contact = frappe.get_doc("Contact", abo.recipient_contact)
+        if contact.email_id:
+            send_as_mail = True
+            mail = contact.email_id
+            send_invoice_as_mail(new_sinv.name, mail)
+        else:
+            send_as_mail = False
+            mail = ''
+    else:
+        send_as_mail = False
+        mail = ''
+    
+    return {
+        'sinv': new_sinv.name,
+        'send_as_mail': send_as_mail,
+        'mail': mail
+    }
+    
+def send_invoice_as_mail(sinv, address):
+	frappe.sendmail([address],
+		subject=  _("New Invoice: {sinv}").format(sinv=sinv),
+        reply_to= 'office@mietrecht.ch',
+		message = _("Please find attached Invoice {sinv}").format(sinv=sinv),
+		attachments = [frappe.attach_print('Sales Invoice', sinv, file_name=sinv, print_format=frappe.db.get_single_value('mp Abo Settings', 'druckformat'))])

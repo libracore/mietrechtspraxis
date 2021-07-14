@@ -7,7 +7,9 @@
   "section_abo_type_item",
   "jahres_abo",
   "gratis_abo",
-  "probe_abo"
+  "probe_abo",
+  "section_druckformat",
+  "druckformat"
  ],
  "fields": [
   {
@@ -41,10 +43,22 @@
    "label": "Probe-Abo",
    "options": "Item",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_druckformat",
+   "fieldtype": "Section Break",
+   "label": "Druckformat Rechnungsversand per Mail"
+  },
+  {
+   "fieldname": "druckformat",
+   "fieldtype": "Data",
+   "label": "Druckformat",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2021-04-12 14:13:33.924962",
+ "modified": "2021-07-14 22:09:11.996857",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo Settings",

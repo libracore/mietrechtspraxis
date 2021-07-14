@@ -137,6 +137,7 @@ frappe.invoice_and_print = {
                             "async": false,
                             "callback": function(response) {
                                 var data = response.message;
+                                $("#invoice_area").empty();
                                 $(frappe.render_template('invoice_table', {'abos': data.abos, 'qty_one': data.qty_one, 'qty_multi': data.qty_multi})).appendTo($("#invoice_area"));
                                 show_alert('Rechnungen erstellt');
                             }

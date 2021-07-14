@@ -6,6 +6,7 @@
         <th>Inhaber</th>
         <th style="text-align: center;">Anz. Exemplare</th>
         <th>Rechnung</th>
+        <th>Versand</th>
     </tr>
     </thead>
     <tbody>
@@ -15,6 +16,11 @@
         <td><a href="/desk#Form/Customer/{{ abo.invoice_recipient }}">{{ abo.recipient }}</a></td>
         <td style="text-align: center;">{{ abo.magazines_qty_total }}</td>
         <td><a href="/desk#Form/Sales Invoice/{{ abo.sinv }}">{{ abo.sinv }}</a></td>
+        {% if abo.send_as_mail %}
+            <td>Per Mail an {{ abo.mail }}</td>
+        {% else %}
+            <td>Als PDF/Post</td>
+        {% endif %}
     </tr>
 {% endfor %}
     </tbody>
