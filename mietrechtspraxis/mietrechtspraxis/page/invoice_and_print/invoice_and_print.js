@@ -159,12 +159,23 @@ frappe.invoice_and_print = {
         var date = $("#date").val();
         if (date) {
             frappe.confirm(
-                __('Are you sure to print/send all correspondence with porsting date') + " " + date,
+                __('Möchten Sie alle Rechnungen mit dem Datum ') + date + " in ein Sammel-PDF drucken?",
                 function(){
-                    show_alert('Print/Send correspondence will be startet!');
+                    show_alert('Druck gestartet, bitte warten...');
+                    frappe.call({
+                        "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.print_pdf",
+                        "args": {
+                            "date": date
+                        },
+                        "async": false,
+                        "callback": function(response) {
+                            show_alert('Druck abgeschlossen');
+                            window.open(response.message, '_blank');
+                        }
+                    });
                 },
                 function(){
-                    show_alert('Print/Send correspondence cancelled!');
+                    show_alert('Druck abgebrochen');
                 }
             )
         } else {

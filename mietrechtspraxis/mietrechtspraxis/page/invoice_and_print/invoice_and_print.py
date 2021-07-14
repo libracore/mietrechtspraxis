@@ -3,10 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, os
 from frappe.utils.data import today
 from frappe import publish_progress
 from frappe import _
+from PyPDF2 import PdfFileWriter
 
 @frappe.whitelist()
 def get_show_data(sel_type):
@@ -113,6 +114,9 @@ def create_invoice(abo, date):
             send_as_mail = True
             mail = contact.email_id
             send_invoice_as_mail(new_sinv.name, mail)
+            new_sinv.sended_as_mail = 1
+            new_sinv.save()
+            frappe.db.commit()
         else:
             send_as_mail = False
             mail = ''
@@ -132,3 +136,27 @@ def send_invoice_as_mail(sinv, address):
         reply_to= 'office@mietrecht.ch',
 		message = _("Please find attached Invoice {sinv}").format(sinv=sinv),
 		attachments = [frappe.attach_print('Sales Invoice', sinv, file_name=sinv, print_format=frappe.db.get_single_value('mp Abo Settings', 'druckformat'))])
+
+@frappe.whitelist()
+def print_pdf(date):
+    bind_source = "/assets/mietrechtspraxis/sinvs_for_print/{date}.pdf".format(date=date)
+    physical_path = "/home/frappe/frappe-bench/sites" + bind_source
+    dest=str(physical_path)
+    
+    invoices = frappe.db.sql("""SELECT `name` FROM `tabSales Invoice` WHERE `posting_date` = '{date}' AND `docstatus` = 1 AND `sended_as_mail` != 1""".format(date=date), as_list=True)
+    
+    output = PdfFileWriter()
+    
+    for invoice in invoices:
+        output = frappe.get_print("Sales Invoice", invoice[0], frappe.db.get_single_value('mp Abo Settings', 'druckformat'), as_pdf = True, output = output, ignore_zugferd=True)
+        
+    if isinstance(dest, str): # when dest is a file path
+        destdir = os.path.dirname(dest)
+        if destdir != '' and not os.path.isdir(destdir):
+            os.makedirs(destdir)
+        with open(dest, "wb") as w:
+            output.write(w)
+    else: # when dest is io.IOBase
+        output.write(dest)
+        
+    return bind_source
