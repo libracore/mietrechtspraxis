@@ -49,6 +49,8 @@ def get_show_data(sel_type):
 @frappe.whitelist()
 def create_invoices(date, year):
     data = []
+    qty_one = 0
+    qty_multi = 0
     abos = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `type` = 'Jahres-Abo' AND `status` = 'Active'""", as_dict=True)
     count = 0
     for _abo in abos:
@@ -66,9 +68,17 @@ def create_invoices(date, year):
         _data['magazines_qty_total'] = abo.magazines_qty_total
         _data['sinv'] = sinv
         data.append(_data)
+        if abo.magazines_qty_total == 1:
+            qty_one += 1
+        else:
+            qty_multi += 1
         progress = (100 / len(abos)) * count
         publish_progress(percent=progress, title="Creating Invoices...")
-    return data
+    return {
+        'abos': data,
+        'qty_one': qty_one,
+        'qty_multi': qty_multi
+    }
         
 def create_invoice(abo, date):
     abo = frappe.get_doc("mp Abo", abo)

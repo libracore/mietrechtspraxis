@@ -1,3 +1,4 @@
+<center><p>Rechnungen mit <b>1 Exemplar</b>: {{ qty_one }}<br>Rechnungen mit <b>>1 Exemplaren</b>: {{ qty_multi }}</p></center>
 <table style="width: 100%;">
     <thead>
     <tr>
@@ -8,7 +9,7 @@
     </tr>
     </thead>
     <tbody>
-{% for abo in data %}
+{% for abo in abos %}
     <tr>
         <td><a href="/desk#Form/mp Abo/{{ abo.abo }}">{{ abo.abo }}</a></td>
         <td><a href="/desk#Form/Customer/{{ abo.invoice_recipient }}">{{ abo.recipient }}</a></td>
