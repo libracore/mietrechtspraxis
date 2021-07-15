@@ -8,7 +8,7 @@ frappe.ui.form.on('Customers Search Mask', {
         cur_frm.set_intro(__('You can use two wildcards:<br>- The percent sign (%) represents zero, one, or multiple characters<br>- The underscore sign (_) represents one, single character'));
         
         // change button from "Save" to "Search"
-        $('[data-label="' + __("Save") + '"]')[0].innerHTML = __('Search');
+        change_button_to_Search();
         
         // add custom button
         frm.add_custom_button(__("Clear Search Fields"), function() {
@@ -24,6 +24,8 @@ frappe.ui.form.on('Customers Search Mask', {
     onload: function(frm) {
         // clear all fields for fresh start
         clear_search_fields(frm);
+        // change button from "Save" to "Search"
+        setTimeout(function(){ change_button_to_Search(); }, 1000);
     }
 });
 
@@ -137,4 +139,17 @@ function remove_mandatory(frm) {
     cur_frm.set_df_property('address_line1','reqd', 0);
     cur_frm.set_df_property('plz','reqd', 0);
     cur_frm.set_df_property('city','reqd', 0);
+}
+
+function change_button_to_Search() {
+    for (var i = 0; i<$('[data-label="Save"]').length; i++) {
+        if ($('[data-label="Save"]')[i]) {
+            $('[data-label="Save"]')[i].innerHTML = __('Search');
+        }
+    }
+    for (var y = 0; y<$('[data-label="Speichern"]').length; y++) {
+        if ($('[data-label="Speichern"]')[y]) {
+            $('[data-label="Speichern"]')[y].innerHTML = __('Search');
+        }
+    }
 }
