@@ -4,6 +4,8 @@ Module: mietrechtspraxis,Invoice run and collective printing,Rechnungslauf und M
 DocType: Customers Search Mask,Firstname,Vorname
 DocType: Customers Search Mask,Lastname,Nachname
 DocType: Customers Search Mask,Search Details,Suchdetails
+DocType: Customers Search Mask,Clear Search Fields,Suchfelder leeren
+DocType: Customers Search Mask,Create new Customer,Neuen Kunden erstellen
 DocType: mp Abo,Magazines Quantity (Total),Anzahl Exemplare (Total)
 DocType: mp Abo,(Total QTY IR + MR),(Total Anzahl IR + MR)
 DocType: mp Abo,Invoice Recipient,"Rechnungsempfänger"

@@ -12,28 +12,28 @@
                 <a href="#Form/Customer/{%= encodeURIComponent(search_results[i].customer_link) %}"
                     class="btn btn-xs btn-default pull-right"
                     style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
-                    {%= __("Edit Customer") %}
+                    Kundenstamm bearbeiten
                 </a>
             {% endif %}
             {% if (search_results[i].contact_name) { %}
                 <a href="#Form/Contact/{%= encodeURIComponent(search_results[i].contact_name) %}"
                     class="btn btn-xs btn-default pull-right"
                     style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
-                    {%= __("Edit Contact") %}
+                    Kontakt bearbeiten
                 </a>
             {% endif %}
             {% if (search_results[i].address_name) { %}
                 <a href="#Form/Address/{%= encodeURIComponent(search_results[i].address_name) %}"
                     class="btn btn-xs btn-default pull-right"
                     style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
-                    {%= __("Edit Address") %}
+                    Adresse bearbeiten
                 </a>
             {% endif %}
             {% if (search_results[i].customer_link) { %}
             <a class="btn btn-xs btn-default pull-right"
                 style="margin-top:-3px; margin-right: -9px; margin-left: 15px;"
                 onclick="show_subscriptions({%= i %});">
-                {%= __("Show/Create Subscriptions") %}
+                Zeige/Erstelle mp Abo
             </a>
             {% endif %}
 		</p>
