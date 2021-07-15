@@ -121,6 +121,8 @@
   },
   {
    "depends_on": "eval:doc.invoice_recipient",
+   "fetch_from": "recipient_contact.address",
+   "fetch_if_empty": 1,
    "fieldname": "recipient_address",
    "fieldtype": "Link",
    "label": "Recipient Address",
@@ -170,7 +172,7 @@
    "label": "Begleittext"
   }
  ],
- "modified": "2021-07-13 19:49:10.154933",
+ "modified": "2021-07-15 11:32:52.378274",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo",
