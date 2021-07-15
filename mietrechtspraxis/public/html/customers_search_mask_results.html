@@ -7,7 +7,7 @@
 {% for(var i=0, l=search_results.length; i<l; i++) { %}
 	<div class="address-box">
 		<p class="h6">
-			{%= search_results[i].first_name %} {%= search_results[i].last_name %}{% if (search_results[i].customer_link) { %}&nbsp;<span class="text-muted">({%= search_results[i].customer_link %})</span>{% endif %}
+			{%= search_results[i].customer_name %}{% if (search_results[i].customer_link) { %}&nbsp;<span class="text-muted">({%= search_results[i].customer_link %})</span>{% endif %}
             {% if (search_results[i].customer_link) { %}
                 <a href="#Form/Customer/{%= encodeURIComponent(search_results[i].customer_link) %}"
                     class="btn btn-xs btn-default pull-right"
@@ -39,6 +39,7 @@
 		</p>
         <div class="row">
             <div class="col-xs-4">
+            <p>{%= search_results[i].first_name %} {%= search_results[i].last_name %}</p>
             {% if(search_results[i].email_id) { %}
                 <p>
                     {%= __("Email") %}: {%= search_results[i].email_id %}<span class="text-muted"> ({%= __("Primary") %})</span>

@@ -40,6 +40,8 @@ function clear_search_fields(frm) {
     cur_frm.set_value('plz', '');
     cur_frm.set_value('city', '');
     cur_frm.set_value('country', '');
+    cur_frm.set_value('is_company', 0);
+    cur_frm.set_value('company', '');
     remove_mandatory(frm);
 }
 
@@ -85,10 +87,20 @@ function create_new_customer(frm) {
         country = cur_frm.doc.country;
     }
     
+    var customer_type = 'Individual';
+    var customer_name = ''
+    if (cur_frm.doc.is_company == 1) {
+        customer_type = 'Company';
+        if (cur_frm.doc.company) {
+            customer_name = cur_frm.doc.company;
+        } else {
+            customer_name = '!';
+        }
+    }
+    
     // check mandatory
-    if ((firstname != '!' || lastname != '!') && (address_line1 != '!' && plz != '!' && city != '!')) {
+    if ((firstname != '!' || lastname != '!') && (address_line1 != '!' && plz != '!' && city != '!' && customer_name != '!')) {
         remove_mandatory(frm);
-        console.log("go for it");
         frappe.call({
             "method": "mietrechtspraxis.mietrechtspraxis.doctype.customers_search_mask.customers_search_mask.create_customer",
             "args": {
@@ -101,7 +113,9 @@ function create_new_customer(frm) {
                 "address_line2": address_line2,
                 "plz": plz,
                 "city": city,
-                "country": country
+                "country": country,
+                "customer_type": customer_type,
+                "customer_name": customer_name
             },
             "async": false,
             "callback": function(response) {
@@ -116,6 +130,7 @@ function create_new_customer(frm) {
                 cur_frm.set_value('plz', plz.replace("!", ""));
                 cur_frm.set_value('city', city.replace("!", ""));
                 cur_frm.set_value('country', country.replace("!", ""));
+                cur_frm.set_value('company', customer_name.replace("!", ""));
                 cur_frm.save();
             }
         });
@@ -131,6 +146,9 @@ function set_mandatory(frm) {
     cur_frm.set_df_property('address_line1','reqd','1');
     cur_frm.set_df_property('plz','reqd','1');
     cur_frm.set_df_property('city','reqd','1');
+    if (cur_frm.doc.is_company == 1) {
+        cur_frm.set_df_property('company','reqd','1');
+    }
 }
 
 function remove_mandatory(frm) {
@@ -139,6 +157,7 @@ function remove_mandatory(frm) {
     cur_frm.set_df_property('address_line1','reqd', 0);
     cur_frm.set_df_property('plz','reqd', 0);
     cur_frm.set_df_property('city','reqd', 0);
+    cur_frm.set_df_property('company','reqd', 0);
 }
 
 function change_button_to_Search() {

@@ -35,6 +35,13 @@ class CustomersSearchMask(Document):
         if self.country:
             filters.append("""`customers_search_mask`.`country` LIKE '%{country}%'""".format(country=self.country))
             
+        # company filters
+        if self.is_company:
+            if self.company:
+                filters.append("""`customers_search_mask`.`customer_link` IN (SELECT `name` FROM `tabCustomer` WHERE `customer_type` = 'Company' AND `customer_name` LIKE '%{company}%')""".format(company=self.company))
+            else:
+                filters.append("""`customers_search_mask`.`customer_link` IN (SELECT `name` FROM `tabCustomer` WHERE `customer_type` = 'Company')""")
+            
         if len(filters) > 0:
             query_filter = 'WHERE ' + ' AND '.join(filters)
         
@@ -54,7 +61,8 @@ class CustomersSearchMask(Document):
                 `customers_search_mask`.`city`,
                 `customers_search_mask`.`pincode`,
                 `customers_search_mask`.`country`,
-                `customers_search_mask`.`customer_link`
+                `customers_search_mask`.`customer_link`,
+                `customers_search_mask`.`customer_name`
             FROM (
                 -- all contacts with linked address
                 SELECT
@@ -72,12 +80,14 @@ class CustomersSearchMask(Document):
                     `tabAddress`.`city`,
                     `tabAddress`.`pincode`,
                     `tabAddress`.`country`,
-                    `DL1`.`link_name` AS `customer_link`
+                    `DL1`.`link_name` AS `customer_link`,
+                    `cus`.`customer_name` AS `customer_name`
                 FROM `tabContact`
                 JOIN `tabAddress` ON `tabContact`.`address` = `tabAddress`.`name`
                 LEFT JOIN `tabDynamic Link` AS `DL1` ON (`tabContact`.`name` = `DL1`.`parent` AND `DL1`.`link_doctype` = 'Customer')
                 LEFT JOIN `tabContact Email` AS `CE` ON (`tabContact`.`name` = `CE`.`parent` AND `CE`.`is_primary` != 1)
                 LEFT JOIN `tabContact Phone` AS `CP` ON (`tabContact`.`name` = `CP`.`parent` AND `CP`.`is_primary_phone` != 1 AND `CP`.`is_primary_mobile_no` != 1)
+                LEFT JOIN `tabCustomer` AS `cus` ON `DL1`.`link_name` = `cus`.`name`
                 GROUP BY `DL1`.`link_name`, `tabContact`.`name`
                 UNION
                 -- all contacts without linked address
@@ -96,11 +106,13 @@ class CustomersSearchMask(Document):
                     NULL AS `city`,
                     NULL AS `pincode`,
                     NULL AS `country`,
-                    `DL1`.`link_name` AS `customer_link`
+                    `DL1`.`link_name` AS `customer_link`,
+                    `cus`.`customer_name` AS `customer_name`
                 FROM `tabContact`
                 LEFT JOIN `tabDynamic Link` AS `DL1` ON (`tabContact`.`name` = `DL1`.`parent` AND `DL1`.`link_doctype` = 'Customer')
                 LEFT JOIN `tabContact Email` AS `CE` ON (`tabContact`.`name` = `CE`.`parent` AND `CE`.`is_primary` != 1)
                 LEFT JOIN `tabContact Phone` AS `CP` ON (`tabContact`.`name` = `CP`.`parent` AND `CP`.`is_primary_phone` != 1 AND `CP`.`is_primary_mobile_no` != 1)
+                LEFT JOIN `tabCustomer` AS `cus` ON `DL1`.`link_name` = `cus`.`name`
                 WHERE `tabContact`.`address` IS NULL
                 GROUP BY `DL1`.`link_name`, `tabContact`.`name`
                 UNION
@@ -120,9 +132,11 @@ class CustomersSearchMask(Document):
                     `tabAddress`.`city`,
                     `tabAddress`.`pincode`,
                     `tabAddress`.`country`,
-                    `DL1`.`link_name` AS `customer_link`
+                    `DL1`.`link_name` AS `customer_link`,
+                    `cus`.`customer_name` AS `customer_name`
                 FROM `tabAddress`
                 LEFT JOIN `tabDynamic Link` AS `DL1` ON (`tabAddress`.`name` = `DL1`.`parent` AND `DL1`.`link_doctype` = 'Customer')
+                LEFT JOIN `tabCustomer` AS `cus` ON `DL1`.`link_name` = `cus`.`name`
                 WHERE `tabAddress`.`name` NOT IN (
                     SELECT `tabContact`.`address` FROM `tabContact` WHERE `tabContact`.`address` IS NOT NULL
                 )
@@ -140,15 +154,17 @@ class CustomersSearchMask(Document):
     pass
 
 @frappe.whitelist()
-def create_customer(firstname, lastname, email, phone, mobile, address_line1, address_line2, plz, city, country):
-    fullname = firstname if firstname != '!' else '-'
-    fullname += ' '
-    fullname += lastname if lastname != '!' else '-'
+def create_customer(firstname, lastname, email, phone, mobile, address_line1, address_line2, plz, city, country, customer_type, customer_name):
+    if customer_type == 'Individual':
+        fullname = firstname if firstname != '!' else ''
+        fullname += " " + lastname if lastname != '!' else ''
+    else:
+        fullname = customer_name
     
     # create customer
     customer = frappe.get_doc({
         "doctype": "Customer",
-        "customer_type": "Individual",
+        "customer_type": customer_type,
         "customer_name": fullname
     })
     customer.insert()
@@ -190,7 +206,7 @@ def create_customer(firstname, lastname, email, phone, mobile, address_line1, ad
     contact = frappe.get_doc({
         "doctype": "Contact",
         "first_name": firstname if firstname != '!' else '-',
-        "last_name": lastname if lastname != '!' else '-',
+        "last_name": lastname if lastname != '!' else '',
         "address": address.name,
         "email_ids": [
             {

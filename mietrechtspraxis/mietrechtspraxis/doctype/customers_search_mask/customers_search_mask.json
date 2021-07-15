@@ -11,12 +11,14 @@
   "email",
   "phone",
   "mobile",
+  "is_company",
   "cb_1",
   "address_line1",
   "address_line2",
   "plz",
   "city",
   "country",
+  "company",
   "section_results",
   "search_result_html"
  ],
@@ -89,11 +91,23 @@
   {
    "fieldname": "search_result_html",
    "fieldtype": "HTML"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_company",
+   "fieldtype": "Check",
+   "label": "Is Company"
+  },
+  {
+   "depends_on": "eval:doc.is_company==1",
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "label": "Company Name"
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2021-04-14 11:48:40.526059",
+ "modified": "2021-07-15 13:29:34.639703",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Customers Search Mask",
