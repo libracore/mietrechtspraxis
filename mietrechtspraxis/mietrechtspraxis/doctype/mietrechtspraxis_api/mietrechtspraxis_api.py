@@ -55,10 +55,8 @@ def check_login(**kwargs):
         # 400 Bad Request (Username Missing)
         return raise_4xx(400, 'Bad Request', 'Username Missing')
         
-    login = frappe.db.sql("""SELECT `mp_password` FROM `tabContact` WHERE `mp_username` = '{username}'""".format(username=username), as_dict=True)
-    if len(login) > 0:
-        login = login[0]
-        
+    mp_user = find_user(username)
+    if mp_user:
         # check password
         try:
             password = kwargs['password']
@@ -66,7 +64,7 @@ def check_login(**kwargs):
             # 400 Bad Request (Password Missing)
             return raise_4xx(400, 'Bad Request', 'Password Missing')
             
-        if login.mp_password == password:
+        if mp_user.mp_password == password:
             return raise_200()
         else:
             # 401 Unauthorized (Invalid Password)
@@ -90,9 +88,8 @@ def update(**kwargs):
         # 400 Bad Request (User-Data Missing)
         return raise_4xx(400, 'Bad Request', 'User-Data Missing')
         
-    login = frappe.db.sql("""SELECT `name` FROM `tabContact` WHERE `mp_username` = '{username}'""".format(username=username), as_dict=True)
-    if len(login) > 0:
-        mp_user = frappe.get_doc("Contact", login[0].name)
+    mp_user = find_user(username)
+    if mp_user:
         old_data = {}
         user_data = json.loads(kwargs['user'])
         if 'salutation' in user_data:
@@ -153,9 +150,8 @@ def newsletter(**kwargs):
         # 400 Bad Request (Newsletters Missing)
         return raise_4xx(400, 'Bad Request', 'Newsletters Missing')
         
-    login = frappe.db.sql("""SELECT `name` FROM `tabContact` WHERE `email_id` = '{email}'""".format(email=email), as_dict=True)
-    if len(login) > 0:
-        mp_user = frappe.get_doc("Contact", login[0].name)
+    mp_user = find_user(username)
+    if mp_user:
         old_data = {}
         old_data['newsletters'] = {}
         old_data['newsletters']['1'] = mp_user.nl_1
@@ -174,6 +170,27 @@ def newsletter(**kwargs):
     else:
         # 404 Not Found (No User found)
         return raise_4xx(404, 'Not Found', 'No User found')
+        
+def find_user(search_key):
+    # 1. Abo-Nr
+    login = frappe.db.sql("""SELECT `name` FROM `tabContact` WHERE `mp_username` = '{search_key}'""".format(search_key=search_key), as_dict=True)
+    if len(login) > 0:
+        mp_user = frappe.get_doc("Contact", login[0].name)
+        return mp_user
+    else:
+        # 2. old Abo-Nr.
+        login = frappe.db.sql("""SELECT `name` FROM `tabContact` WHERE `mp_abo_old` = '{search_key}'""".format(search_key=search_key), as_dict=True)
+        if len(login) > 0:
+            mp_user = frappe.get_doc("Contact", login[0].name)
+            return mp_user
+        else:
+            # 3. E-Mail based
+            login = frappe.db.sql("""SELECT `name` FROM `tabContact` WHERE `email_id` = '{search_key}'""".format(search_key=search_key), as_dict=True)
+            if len(login) > 0:
+                mp_user = frappe.get_doc("Contact", login[0].name)
+                return mp_user
+            else:
+                return False
     
 def raise_4xx(code, title, message):
     # 4xx Bad Request / Unauthorized / Not Found
