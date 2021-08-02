@@ -133,10 +133,10 @@ def update(**kwargs):
         return raise_4xx(404, 'Not Found', 'No User found')
     
 def pw_reset(**kwargs):
-    return
+    return raise_4xx(423, 'Locked', 'Method not implemented yet')
     
 def pw_reset_mail(**kwargs):
-    return
+    return raise_4xx(423, 'Locked', 'Method not implemented yet')
     
 def newsletter(**kwargs):
     # check email
