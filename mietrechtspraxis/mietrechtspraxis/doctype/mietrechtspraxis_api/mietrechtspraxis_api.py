@@ -139,7 +139,41 @@ def pw_reset_mail(**kwargs):
     return
     
 def newsletter(**kwargs):
-    return
+    # check email
+    try:
+        email = kwargs['email']
+    except:
+        # 400 Bad Request (E-Mail Missing)
+        return raise_4xx(400, 'Bad Request', 'E-Mail Missing')
+        
+    # check newsletter data
+    try:
+        newsletter = json.loads(kwargs['newsletters'])
+    except:
+        # 400 Bad Request (Newsletters Missing)
+        return raise_4xx(400, 'Bad Request', 'Newsletters Missing')
+        
+    login = frappe.db.sql("""SELECT `name` FROM `tabContact` WHERE `email_id` = '{email}'""".format(email=email), as_dict=True)
+    if len(login) > 0:
+        mp_user = frappe.get_doc("Contact", login[0].name)
+        old_data = {}
+        old_data['newsletters'] = {}
+        old_data['newsletters']['1'] = mp_user.nl_1
+        old_data['newsletters']['2'] = mp_user.nl_2
+        old_data['newsletters']['3'] = mp_user.nl_3
+        old_data['newsletters']['4'] = mp_user.nl_4
+        mp_user.nl_1 = newsletter['1']
+        mp_user.nl_2 = newsletter['2']
+        mp_user.nl_3 = newsletter['3']
+        mp_user.nl_4 = newsletter['4']
+        
+        mp_user.save(ignore_permissions=True)
+        frappe.db.commit()
+        
+        return raise_200({'old_data': old_data, 'updated_data': newsletter})
+    else:
+        # 404 Not Found (No User found)
+        return raise_4xx(404, 'Not Found', 'No User found')
     
 def raise_4xx(code, title, message):
     # 4xx Bad Request / Unauthorized / Not Found
