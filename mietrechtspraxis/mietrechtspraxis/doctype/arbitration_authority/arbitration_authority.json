@@ -1,0 +1,102 @@
+{
+ "autoname": "field:bezeichnung",
+ "creation": "2021-08-03 14:17:13.147428",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bezeichnung",
+  "titel",
+  "telefon",
+  "kuendigungstermine",
+  "pauschalen",
+  "rechtsberatung",
+  "elektronische_eingaben",
+  "homepage",
+  "gemeinden"
+ ],
+ "fields": [
+  {
+   "fieldname": "titel",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Titel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "telefon",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Telefon",
+   "reqd": 1
+  },
+  {
+   "fieldname": "kuendigungstermine",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "K\u00fcndigungstermine",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pauschalen",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Pauschalen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rechtsberatung",
+   "fieldtype": "Data",
+   "label": "Rechtsberatung",
+   "reqd": 1
+  },
+  {
+   "fieldname": "elektronische_eingaben",
+   "fieldtype": "Data",
+   "label": "elektronische Eingaben",
+   "reqd": 1
+  },
+  {
+   "fieldname": "homepage",
+   "fieldtype": "Data",
+   "label": "Homepage",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gemeinden",
+   "fieldtype": "Table MultiSelect",
+   "label": "Zust\u00e4ndig f\u00fcr die Gemeinden",
+   "options": "Gemeinde Multiselect",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bezeichnung",
+   "fieldtype": "Data",
+   "label": "Bezeichnung",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "modified": "2021-08-03 14:44:15.605538",
+ "modified_by": "Administrator",
+ "module": "mietrechtspraxis",
+ "name": "Arbitration Authority",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

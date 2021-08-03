@@ -17,6 +17,14 @@ class mietrechtspraxisAPI(Document):
 	pass
 
 def _request(**kwargs):
+    '''
+    call on [IP]/api/method/mietrechtspraxis.api.request
+    Mandatory Parameter:
+        - token
+        - method
+        - username
+    '''
+    
     # check that token is present
     try:
         token = kwargs['token']

@@ -74,5 +74,47 @@ def get_data():
                        "description": _("Payment Entry")
                    }
             ]
+        },
+        {
+            "label": _("Schlichtungsbehörden"),
+            "icon": "fa fa-money",
+            "items": [
+                   {
+                       "type": "doctype",
+                       "name": "Arbitration Authority",
+                       "label": _("Schlichtungsbehörden"),
+                       "description": _("Schlichtungsbehörden")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Kantonsinformationen",
+                       "label": _("Kantonsinformationen"),
+                       "description": _("Kantonsinformationen")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Gemeinde Multiselect",
+                       "label": _("Gemeinden"),
+                       "description": _("Gemeinden")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Pincode",
+                       "label": _("Postleitzahlen"),
+                       "description": _("Postleitzahlen")
+                   }
+            ]
+        },
+        {
+            "label": _("API"),
+            "icon": "fa fa-money",
+            "items": [
+                   {
+                       "type": "doctype",
+                       "name": "mietrechtspraxis API",
+                       "label": _("API Einstellungen"),
+                       "description": _("API Einstellungen")
+                   }
+            ]
         }
 ]
