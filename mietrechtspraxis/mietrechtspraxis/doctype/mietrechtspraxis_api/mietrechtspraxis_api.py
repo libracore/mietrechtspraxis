@@ -8,6 +8,10 @@ from frappe.model.document import Document
 from frappe import _
 import requests
 import json
+import hashlib
+from cryptography.fernet import Fernet, InvalidToken
+from frappe.utils import cstr, encode
+from mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo import create_random_pw
 
 class mietrechtspraxisAPI(Document):
 	pass
@@ -64,7 +68,9 @@ def check_login(**kwargs):
             # 400 Bad Request (Password Missing)
             return raise_4xx(400, 'Bad Request', 'Password Missing')
             
-        if mp_user.mp_password == password:
+        mp_password = hashlib.sha256()
+        mp_password.update(encode("{pwd}".format(pwd=mp_user.mp_password)))
+        if mp_password.hexdigest() == password:
             return raise_200()
         else:
             # 401 Unauthorized (Invalid Password)
@@ -118,7 +124,9 @@ def update(**kwargs):
             mp_user.nl_3 = user_data['newsletters']['3']
             mp_user.nl_4 = user_data['newsletters']['4']
         if 'new_password' in user_data:
+            # zuerst encrypt(mp_user.mp_password)!!!
             old_data['password'] = mp_user.mp_password
+            # zuerst decrypt(user_data['new_password'])!!!
             mp_user.mp_password = user_data['new_password']
         
         mp_user.save(ignore_permissions=True)
@@ -130,10 +138,53 @@ def update(**kwargs):
         return raise_4xx(404, 'Not Found', 'No User found')
     
 def pw_reset(**kwargs):
-    return raise_4xx(423, 'Locked', 'Method not implemented yet')
+    # check username
+    try:
+        username = kwargs['username']
+    except:
+        # 400 Bad Request (Username Missing)
+        return raise_4xx(400, 'Bad Request', 'Username Missing')
+        
+    mp_user = find_user(username)
+    if mp_user:
+        # check new_password
+        try:
+            new_password = kwargs['new_password']
+        except:
+            # 400 Bad Request (New Password Missing)
+            return raise_4xx(400, 'Bad Request', 'New Password Missing')
+        # zuerst new_password = encrypt(new_password)!!!
+        mp_user.mp_password = new_password
+        mp_user.save(ignore_permissions=True)
+        frappe.db.commit()
+        return raise_200()
+    else:
+        # 404 Not Found (No User found)
+        return raise_4xx(404, 'Not Found', 'No User found')
     
 def pw_reset_mail(**kwargs):
-    return raise_4xx(423, 'Locked', 'Method not implemented yet')
+    # check username
+    try:
+        username = kwargs['username']
+    except:
+        # 400 Bad Request (Username Missing)
+        return raise_4xx(400, 'Bad Request', 'Username Missing')
+        
+    mp_user = find_user(username)
+    if mp_user:
+        if mp_user.email_id:
+            new_password = create_random_pw()
+            mp_user.mp_password = new_password
+            mp_user.save(ignore_permissions=True)
+            frappe.db.commit()
+            frappe.sendmail(recipients=mp_user.email_id, message="Ihr neues Passwort lautet: {pwd}".format(pwd=new_password))
+            return raise_200()
+        else:
+            # 400 Bad Request (User has no E-Mail)
+            return raise_4xx(400, 'Bad Request', 'User has no E-Mail')
+    else:
+        # 404 Not Found (No User found)
+        return raise_4xx(404, 'Not Found', 'No User found')
     
 def newsletter(**kwargs):
     # check email
@@ -209,3 +260,30 @@ def raise_200(answer=False):
             "message": "OK"
         }
     return ['200 OK', answer]
+    
+
+    
+def get_encryption_key(new=False):
+    if new:
+        encryption_key = Fernet.generate_key().decode()
+        return encryption_key
+    else:
+        return frappe.db.get_single_value('mietrechtspraxis API', 'secret_key')
+    
+def encrypt(pwd):
+    if len(pwd) > 100:
+        # encrypting > 100 chars will lead to truncation
+        frappe.throw(_('Password cannot be more than 100 characters long'))
+
+    cipher_suite = Fernet(encode(get_encryption_key()))
+    cipher_text = cstr(cipher_suite.encrypt(encode(pwd)))
+    return cipher_text
+
+def decrypt(pwd):
+    try:
+        cipher_suite = Fernet(encode(get_encryption_key()))
+        plain_text = cstr(cipher_suite.decrypt(encode(pwd)))
+        return plain_text
+    except InvalidToken:
+        # encryption_key not valid
+        frappe.throw(_('Encryption key is invalid'))
