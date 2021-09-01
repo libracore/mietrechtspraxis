@@ -1,15 +1,15 @@
 {
- "autoname": "field:titel",
- "creation": "2021-08-03 14:12:40.186297",
+ "autoname": "field:title",
+ "creation": "2021-08-26 13:39:03.647754",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "titel"
+  "title"
  ],
  "fields": [
   {
-   "fieldname": "titel",
+   "fieldname": "title",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Titel",
@@ -17,10 +17,10 @@
    "unique": 1
   }
  ],
- "modified": "2021-08-03 14:12:40.186297",
+ "modified": "2021-08-26 13:39:03.647754",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
- "name": "Gemeinde",
+ "name": "Sektion",
  "owner": "Administrator",
  "permissions": [
   {

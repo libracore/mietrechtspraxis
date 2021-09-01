@@ -26,7 +26,9 @@
   "section_recipient",
   "recipient",
   "section_begleitschreiben",
-  "begleittext"
+  "begleittext",
+  "section_import_referenzen",
+  "mitglied_id"
  ],
  "fields": [
   {
@@ -170,9 +172,20 @@
    "fieldname": "begleittext",
    "fieldtype": "Text Editor",
    "label": "Begleittext"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_import_referenzen",
+   "fieldtype": "Section Break",
+   "label": "Import Referenzen"
+  },
+  {
+   "fieldname": "mitglied_id",
+   "fieldtype": "Data",
+   "label": "Mitglied ID"
   }
  ],
- "modified": "2021-07-15 11:32:52.378274",
+ "modified": "2021-09-01 18:16:28.683716",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo",

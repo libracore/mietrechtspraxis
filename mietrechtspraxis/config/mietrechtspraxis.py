@@ -90,18 +90,6 @@ def get_data():
                        "name": "Kantonsinformationen",
                        "label": _("Kantonsinformationen"),
                        "description": _("Kantonsinformationen")
-                   },
-                   {
-                       "type": "doctype",
-                       "name": "Gemeinde Multiselect",
-                       "label": _("Gemeinden"),
-                       "description": _("Gemeinden")
-                   },
-                   {
-                       "type": "doctype",
-                       "name": "Pincode",
-                       "label": _("Postleitzahlen"),
-                       "description": _("Postleitzahlen")
                    }
             ]
         },
