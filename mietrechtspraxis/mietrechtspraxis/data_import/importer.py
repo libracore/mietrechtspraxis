@@ -32,17 +32,26 @@ hm = {
     'datum_eintritt': 'datum_eintritt', # start datum
     'datum_austritt': 'datum_austritt', # enddatum
     'zeitung_anzahl': 'zeitung_anzahl', # anz. Zeitungen
-    'mitglied_id': 'mitglied_id' # mp abo als import referenz
+    'mitglied_id': 'mitglied_id', # mp abo als import referenz
+    'postfach': 'postfach', # checkbox ob Postfach (ja/nein = -1/0)
+    'postfach_nummer': 'postfach_nummer', # address
+    'preis': 'preis', # abo preis
+    'webuser_id': 'webuser_id',
+    'password': 'password'
 }
     
 @frappe.whitelist()
 def read_csv(site_name, file_name, limit=False):
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
     # read csv
-    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/privat/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
     
     # loop through rows
     count = 1
     max_loop = limit
+    
     if not limit:
         index = df.index
         max_loop = len(index)
@@ -111,6 +120,7 @@ def read_csv(site_name, file_name, limit=False):
             else:
                 # error handling customer creation
                 frappe.log_error('{0}'.format(customer_response['data']), "Kunde: {0}".format(customer_response['error']))
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
             count += 1
         else:
             break
@@ -136,13 +146,18 @@ def create_contact(data):
     
     try:
         # base data
+        webuser_id = get_value(data, 'webuser_id')
+        if len(webuser_id) < 8:
+            webuser_id = webuser_id.zfill(8)
         new_contact = frappe.get_doc({
             'doctype': 'Contact',
             'first_name': first_name,
             'last_name': last_name,
             'salutation': get_value(data, 'salutation'),
             'sektion': get_sektion(get_value(data, 'sektion')),
-            'company_name': company_name
+            'company_name': company_name,
+            'mp_password': get_value(data, 'password'),
+            'mp_abo_old': webuser_id
         })
         
         # email
@@ -187,48 +202,59 @@ def create_contact(data):
         }
         
 def create_address(data):
-    address_line1 = get_value(data, 'address_line1')
-    address_line2 = get_value(data, 'address_line2')
-    
-    if not address_line1:
-        address_line1 = get_value(data, 'postfach')
-        if not address_line1:
-            return {
-                'success': False,
-                'data': data,
-                'error': 'Weder Strasse noch Postfach hinterlegt'
-            }
-        else:
-            address_line1 = "Postfach {0}".format(address_line1)
+    # get datas
+    if len(get_value(data, 'address_line1')) > 0:
+        address_line1 = strasse = (" ").join((str(get_value(data, 'address_line1')), str(get_value(data, 'nummer')), str(get_value(data, 'nummer_zu'))))
     else:
-        address_line1 = (" ").join((str(address_line1), str(get_value(data, 'nummer')), str(get_value(data, 'nummer_zu'))))
-    if address_line2:
-        address_line2 = address_line1
-        address_line1 = get_value(data, 'address_line2')
-        
-    plz = get_value(data, 'plz')
+        address_line1 = strasse = False
+    address_line2 = zusatz = get_value(data, 'address_line2')
+    pincode = plz = get_value(data, 'plz')
+    city = get_value(data, 'city')
+    postfach_check = get_value(data, 'postfach')
+    postfach = 0
+    if postfach_check:
+        if int(postfach_check) < 0:
+            postfach = 1
+    postfach_nummer = get_value(data, 'postfach_nummer')
+    if not address_line1 and not postfach and postfach_nummer:
+        postfach = 1
+    
+    # validierung
+    if not address_line1 and not postfach and not postfach_nummer:
+        return {
+            'success': False,
+            'data': data,
+            'error': 'Weder Strasse noch Postfach hinterlegt'
+        }
     if not plz:
         return {
             'success': False,
             'data': data,
             'error': 'Keine PLZ hinterlegt'
         }
-    city = get_value(data, 'city')
     if not city:
         return {
             'success': False,
             'data': data,
             'error': 'Kein Ort hinterlegt'
         }
+        
+    if not address_line1:
+        address_line1 = '-'
       
+    # daten anlage
     try:
         new_address = frappe.get_doc({
             'doctype': 'Address',
             'address_title': get_value(data, 'address_title'),
             'address_line1': address_line1,
             'address_line2': address_line2,
+            'strasse': strasse,
             'sektion': get_sektion(get_value(data, 'sektion')),
             'pincode': plz,
+            'plz': plz,
+            'postfach': postfach,
+            'postfach_nummer': postfach_nummer,
             'city': city
         })
         new_address.insert()
@@ -245,7 +271,7 @@ def create_address(data):
         }
         
 def create_customer(data=None, contact=None):
-    customer_addition = ''
+    customer_addition = get_value(data, 'customer_addition')
     if not contact:
         company = get_value(data, 'company_name')
         if not company:
@@ -256,7 +282,6 @@ def create_customer(data=None, contact=None):
             }
         else:
             customer_name = company
-            customer_addition = get_value(data, 'customer_addition')
             customer_type = 'Company'
     else:
         contact = frappe.get_doc('Contact', contact)
@@ -288,69 +313,77 @@ def create_customer(data=None, contact=None):
         }
         
 def create_or_append_abo(data, new, customer=False, address=False, contact=False):
-    # ausschluss von "Buchhandlungen"
-    if get_value(data, 'mkategorie_id') != 192:
-        if new:
-            # create new Abo
-            abo_type = 'Jahres-Abo'
-            abo_status = 'Inactive'
-            if get_value(data, 'mkategorie_id') == 195:
-                abo_type = 'Gratis-Abo'
-            start_datum_raw = get_value(data, 'datum_eintritt').split(" ")[0]
-            if not start_datum_raw:
-                start_datum_raw = '1900-01-01'
-            end_datum_raw = get_value(data, 'datum_austritt').split(" ")[0]
-            if not start_datum_raw:
-                end_datum_raw = ''
-                abo_status = 'Active'
-            
-            try:
-                new_abo = frappe.get_doc({
-                    'doctype': 'mp Abo',
-                    'type': abo_type,
-                    'start_date': start_datum_raw.replace("/", "-"),
-                    'end_date': end_datum_raw,
-                    'status': abo_status,
-                    'invoice_recipient': customer,
-                    'customer': customer,
-                    'recipient_contact': contact,
-                    'recipient_address': address,
-                    'magazines_qty_ir': get_value(data, 'zeitung_anzahl'),
-                    'mitglied_id': get_value(data, 'mitglied_id')
-                })
-                new_abo.insert()
-                frappe.db.commit()
-                return {
-                    'success': True,
-                    'customer': new_abo.name
-                }
-            except Exception as err:
-                return {
-                    'success': False,
-                    'data': data,
-                    'error': err
-                }
-            
-        else:
-            # append to existing Abo
-            mitglied_id = get_value(data, 'mitglied_id')
-            existing_abo = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `mitglied_id` = '{mitglied_id}' LIMIT 1""".format(mitglied_id=mitglied_id), as_dict=True)
-            if len(existing_abo) > 0:
-                existing_abo = frappe.get_doc("mp Abo", existing_abo[0].name)
-                row = existing_abo.append('recipient', {})
-                row.magazines_recipient = customer
-                row.recipient_contact = contact
-                row.recipient_address = address
-                row.magazines_qty_mr = get_value(data, 'zeitung_anzahl')
-                existing_abo.save(ignore_permissions=True)
-                frappe.db.commit()
-            else:
-                # error handling no existing Abo
-                frappe.log_error('{0}'.format(data), "Kein 'Eltern'-Abo gefunden")
-    else:
-        # error handling Buchhandlungen
-        frappe.log_error('{0}'.format(data), "Buchhandlungen")
+    if new:
+        # create new Abo
+        abo_type = 'Jahres-Abo'
+        abo_status = 'Inactive'
+        preis = 0
+        if get_value(data, 'preis'):
+            preis = get_value(data, 'preis')
+        if not preis > 0:
+            abo_type = 'Gratis-Abo'
+        start_datum_raw = get_value(data, 'datum_eintritt').split(" ")[0]
+        if not start_datum_raw:
+            start_datum_raw = '1900-01-01'
+        end_datum_raw = get_value(data, 'datum_austritt').split(" ")[0]
+        if not start_datum_raw:
+            end_datum_raw = ''
+            abo_status = 'Active'
         
+        try:
+            new_abo = frappe.get_doc({
+                'doctype': 'mp Abo',
+                'type': abo_type,
+                'start_date': start_datum_raw.replace("/", "-"),
+                'end_date': end_datum_raw,
+                'status': abo_status,
+                'invoice_recipient': customer,
+                'customer': customer,
+                'recipient_contact': contact,
+                'recipient_address': address,
+                'magazines_qty_ir': get_value(data, 'zeitung_anzahl'),
+                'mitglied_id': get_value(data, 'mitglied_id')
+            })
+            new_abo.insert()
+            frappe.db.commit()
+            add_new_abo_nr_to_contact(contact, new_abo.name)
+            return {
+                'success': True,
+                'customer': new_abo.name
+            }
+        except Exception as err:
+            return {
+                'success': False,
+                'data': data,
+                'error': err
+            }
+        
+    else:
+        # append to existing Abo
+        mitglied_id = get_value(data, 'mitglied_id')
+        existing_abo = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `mitglied_id` = '{mitglied_id}' LIMIT 1""".format(mitglied_id=mitglied_id), as_dict=True)
+        if len(existing_abo) > 0:
+            existing_abo = frappe.get_doc("mp Abo", existing_abo[0].name)
+            row = existing_abo.append('recipient', {})
+            row.magazines_recipient = customer
+            row.recipient_contact = contact
+            row.recipient_address = address
+            row.magazines_qty_mr = get_value(data, 'zeitung_anzahl')
+            existing_abo.save(ignore_permissions=True)
+            frappe.db.commit()
+            add_new_abo_nr_to_contact(contact, existing_abo.name)
+        else:
+            # error handling no existing Abo
+            frappe.log_error('{0}'.format(data), "Kein 'Eltern'-Abo gefunden")
+        
+        
+def add_new_abo_nr_to_contact(contact, abo):
+    contact = frappe.get_doc("Contact", contact)
+    contact.mp_username = abo
+    contact.save(ignore_permissions=True)
+    frappe.db.commit()
+    
+    
 def get_sektion(id):
     if id == 25:
         return 'MP'
