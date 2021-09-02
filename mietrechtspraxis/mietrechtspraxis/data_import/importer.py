@@ -37,7 +37,8 @@ hm = {
     'postfach_nummer': 'postfach_nummer', # address
     'preis': 'preis', # abo preis
     'webuser_id': 'webuser_id',
-    'password': 'password'
+    'password': 'password',
+    'backup_mail': 'email'
 }
     
 @frappe.whitelist()
@@ -127,9 +128,9 @@ def read_csv(site_name, file_name, limit=False):
 
 def create_contact(data):
     # check mandatory fields
-    first_name = get_value(data, 'first_name')
-    last_name = get_value(data, 'last_name')
-    company_name = get_value(data, 'company_name')
+    first_name = str(get_value(data, 'first_name'))
+    last_name = str(get_value(data, 'last_name'))
+    company_name = str(get_value(data, 'company_name'))
     
     if not first_name:
         if not last_name:
@@ -146,17 +147,17 @@ def create_contact(data):
     
     try:
         # base data
-        webuser_id = get_value(data, 'webuser_id')
+        webuser_id = str(get_value(data, 'webuser_id'))
         if len(webuser_id) < 8:
             webuser_id = webuser_id.zfill(8)
         new_contact = frappe.get_doc({
             'doctype': 'Contact',
             'first_name': first_name,
             'last_name': last_name,
-            'salutation': get_value(data, 'salutation'),
-            'sektion': get_sektion(get_value(data, 'sektion')),
+            'salutation': str(get_value(data, 'salutation')),
+            'sektion': str(get_sektion(get_value(data, 'sektion'))),
             'company_name': company_name,
-            'mp_password': get_value(data, 'password'),
+            'mp_password': str(get_value(data, 'password')),
             'mp_abo_old': webuser_id
         })
         
@@ -166,23 +167,29 @@ def create_contact(data):
             email_row = new_contact.append("email_ids", {})
             email_row.email_id = email_id
             email_row.is_primary = 1
+        else:
+            email_id = get_value(data, 'backup_mail')
+            if email_id:
+                email_row = new_contact.append("email_ids", {})
+                email_row.email_id = email_id
+                email_row.is_primary = 1
             
         # private phone
-        is_primary_phone = get_value(data, 'is_primary_phone')
+        is_primary_phone = str(get_value(data, 'is_primary_phone'))
         if is_primary_phone:
             is_primary_phone_row = new_contact.append("phone_nos", {})
             is_primary_phone_row.phone = is_primary_phone
             is_primary_phone_row.is_primary_phone = 1
             
         # mobile phone
-        is_primary_mobile_no = get_value(data, 'is_primary_mobile_no')
+        is_primary_mobile_no = str(get_value(data, 'is_primary_mobile_no'))
         if is_primary_mobile_no:
             is_primary_mobile_no_row = new_contact.append("phone_nos", {})
             is_primary_mobile_no_row.phone = is_primary_mobile_no
             is_primary_mobile_no_row.is_primary_mobile_no = 1
             
         # other (company) phone
-        phone = get_value(data, 'phone')
+        phone = str(get_value(data, 'phone'))
         if phone:
             phone_row = new_contact.append("phone_nos", {})
             phone_row.phone = phone
@@ -391,9 +398,12 @@ def get_sektion(id):
 def get_value(row, value):
     value = row[hm[value]]
     if not pd.isnull(value):
-        if isinstance(value, str):
-            return value.strip()
-        else:
+        try:
+            if isinstance(value, str):
+                return value.strip()
+            else:
+                return value
+        except:
             return value
     else:
         return ''
