@@ -29,13 +29,6 @@
                     Adresse bearbeiten
                 </a>
             {% endif %}
-            {% if (search_results[i].customer_link) { %}
-            <a class="btn btn-xs btn-default pull-right"
-                style="margin-top:-3px; margin-right: -9px; margin-left: 15px;"
-                onclick="show_subscriptions({%= i %});">
-                Zeige/Erstelle mp Abo
-            </a>
-            {% endif %}
 		</p>
         <div class="row">
             <div class="col-xs-4">
@@ -86,19 +79,3 @@
         </div>
 	</div>
 {% } %}
-
-<script>
-    function show_subscriptions(customer) {
-        var search_results = [
-        {% for(var i=0, l=search_results.length; i<l; i++) { %}
-            ["{%= search_results[i].customer_link %}","{%= search_results[i].address_name %}","{%= search_results[i].contact_name %}"],
-        {% } %}
-        ["","",""]];
-        frappe.route_options = {
-                                "invoice_recipient": search_results[customer][0],
-                                "recipient_address": search_results[customer][1],
-                                "recipient_contact": search_results[customer][2]
-                                };
-        frappe.set_route("List", "mp Abo");
-    }
-</script>

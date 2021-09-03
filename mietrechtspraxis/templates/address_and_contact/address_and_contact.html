@@ -1,16 +1,8 @@
 {% if customer_type == 'Individual' %}
 <div class="address-box">
-    
-</div>
-{% endif %}
-{% if customer_type == 'Company' %}
-<div class="address-box">
-    <p>{{ customer_name }}<br>{{ customer_addition }}</p>
     <p>
+        {{ salutation }} {{ first_name }} {{ last_name }}<br>
         {% if zusatz %}{{ zusatz }}<br>{% endif %}
-        {% if first_name != customer_name %}
-            {{ salutation }} {{ first_name }} {{ last_name }}<br>
-        {% endif %}
         {% if not postfach %}
             {{ strasse }}<br>
         {% else %}
@@ -22,5 +14,28 @@
         {% if email_id %}{{ email_id }}<br>{% endif %}
         {% if phone %}{{ phone }}<br>{% endif %}
         {% if mobile_no %}{{ mobile_no }}{% endif %}
+    </p>
+</div>
+{% endif %}
+{% if customer_type == 'Company' %}
+<div class="address-box">
+    <p>{{ customer_name }}<br>{{ customer_addition }}</p>
+    <p>
+        {% if first_name != customer_name %}
+            {{ salutation }} {{ first_name }} {{ last_name }}<br>
+        {% endif %}
+        {% if zusatz %}{{ zusatz }}<br>{% endif %}
+        {% if not postfach %}
+            {{ strasse }}<br>
+        {% else %}
+            Postfach {% if postfach_nummer %}{{ postfach_nummer }}{% endif %}<br>
+        {% endif %}
+        {{ plz }} {{ city }}
+    </p>
+    <p>
+        {% if email_id %}{{ email_id }}<br>{% endif %}
+        {% if phone %}{{ phone }}<br>{% endif %}
+        {% if mobile_no %}{{ mobile_no }}{% endif %}
+    </p>
 </div>
 {% endif %}
