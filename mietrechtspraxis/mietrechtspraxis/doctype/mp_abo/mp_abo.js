@@ -216,10 +216,7 @@ function fetch_address(frm) {
             "async": false,
             "callback": function(response) {
                 var html = response.message;
-                if (cur_frm.get_field("invoice_recipient_address_html").df.options != html) {
-                    cur_frm.set_df_property('invoice_recipient_address_html','options', html);
-                    cur_frm.refresh();
-                }
+                $(frm.fields_dict["invoice_recipient_address_html"].wrapper).html(html);
             }
         });
     } else {

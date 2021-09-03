@@ -44,23 +44,25 @@ def get_address_html(customer, contact, address):
     contact = frappe.get_doc("Contact", contact)
     address = frappe.get_doc("Address", address)
     
-    html = ''
+    data = {
+        'customer_type': customer.customer_type,
+        'customer_name': customer.customer_name,
+        'customer_addition': customer.customer_addition,
+        'zusatz': address.zusatz,
+        'salutation': contact.salutation,
+        'first_name': contact.first_name,
+        'last_name': contact.last_name,
+        'postfach': address.postfach,
+        'strasse': address.strasse,
+        'postfach_nummer': address.postfach_nummer,
+        'plz': address.plz,
+        'city': address.city,
+        'email_id': contact.email_id,
+        'phone': contact.phone,
+        'mobile_no': contact.mobile_no
+    }
     
-    if customer.customer_type == 'Individual':
-        # contact
-        salutation = contact.salutation + "<br>" if contact.salutation else ''
-        first_name = contact.first_name + ' ' if contact.first_name != '-' else ''
-        last_name = contact.last_name if contact.last_name != '-' else ''
-        html += salutation + first_name + last_name + "<br>"
-        
-        # address
-        address_line2 = address.address_line2 + "<br>" if address.address_line2 else ''
-        html += str(address.address_line1) + "<br>" + address_line2 + str(address.pincode) + " " + str(address.city) + "<br>" + str(address.country)
-    else:
-        #tbd"
-        html = 'tbd'
-    
-    return html
+    return frappe.render_template('templates/address_and_contact/address_and_contact.html', data)
 
 @frappe.whitelist()
 def get_abo_list(customer):
