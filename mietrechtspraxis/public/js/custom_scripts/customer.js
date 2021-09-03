@@ -27,6 +27,7 @@ function get_mp_abos(frm) {
         "callback": function(response) {
             var data = response.message;
             console.log(data);
+            $(frm.fields_dict["mp_abo_html"].wrapper).html(data);
         }
     });
 }

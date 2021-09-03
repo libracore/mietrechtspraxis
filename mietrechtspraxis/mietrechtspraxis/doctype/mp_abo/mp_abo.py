@@ -73,7 +73,7 @@ def get_abo_list(customer):
                                         FROM `tabmp Abo`
                                         INNER JOIN `tabmp Abo Recipient` ON `tabmp Abo`.`name` = `tabmp Abo Recipient`.`parent`
                                         WHERE `tabmp Abo Recipient`.`magazines_recipient` = '{customer}'""".format(customer=customer), as_dict=True)
-    return data
+    return frappe.render_template('templates/customer/abo_table.html', data)
 
 def set_inactive_status():
     abos = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `status` = 'Actively terminated' AND `end_date` < '{today}'""".format(today=today()), as_dict=True)

@@ -1,0 +1,31 @@
+<table style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Abo</th>
+                <th>Typ</th>
+                <th>Status</th>
+                <th style="text-align: center;">Inhaber</th>
+                <th style="text-align: center;">Empfänger</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for abo in owner %}
+                <tr>
+                    <td><a href="/desk#Form/mp Abo/{{ abo.name }}">{{ abo.name }}</a></td>
+                    <td>{{ abo.type }}</td>
+                    <td>{{ abo.status }}</td>
+                    <td style="text-align: center;">&#10004;</td>
+                    <td style="text-align: center;">&#215;</td>
+                </tr>
+            {% endfor %}
+            {% for abo in recipient %}
+                <tr>
+                    <td><a href="/desk#Form/mp Abo/{{ abo.name }}">{{ abo.name }}</a></td>
+                    <td>{{ abo.type }}</td>
+                    <td>{{ abo.status }}</td>
+                    <td style="text-align: center;">&#215;</td>
+                    <td style="text-align: center;">&#10004;</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+</table>
