@@ -61,11 +61,11 @@
             </div>
             <div class="col-xs-8">
                 <p>
-                    {% if(search_results[i].address_line1) { %}
-                        {%= search_results[i].address_line1 %}<br>
+                    {% if(search_results[i].strasse) { %}
+                        {%= search_results[i].strasse %}<br>
                     {% endif %}
-                    {% if(search_results[i].address_line2) { %}
-                        {%= search_results[i].address_line2 %}<br>
+                    {% if(search_results[i].zusatz) { %}
+                        {%= search_results[i].zusatz %}<br>
                     {% endif %}
                     {% if(search_results[i].pincode || search_results[i].city) { %}
                         {% if(search_results[i].pincode) { %}{%= search_results[i].pincode %} {% endif %}

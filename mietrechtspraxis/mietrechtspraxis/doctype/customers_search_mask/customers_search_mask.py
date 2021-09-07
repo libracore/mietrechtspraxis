@@ -25,9 +25,9 @@ class CustomersSearchMask(Document):
         
         # address filters
         if self.address_line1:
-            filters.append("""`customers_search_mask`.`address_line1` LIKE '%{address_line1}%'""".format(address_line1=self.address_line1))
+            filters.append("""`customers_search_mask`.`strasse` LIKE '%{strasse}%'""".format(strasse=self.address_line1))
         if self.address_line2:
-            filters.append("""`customers_search_mask`.`address_line2` LIKE '%{address_line2}%'""".format(address_line2=self.address_line2))
+            filters.append("""`customers_search_mask`.`zusatz` LIKE '%{zusatz}%'""".format(zusatz=self.address_line2))
         if self.plz:
             filters.append("""`customers_search_mask`.`pincode` LIKE '%{pincode}%'""".format(pincode=self.plz))
         if self.city:
@@ -56,8 +56,8 @@ class CustomersSearchMask(Document):
                 `customers_search_mask`.`mobile_no`,
                 `customers_search_mask`.`other_phones`,
                 `customers_search_mask`.`address_name`,
-                `customers_search_mask`.`address_line1`,
-                `customers_search_mask`.`address_line2`,
+                `customers_search_mask`.`strasse`,
+                `customers_search_mask`.`zusatz`,
                 `customers_search_mask`.`city`,
                 `customers_search_mask`.`pincode`,
                 `customers_search_mask`.`country`,
@@ -75,8 +75,8 @@ class CustomersSearchMask(Document):
                     `tabContact`.`mobile_no`,
                     GROUP_CONCAT(`CP`.`phone`) AS `other_phones`,
                     `tabAddress`.`name` AS `address_name`,
-                    `tabAddress`.`address_line1`,
-                    `tabAddress`.`address_line2`,
+                    `tabAddress`.`strasse`,
+                    `tabAddress`.`zusatz`,
                     `tabAddress`.`city`,
                     `tabAddress`.`pincode`,
                     `tabAddress`.`country`,
@@ -101,8 +101,8 @@ class CustomersSearchMask(Document):
                     `tabContact`.`mobile_no`,
                     GROUP_CONCAT(`CP`.`phone`) AS `other_phones`,
                     NULL AS `address_name`,
-                    NULL AS `address_line1`,
-                    NULL AS `address_line2`,
+                    NULL AS `strasse`,
+                    NULL AS `zusatz`,
                     NULL AS `city`,
                     NULL AS `pincode`,
                     NULL AS `country`,
@@ -127,8 +127,8 @@ class CustomersSearchMask(Document):
                     NULL AS `mobile_no`,
                     NULL AS `other_phones`,
                     `tabAddress`.`name` AS `address_name`,
-                    `tabAddress`.`address_line1`,
-                    `tabAddress`.`address_line2`,
+                    `tabAddress`.`strasse`,
+                    `tabAddress`.`zusatz`,
                     `tabAddress`.`city`,
                     `tabAddress`.`pincode`,
                     `tabAddress`.`country`,
@@ -175,6 +175,8 @@ def create_customer(firstname, lastname, email, phone, mobile, address_line1, ad
         "address_type": "Billing",
         "address_line1": address_line1,
         "address_line2": address_line2 if address_line2 != '!' else '',
+        "strasse": address_line1,
+        "zusatz": address_line2 if address_line2 != '!' else '',
         "city": city,
         "country": country if country != '!' else '',
         "pincode": plz,
