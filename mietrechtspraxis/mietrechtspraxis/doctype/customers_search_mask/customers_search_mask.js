@@ -17,15 +17,26 @@ frappe.ui.form.on('Customers Search Mask', {
         frm.add_custom_button(__("Create new Customer"), function() {
             create_new_customer(frm);
         });
-        
-        // render search results
-        $(cur_frm.fields_dict['search_result_html'].wrapper).html(frappe.render_template("customers_search_mask_results", cur_frm.doc.__onload));
 	},
     onload: function(frm) {
         // clear all fields for fresh start
         clear_search_fields(frm);
         // change button from "Save" to "Search"
         setTimeout(function(){ change_button_to_Search(); }, 1000);
+    },
+    validate: function(frm) {
+        frappe.call({
+            "method": "mietrechtspraxis.mietrechtspraxis.doctype.customers_search_mask.customers_search_mask.search_results",
+            "args": {
+                "self": cur_frm.doc
+            },
+            "async": false,
+            "callback": function(response) {
+                var data = response.message;
+                console.log(data);
+                $(frm.fields_dict["search_result_html"].wrapper).html(data);
+            }
+        });
     }
 });
 
@@ -42,6 +53,8 @@ function clear_search_fields(frm) {
     cur_frm.set_value('country', '');
     cur_frm.set_value('is_company', 0);
     cur_frm.set_value('company', '');
+    cur_frm.set_value('postfach', 0);
+    cur_frm.set_value('postfach_nummer', '');
     remove_mandatory(frm);
 }
 
