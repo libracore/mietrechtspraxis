@@ -34,7 +34,9 @@
 		</p>
         <div class="row">
             <div class="col-xs-4">
-                <p>{{ search_result.first_name or '' }} {{ search_result.last_name or '' }}</p>
+                {% if search_result.first_name != search_result.company_name %}
+                    <p>{{ search_result.first_name or '' }} {{ search_result.last_name or '' }}</p>
+                {% endif %}
                 {% if search_result.email_id %}
                     <p>
                         {{ _("Email") }}: {{ search_result.email_id }}<span class="text-muted"> ({{ _("Primary") }})</span>

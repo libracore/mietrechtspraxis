@@ -55,6 +55,7 @@ function clear_search_fields(frm) {
     cur_frm.set_value('company', '');
     cur_frm.set_value('postfach', 0);
     cur_frm.set_value('postfach_nummer', '');
+    cur_frm.set_value('abo_nummer', '');
     remove_mandatory(frm);
 }
 

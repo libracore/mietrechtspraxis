@@ -41,7 +41,7 @@ hm = {
     'backup_mail': 'email'
 }
     
-@frappe.whitelist()
+
 def read_csv(site_name, file_name, limit=False):
     # display all coloumns for error handling
     pd.set_option('display.max_rows', None, 'display.max_columns', None)
@@ -248,6 +248,7 @@ def create_address(data):
         
     if not address_line1:
         address_line1 = '-'
+        strasse = '-'
       
     # daten anlage
     try:
@@ -407,3 +408,18 @@ def get_value(row, value):
             return value
     else:
         return ''
+
+
+def clear_data():
+    frappe.db.sql("""SET SQL_SAFE_UPDATES = 0""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabContact Phone`""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabContact Email`""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabmp Abo`""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabContact`""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabAddress`""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabDynamic Link`""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabCustomer`""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabmp Abo Invoice`""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabmp Abo Recipient`""", as_list=True)
+    frappe.db.sql("""SET SQL_SAFE_UPDATES = 1""", as_list=True)
+    print("Done")
