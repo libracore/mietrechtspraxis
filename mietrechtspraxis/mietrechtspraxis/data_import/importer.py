@@ -248,6 +248,7 @@ def create_address(data):
         
     if not address_line1:
         address_line1 = '-'
+        strasse = '-'
       
     # daten anlage
     try:
