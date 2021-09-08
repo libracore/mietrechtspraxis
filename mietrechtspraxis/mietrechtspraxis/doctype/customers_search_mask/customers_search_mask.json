@@ -8,6 +8,8 @@
   "section_allgemein",
   "is_company",
   "company",
+  "cb_0",
+  "abo_nummer",
   "section_kontakt",
   "firstname",
   "lastname",
@@ -139,11 +141,20 @@
    "fieldname": "section_allgemein",
    "fieldtype": "Section Break",
    "label": "Allgemeines"
+  },
+  {
+   "fieldname": "cb_0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "abo_nummer",
+   "fieldtype": "Data",
+   "label": "Abo Nr."
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2021-09-08 12:14:43.078908",
+ "modified": "2021-09-08 13:02:06.683114",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Customers Search Mask",

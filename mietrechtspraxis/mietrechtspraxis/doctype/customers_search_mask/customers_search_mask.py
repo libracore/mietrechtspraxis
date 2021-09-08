@@ -106,6 +106,8 @@ def search_results(self):
         filters.append("""(`customers_search_mask`.`phone` LIKE '%{phone}%' OR `customers_search_mask`.`other_phones` LIKE '%{phone}%')""".format(phone=self["phone"]))
     if self["mobile"]:
         filters.append("""(`customers_search_mask`.`mobile_no` LIKE '%{mobile_no}%' OR `customers_search_mask`.`other_phones` LIKE '%{mobile_no}%')""".format(mobile_no=self["mobile"]))
+    if self["abo_nummer"]:
+        filters.append("""(`customers_search_mask`.`mp_abo_old` LIKE '%{abo_nummer}%' OR `customers_search_mask`.`mp_username` LIKE '%{abo_nummer}%')""".format(abo_nummer=self["abo_nummer"]))
     
     # address filters
     if self["address_line1"]:
@@ -138,6 +140,8 @@ def search_results(self):
             `customers_search_mask`.`contact_name`,
             `customers_search_mask`.`first_name`,
             `customers_search_mask`.`last_name`,
+            `customers_search_mask`.`mp_abo_old`,
+            `customers_search_mask`.`mp_username`,
             `customers_search_mask`.`email_id`,
             `customers_search_mask`.`other_mails`,
             `customers_search_mask`.`phone`,
@@ -159,6 +163,8 @@ def search_results(self):
                 `tabContact`.`name` AS `contact_name`,
                 `tabContact`.`first_name`,
                 `tabContact`.`last_name`,
+                `tabContact`.`mp_abo_old`,
+                `tabContact`.`mp_username`,
                 `tabContact`.`email_id`,
                 GROUP_CONCAT(`CE`.`email_id`) AS `other_mails`,
                 `tabContact`.`phone`,
@@ -187,6 +193,8 @@ def search_results(self):
                 `tabContact`.`name` AS `contact_name`,
                 `tabContact`.`first_name`,
                 `tabContact`.`last_name`,
+                `tabContact`.`mp_abo_old`,
+                `tabContact`.`mp_username`,
                 `tabContact`.`email_id`,
                 GROUP_CONCAT(`CE`.`email_id`) AS `other_mails`,
                 `tabContact`.`phone`,
@@ -215,6 +223,8 @@ def search_results(self):
                 NULL AS `contact_name`,
                 NULL AS `first_name`,
                 NULL AS `last_name`,
+                NULL AS `mp_abo_old`,
+                NULL AS `mp_username`,
                 NULL AS `email_id`,
                 NULL AS `other_mails`,
                 NULL AS `phone`,
