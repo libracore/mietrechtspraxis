@@ -5,29 +5,31 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_search",
+  "section_allgemein",
+  "is_company",
+  "company",
+  "cb_0",
+  "abo_nummer",
+  "section_kontakt",
   "firstname",
   "lastname",
-  "email",
-  "phone",
-  "mobile",
-  "is_company",
   "cb_1",
+  "email",
+  "mobile",
+  "phone",
+  "section_adresse",
+  "postfach",
+  "postfach_nummer",
   "address_line1",
   "address_line2",
+  "cb_2",
   "plz",
   "city",
   "country",
-  "company",
   "section_results",
   "search_result_html"
  ],
  "fields": [
-  {
-   "fieldname": "section_search",
-   "fieldtype": "Section Break",
-   "label": "Search Details"
-  },
   {
    "fieldname": "firstname",
    "fieldtype": "Data",
@@ -39,11 +41,13 @@
    "label": "Lastname"
   },
   {
+   "depends_on": "eval:!doc.postfach",
    "fieldname": "address_line1",
    "fieldtype": "Data",
    "label": "Strasse"
   },
   {
+   "depends_on": "eval:!doc.postfach",
    "fieldname": "address_line2",
    "fieldtype": "Data",
    "label": "Zusatz"
@@ -103,11 +107,54 @@
    "fieldname": "company",
    "fieldtype": "Data",
    "label": "Company Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "postfach",
+   "fieldtype": "Check",
+   "label": "Postfach"
+  },
+  {
+   "depends_on": "eval:doc.postfach",
+   "fieldname": "postfach_nummer",
+   "fieldtype": "Data",
+   "label": "Postfachnummer"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_kontakt",
+   "fieldtype": "Section Break",
+   "label": "Kontaktdaten"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_adresse",
+   "fieldtype": "Section Break",
+   "label": "Adressdaten"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemeines"
+  },
+  {
+   "fieldname": "cb_0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "abo_nummer",
+   "fieldtype": "Data",
+   "label": "Abo Nr."
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2021-09-07 08:45:56.628192",
+ "modified": "2021-09-08 13:02:06.683114",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Customers Search Mask",

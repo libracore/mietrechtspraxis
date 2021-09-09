@@ -1,0 +1,89 @@
+<!-- no results -->
+{% if data|length < 1 %}
+<p class="text-muted">{{ _("No results found.") }}</p>
+<p class="text-muted">{{ _("Please fill in the form above and click Search on top right or create a new Customer.") }}</p>
+{% endif %}
+
+<!-- results as cards -->
+<div class="clearfix"></div>
+{% for search_result in data %}
+	<div class="address-box">
+		<p class="h6">
+			{{ search_result.customer_name or '' }}{% if search_result.customer_link %}&nbsp;<span class="text-muted">({{ search_result.customer_link }})</span>{% endif %}
+            {% if search_result.customer_link %}
+                <a href="#Form/Customer/{{ search_result.customer_link }}"
+                    class="btn btn-xs btn-default pull-right"
+                    style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
+                    Kundenstamm bearbeiten
+                </a>
+            {% endif %}
+            {% if search_result.contact_name %}
+                <a href="#Form/Contact/{{ search_result.contact_name }}"
+                    class="btn btn-xs btn-default pull-right"
+                    style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
+                    Kontakt bearbeiten
+                </a>
+            {% endif %}
+            {% if search_result.address_name %}
+                <a href="#Form/Address/{{ search_result.address_name }}"
+                    class="btn btn-xs btn-default pull-right"
+                    style="margin-top:-3px; margin-right: -9px; margin-left: 15px;">
+                    Adresse bearbeiten
+                </a>
+            {% endif %}
+		</p>
+        <div class="row">
+            <div class="col-xs-4">
+                {% if search_result.first_name != search_result.company_name %}
+                    <p>{{ search_result.first_name or '' }} {{ search_result.last_name or '' }}</p>
+                {% endif %}
+                {% if search_result.email_id %}
+                    <p>
+                        {{ _("Email") }}: {{ search_result.email_id }}<span class="text-muted"> ({{ _("Primary") }})</span>
+                        {% if search_result.other_mails %}
+                            {% for mail in search_result.other_mails.split(",") %}
+                                <br>{{ _("Email") }}: {{ mail }}
+                            {% endfor %}
+                        {% endif %}
+                    </p>
+                {% endif %}
+                {% if search_result.phone or search_result.mobile_no or search_result.other_phones %}
+                    <p>
+                        {% if search_result.phone %}
+                            {{ _("Phone") }}: {{ search_result.phone }}<span class="text-muted"> ({{ _("Primary") }})</span><br>
+                        {% endif %}
+                        {% if search_result.mobile_no %}
+                            {{ _("Mobile") }}: {{ search_result.mobile_no }}<span class="text-muted"> ({{ _("Primary") }})</span><br>
+                        {% endif %}
+                        {% if search_result.other_phones %}
+                            {% for other_phone in search_result.other_phones.split(",") %}
+                                {{ _("Phone") }}: {{ other_phone }}<br>
+                            {% endfor %}
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+            <div class="col-xs-8">
+                <p>
+                    {% if search_result.postfach %}
+                        Postfach {{ search_result.postfach_nummer or '' }}<br>
+                    {% else %}
+                        {% if search_result.zusatz %}
+                            {{ search_result.zusatz }}<br>
+                        {% endif %}
+                        {% if search_result.strasse %}
+                            {{ search_result.strasse }}<br>
+                        {% endif %}
+                    {% endif %}
+                    {% if search_result.plz or search_result.city %}
+                        {% if search_result.plz %}{{ search_result.plz }} {% endif %}
+                        {% if search_result.city %}{{ search_result.city }}{% endif %}<br>
+                    {% endif %}
+                    {% if search_result.country %}
+                        {{ search_result.country }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+	</div>
+{% endfor %}
