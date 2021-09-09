@@ -29,4 +29,3 @@ DocType: mp Abo,Sales Invoices,"Ausgangsrechnungen"
 DocType: mp Abo,Recipient Name,"Empfänger Name"
 DocType: mp Abo,Recipient Contact,"Empfänger Kontakt"
 DocType: mp Abo,Recipient Address,"Empfänger Adresse"
-
