@@ -5,7 +5,7 @@ DocType: Address,Zusatz,"Zusatz Adresse"
 DocType: Contact,Last Name,"Nachname"
 DocType: Contact,Sektions Daten,"Verbandsspezifische Angaben"
 DocType: Contact,Mobile No,Mobiltelefon
-DocType: Customer,Customer Addition,"Zusatz Adresse"
+DocType: Customer,Customer Addition,"Firmen Zusatz"
 DocType: Customer,Customer Details,"Wichtige Informationen zum Mitglied"
 DocType: Customer,Additional information regarding the customer.,"Wichtige Informationen zum Mitglied (werden beim Sektionswechsel der neuen Sektion übergeben)."
 DocType: Customer,Tax ID,UID-Nummer
