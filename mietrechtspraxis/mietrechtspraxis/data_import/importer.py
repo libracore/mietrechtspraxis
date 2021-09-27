@@ -19,7 +19,8 @@ hm = {
     'customer_addition': 'zusatz_firma', # customer
     'company_name': 'firma', # contact, customer
     'sektion': 'sektion_id', # contact, address
-    'address_title': 'adress_id', # address
+    'address_title': 'adress_id', # address,
+    'adress_id': 'adress_identifier', # address
     'address_line1': 'strasse', # address
     'address_line2': 'zusatz_adresse', # address
     'postfach': 'postfach_nummer', # address
@@ -146,20 +147,38 @@ def create_contact(data):
             first_name = last_name
     
     try:
-        # base data
-        webuser_id = str(get_value(data, 'webuser_id'))
-        if len(webuser_id) < 8:
-            webuser_id = webuser_id.zfill(8)
-        new_contact = frappe.get_doc({
-            'doctype': 'Contact',
-            'first_name': first_name,
-            'last_name': last_name,
-            'salutation': str(get_value(data, 'salutation')),
-            'sektion': str(get_sektion(get_value(data, 'sektion'))),
-            'company_name': company_name,
-            'mp_password': str(get_value(data, 'password')),
-            'mp_abo_old': webuser_id
-        })
+        existing = check_if_update(str(get_value(data, 'adress_id')), "Contact")
+        if not existing:
+            # base data
+            webuser_id = str(get_value(data, 'webuser_id'))
+            if len(webuser_id) < 8:
+                webuser_id = webuser_id.zfill(8)
+            new_contact = frappe.get_doc({
+                'doctype': 'Contact',
+                'first_name': first_name,
+                'last_name': last_name,
+                'salutation': str(get_value(data, 'salutation')),
+                'sektion': str(get_sektion(get_value(data, 'sektion'))),
+                'company_name': company_name,
+                'mp_password': str(get_value(data, 'password')),
+                'mp_abo_old': webuser_id,
+                'adress_id': str(get_value(data, 'adress_id'))
+            })
+        else:
+            webuser_id = str(get_value(data, 'webuser_id'))
+            if len(webuser_id) < 8:
+                webuser_id = webuser_id.zfill(8)
+            new_contact = frappe.get_doc("Contact", existing)
+            new_contact.first_name = first_name
+            new_contact.last_name = last_name
+            new_contact.salutation = str(get_value(data, 'salutation'))
+            new_contact.sektion = str(get_sektion(get_value(data, 'sektion')))
+            new_contact.company_name = company_name
+            new_contact.mp_password = str(get_value(data, 'password'))
+            new_contact.mp_abo_old = webuser_id
+            new_contact.email_ids = []
+            new_contact.phone_nos = []
+            
         
         # email
         email_id = get_value(data, 'email_id')
@@ -194,7 +213,11 @@ def create_contact(data):
             phone_row = new_contact.append("phone_nos", {})
             phone_row.phone = phone
             
-        new_contact.insert()
+        if not existing:
+            new_contact.insert()
+        else:
+            new_contact.save(ignore_permissions=True)
+        
         frappe.db.commit()
         return {
             'success': True,
@@ -252,20 +275,37 @@ def create_address(data):
       
     # daten anlage
     try:
-        new_address = frappe.get_doc({
-            'doctype': 'Address',
-            'address_title': get_value(data, 'address_title'),
-            'address_line1': address_line1,
-            'address_line2': address_line2,
-            'strasse': strasse,
-            'sektion': get_sektion(get_value(data, 'sektion')),
-            'pincode': plz,
-            'plz': plz,
-            'postfach': postfach,
-            'postfach_nummer': postfach_nummer,
-            'city': city
-        })
-        new_address.insert()
+        existing = check_if_update(str(get_value(data, 'adress_id')), "Address")
+        if not existing:
+            new_address = frappe.get_doc({
+                'doctype': 'Address',
+                'address_title': get_value(data, 'address_title'),
+                'address_line1': address_line1,
+                'address_line2': address_line2,
+                'strasse': strasse,
+                'sektion': get_sektion(get_value(data, 'sektion')),
+                'pincode': plz,
+                'plz': plz,
+                'postfach': postfach,
+                'postfach_nummer': postfach_nummer,
+                'city': city,
+                'adress_id': str(get_value(data, 'adress_id'))
+            })
+            new_address.insert()
+        else:
+            new_address = frappe.get_doc("Address", existing)
+            new_address.address_title = get_value(data, 'address_title')
+            new_address.address_line1 = address_line1
+            new_address.address_line2 = address_line2
+            new_address.strasse = strasse
+            new_address.sektion = get_sektion(get_value(data, 'sektion'))
+            new_address.pincode = plz
+            new_address.plz = plz
+            new_address.postfach = postfach
+            new_address.postfach_nummer = postfach_nummer
+            new_address.city = city
+            new_address.save(ignore_permissions=True)
+            
         frappe.db.commit()
         return {
             'success': True,
@@ -301,13 +341,23 @@ def create_customer(data=None, contact=None):
             customer_type = 'Company'
         
     try:
-        new_customer = frappe.get_doc({
-            'doctype': 'Customer',
-            'customer_name': customer_name,
-            'customer_addition': customer_addition,
-            'customer_type': customer_type
-        })
-        new_customer.insert()
+        existing = check_if_update(str(get_value(data, 'adress_id')), "Customer")
+        if not existing:
+            new_customer = frappe.get_doc({
+                'doctype': 'Customer',
+                'customer_name': customer_name,
+                'customer_addition': customer_addition,
+                'customer_type': customer_type,
+                'adress_id': str(get_value(data, 'adress_id'))
+            })
+            new_customer.insert()
+        else:
+            new_customer = frappe.get_doc("Customer", existing)
+            new_customer.customer_name = customer_name
+            new_customer.customer_addition = customer_addition
+            new_customer.customer_type = customer_type
+            new_customer.save(ignore_permissions=True)
+            
         frappe.db.commit()
         return {
             'success': True,
@@ -339,20 +389,39 @@ def create_or_append_abo(data, new, customer=False, address=False, contact=False
             abo_status = 'Active'
         
         try:
-            new_abo = frappe.get_doc({
-                'doctype': 'mp Abo',
-                'type': abo_type,
-                'start_date': start_datum_raw.replace("/", "-"),
-                'end_date': end_datum_raw,
-                'status': abo_status,
-                'invoice_recipient': customer,
-                'customer': customer,
-                'recipient_contact': contact,
-                'recipient_address': address,
-                'magazines_qty_ir': get_value(data, 'zeitung_anzahl'),
-                'mitglied_id': get_value(data, 'mitglied_id')
-            })
-            new_abo.insert()
+            # update existing Abo
+            mitglied_id = get_value(data, 'mitglied_id')
+            existing_abo = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `mitglied_id` = '{mitglied_id}' LIMIT 1""".format(mitglied_id=mitglied_id), as_dict=True)
+            if len(existing_abo) > 0:
+                new_abo = frappe.get_doc("mp Abo", existing_abo[0].name)
+                new_abo.type = abo_type
+                new_abo.start_date = start_datum_raw.replace("/", "-")
+                new_abo.end_date = end_datum_raw
+                new_abo.status = abo_status
+                new_abo.invoice_recipient = customer
+                new_abo.customer = customer
+                new_abo.recipient_contact = contact
+                new_abo.recipient_address = address
+                new_abo.magazines_qty_ir = get_value(data, 'zeitung_anzahl')
+                new_abo.mitglied_id = get_value(data, 'mitglied_id')
+                new_abo.save(ignore_permissions=True)
+                
+            else:
+                new_abo = frappe.get_doc({
+                    'doctype': 'mp Abo',
+                    'type': abo_type,
+                    'start_date': start_datum_raw.replace("/", "-"),
+                    'end_date': end_datum_raw,
+                    'status': abo_status,
+                    'invoice_recipient': customer,
+                    'customer': customer,
+                    'recipient_contact': contact,
+                    'recipient_address': address,
+                    'magazines_qty_ir': get_value(data, 'zeitung_anzahl'),
+                    'mitglied_id': get_value(data, 'mitglied_id')
+                })
+                new_abo.insert()
+                
             frappe.db.commit()
             add_new_abo_nr_to_contact(contact, new_abo.name)
             return {
@@ -409,6 +478,12 @@ def get_value(row, value):
     else:
         return ''
 
+def check_if_update(id, dt):
+    data = frappe.db.sql("""SELECT `name` FROM `tab{dt}` WHERE `adress_id` = '{id}'""".format(dt=dt, id=id), as_dict=True)
+    if len(data) > 0:
+        return data[0].name
+    else:
+        return False
 
 def clear_data():
     frappe.db.sql("""SET SQL_SAFE_UPDATES = 0""", as_list=True)
