@@ -11,7 +11,7 @@ frappe.pages['invoice_and_print'].on_page_load = function(wrapper) {
 	frappe.breadcrumbs.add("mietrechtspraxis");
     setTimeout(function(){
         frappe.invoice_and_print.get_show_data();
-    }, 1000);
+    }, 500);
 }
 
 frappe.invoice_and_print = {
@@ -28,12 +28,9 @@ frappe.invoice_and_print = {
         $("#create_data").on("click", function() {
             frappe.invoice_and_print.create_data();
         });
-        $("#print_data").on("click", function() {
-            frappe.invoice_and_print.print_data();
-        });
 	},
 	get_show_data: function() {
-		var sel_type = $("#sel_type").val();
+        var sel_type = 'all';
         frappe.call({
             "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.get_show_data",
             "args": {
@@ -49,11 +46,7 @@ frappe.invoice_and_print = {
     show_data: function(sel_type, data) {
         $("#chart_area").empty();
         $('<div id="chart"></div>').appendTo($("#chart_area"));
-        if (sel_type == 'all') {
-            frappe.invoice_and_print.show_donut_all(data);
-        } else {
-            frappe.invoice_and_print.show_donut_rest(data);
-        }
+        frappe.invoice_and_print.show_donut_all(data);
         
     },
     show_donut_all: function(_data) {
@@ -85,61 +78,33 @@ frappe.invoice_and_print = {
             colors: ['#7cd6fd', '#743ee2', '#ffa3ef']
         })
     },
-    show_donut_rest: function(_data) {
-        if (_data.abo_qty > 0) {
-            const data = {
-                labels: ["Anzahl Abos", "Anzahl Magazine"
-                ],
-                datasets: [
-                    {
-                        name: "Stk", type: "bar",
-                        values: [_data.abo_qty, _data.magazine_qty]
-                    }
-                ],
-                yMarkers: [
-                    {
-                        label: "Durchschnittliche Magazine pro Abo",
-                        value: (_data.magazine_qty / _data.abo_qty),
-                        options: { labelPos: 'left' } // default: 'right'
-                    }
-                ]
-            }
-
-            const chart = new frappe.Chart("#chart", {  // or a DOM element,
-                                                        // new Chart() in case of ES6 module with above usage
-                title: __("Magazine Typen Übersicht"),
-                data: data,
-                type: 'bar', // or 'axis-mixed', 'bar', 'line', 'scatter', 'pie', 'percentage'
-                height: 250,
-                colors: ['#7cd6fd', '#743ee2']
-            })
-        } else {
-            $("#chart_area").empty();
-            $('<p>' + __("Keine Resultate gefunden") + '</p>').appendTo($("#chart_area"));
-        }
-    },
     create_data: function() {
         var date = $("#date").val();
+        var limit = String(parseInt($("#limit").val()));
         if (date) {
             frappe.confirm(
-                __('Wollen Sie die Rechnungen mit dem Datum ') + frappe.datetime.obj_to_user(date) + " erstellen?",
+                'Wollen Sie ' + limit + ' Rechnungen mit dem Datum ' + frappe.datetime.obj_to_user(date) + " erstellen?",
                 function(){
                     frappe.prompt([
                         {'fieldname': 'year', 'fieldtype': 'Int', 'label': 'Invoice Year', 'reqd': 1, 'default': new Date().getFullYear()}  
                     ],
                     function(values){
+                        frappe.show_alert({message:__("Bitte warten, die Rechnungen werden erstellt/versendet."), indicator:'blue'});
+                        $("#invoice_area").empty();
+                        $("<div>Bitte warten...</div>").appendTo($("#invoice_area"));
                         frappe.call({
                             "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_invoices",
                             "args": {
                                 "date": date,
-                                "year": values.year
+                                "year": values.year,
+                                'limit': limit
                             },
                             "async": false,
                             "callback": function(response) {
                                 var data = response.message;
                                 $("#invoice_area").empty();
-                                $(frappe.render_template('invoice_table', {'abos': data.abos, 'qty_one': data.qty_one, 'qty_multi': data.qty_multi})).appendTo($("#invoice_area"));
-                                show_alert('Rechnungen erstellt');
+                                $(frappe.render_template('invoice_table', {'abos': data.abos, 'qty_one': data.qty_one, 'qty_multi': data.qty_multi, 'rm_log': data.rm_log})).appendTo($("#invoice_area"));
+                                frappe.show_alert({message:__("Die Rechnungen wurden erstellt/versendet."), indicator:'green'});
                             }
                         });
                     },
@@ -149,33 +114,6 @@ frappe.invoice_and_print = {
                 },
                 function(){
                     show_alert('Rechnungserstellung abgebrochen');
-                }
-            )
-        } else {
-            frappe.throw(__("Bittte wählen Sie zuerst ein Datum aus"));
-        }
-    },
-    print_data: function() {
-        var date = $("#date").val();
-        if (date) {
-            frappe.confirm(
-                __('Möchten Sie alle Rechnungen mit dem Datum ') + date + " in ein Sammel-PDF drucken?",
-                function(){
-                    show_alert('Druck gestartet, bitte warten...');
-                    frappe.call({
-                        "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.print_pdf",
-                        "args": {
-                            "date": date
-                        },
-                        "async": false,
-                        "callback": function(response) {
-                            show_alert('Druck abgeschlossen');
-                            window.open(response.message, '_blank');
-                        }
-                    });
-                },
-                function(){
-                    show_alert('Druck abgebrochen');
                 }
             )
         } else {

@@ -1,0 +1,89 @@
+{
+ "creation": "2021-09-29 10:51:39.759727",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "start",
+  "download_pdf",
+  "cb_1",
+  "ende",
+  "storno",
+  "section_rechnungen",
+  "sinvs",
+  "status"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:doc.status!='Rechnungen storniert'",
+   "fieldname": "download_pdf",
+   "fieldtype": "Button",
+   "label": "Download PDF"
+  },
+  {
+   "fieldname": "section_rechnungen",
+   "fieldtype": "Section Break",
+   "label": "Rechnungen"
+  },
+  {
+   "fieldname": "sinvs",
+   "fieldtype": "Table",
+   "label": "\u00dcbersicht",
+   "options": "RM Log Sinv",
+   "read_only": 1
+  },
+  {
+   "fieldname": "start",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Gestartet am",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ende",
+   "fieldtype": "Datetime",
+   "label": "Beendet am",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.status!='Rechnungen storniert'",
+   "fieldname": "storno",
+   "fieldtype": "Button",
+   "label": "Rechnungen Stornieren"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "PDF erstellt\nRechnungen storniert"
+  }
+ ],
+ "modified": "2021-09-29 13:52:48.758500",
+ "modified_by": "Administrator",
+ "module": "mietrechtspraxis",
+ "name": "RM Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
