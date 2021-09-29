@@ -36,6 +36,12 @@ def get_data():
                        "name": "invoice_and_print",
                        "label": _("Invoice run and collective printing"),
                        "description": _("Invoice run and collective printing")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "RM Log",
+                       "label": _("Massenlauf Logfile"),
+                       "description": _("Massenlauf Logfile")
                    }
             ]
         },

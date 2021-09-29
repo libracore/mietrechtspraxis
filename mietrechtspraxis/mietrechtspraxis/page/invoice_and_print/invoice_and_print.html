@@ -4,6 +4,8 @@
          <form class="form">
             <label for="date">{{ __("Rechnungsdatum") }}:</label>
             <input type="date" class="form-control" id="date">
+            <label for="limit">{{ __("Limit") }}:</label>
+            <input type="number" step="1" min="1" max="500" value="100" class="form-control" id="limit">
         </form>
     </div>
     <div class="col-xs-5"></div>
@@ -13,7 +15,6 @@
     <div class="col-xs-8 text-center">
         <form class="form-inline">
             <button type="button" class="btn btn-danger" id="create_data">{{ __("Rechnungen erstellen / per Mail versenden") }}</button>
-            <button type="button" class="btn btn-warning" id="print_data">{{ __("Rechnungen als PDF Drucken") }}</button>
         </form>
     </div>
     <div class="col-xs-2"></div>
@@ -22,13 +23,6 @@
     <div class="col-xs-4"></div>
     <div class="col-xs-4 text-center">
         <form class="form">
-            <label for="sel_type">{{ __("Datenauswertungs Typ") }}:</label>
-            <select class="form-control" id="sel_type">
-                <option value="all">{{ __("All") }}</option>
-                <option value="inv_incl">{{ __("Rechnungen inkl. Magazine") }}</option>
-                <option value="inv_excl">{{ __("Rechnungen exkl. Magazine") }}</option>
-                <option value="only_mag">{{ __("Nur Magazine") }}</option>
-            </select>
             <center><button type="button" class="btn btn-info" id="show_data" style="margin-top: 5px;">{{ __("Daten aktualisieren") }}</button></center>
         </form>
     </div>

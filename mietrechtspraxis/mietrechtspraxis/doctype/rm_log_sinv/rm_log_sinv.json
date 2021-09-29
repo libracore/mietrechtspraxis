@@ -1,0 +1,65 @@
+{
+ "creation": "2021-09-29 12:38:29.381254",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sinv",
+  "abo",
+  "anz",
+  "pdf",
+  "e_mail"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "sinv",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Rechnung",
+   "options": "Sales Invoice",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "pdf",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "PDF"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "e_mail",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "E-Mail"
+  },
+  {
+   "columns": 2,
+   "fieldname": "abo",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Abo",
+   "options": "mp Abo",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "anz",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Anz."
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-09-29 13:33:58.921201",
+ "modified_by": "Administrator",
+ "module": "mietrechtspraxis",
+ "name": "RM Log Sinv",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
