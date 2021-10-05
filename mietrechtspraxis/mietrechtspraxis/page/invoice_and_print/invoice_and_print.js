@@ -1,27 +1,27 @@
 frappe.pages['invoice_and_print'].on_page_load = function(wrapper) {
-	var page = frappe.ui.make_app_page({
-		parent: wrapper,
-		title: 'Rechnungslauf und Massendruck',
-		single_column: true
-	});
+    var page = frappe.ui.make_app_page({
+        parent: wrapper,
+        title: 'Rechnungslauf und Massendruck',
+        single_column: true
+    });
 
-	frappe.invoice_and_print.make(page);
-	
-	// add the application reference
-	frappe.breadcrumbs.add("mietrechtspraxis");
+    frappe.invoice_and_print.make(page);
+
+    // add the application reference
+    frappe.breadcrumbs.add("mietrechtspraxis");
     setTimeout(function(){
         frappe.invoice_and_print.get_show_data();
     }, 500);
 }
 
 frappe.invoice_and_print = {
-	start: 0,
-	make: function(page) {
-		var me = frappe.invoice_and_print;
-		me.page = page;
-		me.body = $('<div></div>').appendTo(me.page.main);
-		var data = "";
-		$(frappe.render_template('invoice_and_print', data)).appendTo(me.body);
+    start: 0,
+    make: function(page) {
+        var me = frappe.invoice_and_print;
+        me.page = page;
+        me.body = $('<div></div>').appendTo(me.page.main);
+        var data = "";
+        $(frappe.render_template('invoice_and_print', data)).appendTo(me.body);
         $("#show_data").on("click", function() {
             frappe.invoice_and_print.get_show_data();
         });
@@ -36,8 +36,8 @@ frappe.invoice_and_print = {
                 $("#date").hide();
             }
         });
-	},
-	get_show_data: function() {
+    },
+    get_show_data: function() {
         var sel_type = 'all';
         frappe.call({
             "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.get_show_data",
@@ -50,7 +50,7 @@ frappe.invoice_and_print = {
                 frappe.invoice_and_print.show_data(sel_type, data);
             }
         });
-	},
+    },
     show_data: function(sel_type, data) {
         $("#chart_area").empty();
         $('<div id="chart"></div>').appendTo($("#chart_area"));
@@ -106,9 +106,9 @@ frappe.invoice_and_print = {
                         {'fieldname': 'year', 'fieldtype': 'Int', 'label': 'Invoice Year', 'reqd': 1, 'default': new Date().getFullYear()}  
                     ],
                     function(values){
-                        frappe.show_alert({message:__("Bitte warten, die Rechnungen werden erstellt/versendet."), indicator:'blue'});
+                        frappe.show_alert({message:__("Bitte warten, die Rechnungen werden erstellt/versendet."), indicator:'green'});
                         $("#invoice_area").empty();
-                        $("<div>Bitte warten...</div>").appendTo($("#invoice_area"));
+                        $("<center><div>Der Background-Job wurde gestartet. Sie können dessen Status <a href='/desk#background_jobs'>hier</a> einsehen.<br>Bitte warten Sie oder starten Sie einen Folge-Auftrag.</div></center>").appendTo($("#invoice_area"));
                         frappe.call({
                             "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_invoices",
                             "args": {
@@ -116,13 +116,6 @@ frappe.invoice_and_print = {
                                 "year": values.year,
                                 'limit': limit,
                                 'selected_type': selected_type
-                            },
-                            "async": false,
-                            "callback": function(response) {
-                                var data = response.message;
-                                $("#invoice_area").empty();
-                                $(frappe.render_template('invoice_table', {'abos': data.abos, 'qty_one': data.qty_one, 'qty_multi': data.qty_multi, 'rm_log': data.rm_log})).appendTo($("#invoice_area"));
-                                frappe.show_alert({message:__("Die Rechnungen wurden erstellt/versendet."), indicator:'green'});
                             }
                         });
                     },
@@ -143,20 +136,13 @@ frappe.invoice_and_print = {
         frappe.confirm(
             'Wollen Sie ' + limit + ' Begleitschreiben erstellen?',
             function(){
-                frappe.show_alert({message:__("Bitte warten, die Dokumente werden erstellt/versendet."), indicator:'blue'});
+                frappe.show_alert({message:__("Bitte warten, die Dokumente werden erstellt/versendet."), indicator:'green'});
                 $("#invoice_area").empty();
-                $("<div>Bitte warten...</div>").appendTo($("#invoice_area"));
+                $("<center><div>Der Background-Job wurde gestartet. Sie können dessen Status <a href='/desk#background_jobs'>hier</a> einsehen.<br>Bitte warten Sie oder starten Sie einen Folge-Auftrag.</div></center>").appendTo($("#invoice_area"));
                 frappe.call({
                     "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_begleitschreiben",
                     "args": {
                         'limit': limit
-                    },
-                    "async": false,
-                    "callback": function(response) {
-                        var data = response.message;
-                        $("#invoice_area").empty();
-                        $(frappe.render_template('invoice_table', {'abos': data.abos, 'qty_one': data.qty_one, 'qty_multi': data.qty_multi, 'rm_log': data.rm_log})).appendTo($("#invoice_area"));
-                        frappe.show_alert({message:__("Die Dokumente wurden erstellt/versendet."), indicator:'green'});
                     }
                 });
             },

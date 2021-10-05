@@ -8,6 +8,7 @@ from frappe.utils.data import today, now
 from frappe import publish_progress
 from frappe import _
 from PyPDF2 import PdfFileWriter
+from frappe.utils.background_jobs import enqueue
 
 @frappe.whitelist()
 def get_show_data(sel_type):
@@ -23,7 +24,16 @@ def get_show_data(sel_type):
 
 @frappe.whitelist()
 def create_invoices(date, year, selected_type, limit=False):
-    data = []
+    args = {
+        'date': date,
+        'year': year,
+        'selected_type': selected_type,
+        'limit': limit
+    }
+    enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_invoices", queue='long', job_name='Generierung Sammel-PDF (Rechnungslauf)', timeout=5000, **args)
+
+def _create_invoices(date, year, selected_type, limit=False):
+    # data = []
     qty_one = 0
     qty_multi = 0
     abos = []
@@ -47,7 +57,7 @@ def create_invoices(date, year, selected_type, limit=False):
                                     WHERE `type` = 'Jahres-Abo'
                                     AND `status` = 'Active'
                                     AND {filter_invoice_typ}
-                                    AND `name` NOT IN ({filter_keine_doppel_rechnung}){filter_ausland_adressen} ORDER BY `magazines_qty_total` ASC{limit_filter}""".format(filter_invoice_typ=filter_invoice_typ, filter_keine_doppel_rechnung=filter_keine_doppel_rechnung, filter_ausland_adressen=filter_ausland_adressen, limit_filter=limit_filter), as_dict=True)
+                                    AND `name` NOT IN ({filter_keine_doppel_rechnung}){filter_ausland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_invoice_typ=filter_invoice_typ, filter_keine_doppel_rechnung=filter_keine_doppel_rechnung, filter_ausland_adressen=filter_ausland_adressen, limit_filter=limit_filter), as_dict=True)
     for ausland_abo in ausland_abos:
         abos.append(ausland_abo)
     
@@ -58,7 +68,7 @@ def create_invoices(date, year, selected_type, limit=False):
                                     WHERE `type` = 'Jahres-Abo'
                                     AND `status` = 'Active'
                                     AND {filter_invoice_typ}
-                                    AND `name` NOT IN ({filter_keine_doppel_rechnung}){filter_inland_adressen} ORDER BY `magazines_qty_total` ASC{limit_filter}""".format(filter_invoice_typ=filter_invoice_typ, filter_keine_doppel_rechnung=filter_keine_doppel_rechnung, filter_inland_adressen=filter_inland_adressen, limit_filter=limit_filter), as_dict=True)
+                                    AND `name` NOT IN ({filter_keine_doppel_rechnung}){filter_inland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_invoice_typ=filter_invoice_typ, filter_keine_doppel_rechnung=filter_keine_doppel_rechnung, filter_inland_adressen=filter_inland_adressen, limit_filter=limit_filter), as_dict=True)
     for inland_abo in inland_abos:
         abos.append(inland_abo)
     
@@ -66,13 +76,13 @@ def create_invoices(date, year, selected_type, limit=False):
     
     rm_log = frappe.get_doc({
         "doctype": "RM Log",
-        'start': now()
+        'start': now(),
+        'status': 'Job gestartet'
     })
     rm_log.insert()
     frappe.db.commit()
     
     for _abo in abos:
-        count += 1
         abo = frappe.get_doc("mp Abo", _abo.name)
         sinv = create_invoice(abo.name, date)
         
@@ -90,40 +100,25 @@ def create_invoices(date, year, selected_type, limit=False):
             else:
                 sinv_row.e_mail = 1
             sinv_row.abo = abo.name
-            sinv_row.anz = abo.magazines_qty_total
+            sinv_row.anz = abo.magazines_qty_ir
+            sinv_row.recipient_name = abo.recipient_name
             rm_log.save(ignore_permissions=True)
             frappe.db.commit()
-            
-            _data = {}
-            _data['abo'] = abo.name
-            _data['recipient'] = abo.recipient_name
-            _data['invoice_recipient'] = abo.invoice_recipient
-            _data['magazines_qty_total'] = abo.magazines_qty_total
-            _data['sinv'] = sinv['sinv']
-            _data['send_as_mail'] = sinv['send_as_mail']
-            _data['mail'] = sinv['mail']
-            data.append(_data)
             
             if not sinv['send_as_mail']:
                 if abo.magazines_qty_total == 1:
                     qty_one += 1
                 else:
                     qty_multi += 1
-            progress = (100 / len(abos)) * count
-            publish_progress(percent=progress, title="Creating Invoices...")
         
     print_pdf(rm_log.name)
     
     rm_log.ende = now()
+    rm_log.status = 'PDF erstellt'
+    rm_log.qty_one = qty_one
+    rm_log.qty_multi = qty_multi
     rm_log.save(ignore_permissions=True)
     frappe.db.commit()
-    
-    return {
-        'abos': data,
-        'qty_one': qty_one,
-        'qty_multi': qty_multi,
-        'rm_log': rm_log.name
-    }
         
 def create_invoice(abo, date):
     abo = frappe.get_doc("mp Abo", abo)
@@ -212,6 +207,12 @@ def print_pdf(rm_log):
 
 @frappe.whitelist()
 def create_begleitschreiben(limit=False):
+    args = {
+        'limit': limit
+    }
+    enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_begleitschreiben", queue='long', job_name='Generierung Sammel-PDF (Begleitschreiben)', timeout=5000, **args)
+
+def _create_begleitschreiben(limit=False):
     data = []
     qty_one = 0
     qty_multi = 0
@@ -220,7 +221,8 @@ def create_begleitschreiben(limit=False):
     
     rm_log = frappe.get_doc({
         "doctype": "RM Log",
-        'start': now()
+        'start': now(),
+        'status': 'Job gestartet'
     })
     rm_log.insert()
     frappe.db.commit()
@@ -243,7 +245,7 @@ def create_begleitschreiben(limit=False):
                                         FROM `tabmp Abo`
                                         WHERE `type` = 'Gratis-Abo'
                                         AND `status` = 'Active'
-                                        {filter_ausland_adressen} ORDER BY `magazines_qty_total` ASC{limit_filter}""".format(filter_ausland_adressen=filter_ausland_adressen, limit_filter=limit_filter), as_dict=True)
+                                        {filter_ausland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_ausland_adressen=filter_ausland_adressen, limit_filter=limit_filter), as_dict=True)
     for ausland_abo in gratis_ausland_abos:
         try:
             output = frappe.get_print("mp Abo", ausland_abo.name, 'Weiterführung Gratis Abo', as_pdf = True, output = output, ignore_zugferd=True)
@@ -256,7 +258,7 @@ def create_begleitschreiben(limit=False):
                                         FROM `tabmp Abo`
                                         WHERE `type` = 'Gratis-Abo'
                                         AND `status` = 'Active'
-                                        {filter_inland_adressen} ORDER BY `magazines_qty_total` ASC{limit_filter}""".format(filter_inland_adressen=filter_inland_adressen, limit_filter=limit_filter), as_dict=True)
+                                        {filter_inland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_inland_adressen=filter_inland_adressen, limit_filter=limit_filter), as_dict=True)
     for inland_abo in gratis_inland_abos:
         try:
             output = frappe.get_print("mp Abo", inland_abo.name, 'Weiterführung Gratis Abo', as_pdf = True, output = output, ignore_zugferd=True)
@@ -269,7 +271,7 @@ def create_begleitschreiben(limit=False):
                                                 `name`
                                             FROM `tabmp Abo`
                                             WHERE `status` = 'Actively terminated'
-                                            {filter_ausland_adressen} ORDER BY `magazines_qty_total` ASC{limit_filter}""".format(filter_ausland_adressen=filter_ausland_adressen, limit_filter=limit_filter), as_dict=True)
+                                            {filter_ausland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_ausland_adressen=filter_ausland_adressen, limit_filter=limit_filter), as_dict=True)
     for ausland_abo in gekuendete_ausland_abos:
         try:
             output = frappe.get_print("mp Abo", ausland_abo.name, 'Ablauf Jahres Abo', as_pdf = True, output = output, ignore_zugferd=True)
@@ -281,7 +283,7 @@ def create_begleitschreiben(limit=False):
                                                 `name`
                                             FROM `tabmp Abo`
                                             WHERE `status` = 'Actively terminated'
-                                            {filter_inland_adressen} ORDER BY `magazines_qty_total` ASC{limit_filter}""".format(filter_inland_adressen=filter_inland_adressen, limit_filter=limit_filter), as_dict=True)
+                                            {filter_inland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_inland_adressen=filter_inland_adressen, limit_filter=limit_filter), as_dict=True)
     for inland_abo in gekuendete_inland_abos:
         try:
             output = frappe.get_print("mp Abo", inland_abo.name, 'Ablauf Jahres Abo', as_pdf = True, output = output, ignore_zugferd=True)
@@ -313,12 +315,6 @@ def create_begleitschreiben(limit=False):
         output.write(dest)
     
     rm_log.ende = now()
+    rm_log.status = 'PDF erstellt'
     rm_log.save(ignore_permissions=True)
     frappe.db.commit()
-    
-    return {
-        'abos': data,
-        'qty_one': qty_one,
-        'qty_multi': qty_multi,
-        'rm_log': rm_log.name
-    }
