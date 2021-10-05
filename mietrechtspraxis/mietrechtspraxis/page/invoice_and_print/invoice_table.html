@@ -1,10 +1,11 @@
 <center>
     <p>
-        Rechnungen mit <b>1 Exemplar</b>: {{ qty_one }}<br>
-        Rechnungen mit <b>>1 Exemplaren</b>: {{ qty_multi }}<br><br>
+        {% if qty_one > 0 %}Rechnungen mit <b>1 Exemplar</b>: {{ qty_one }}<br>{% endif %}
+        {% if qty_multi > 0 %}Rechnungen mit <b>>1 Exemplaren</b>: {{ qty_multi }}<br><br>{% endif %}
         <a href="/desk#Form/RM Log/{{ rm_log }}">Logfile öffnen</a>
     </p>
 </center>
+{% if abos|length > 0 %}
 <table style="width: 100%;">
     <thead>
     <tr>
@@ -31,3 +32,4 @@
 {% endfor %}
     </tbody>
 </table>
+{% endif %}
