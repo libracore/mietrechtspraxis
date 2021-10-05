@@ -28,6 +28,14 @@ frappe.invoice_and_print = {
         $("#create_data").on("click", function() {
             frappe.invoice_and_print.create_data();
         });
+        $("#job_typ").on("change", function() {
+            var selected_type = $("#job_typ").val();
+            if (selected_type != 'begleitschreiben') {
+                $("#date").show();
+            } else {
+                $("#date").hide();
+            }
+        });
 	},
 	get_show_data: function() {
         var sel_type = 'all';
@@ -79,6 +87,15 @@ frappe.invoice_and_print = {
         })
     },
     create_data: function() {
+        var selected_type = $("#job_typ").val();
+        if (selected_type != 'begleitschreiben') {
+            frappe.invoice_and_print.create_invoice(selected_type);
+        } else {
+            frappe.invoice_and_print.create_begleitschreiben();
+        }
+        
+    },
+    create_invoice: function(selected_type) {
         var date = $("#date").val();
         var limit = String(parseInt($("#limit").val()));
         if (date) {
@@ -97,7 +114,8 @@ frappe.invoice_and_print = {
                             "args": {
                                 "date": date,
                                 "year": values.year,
-                                'limit': limit
+                                'limit': limit,
+                                'selected_type': selected_type
                             },
                             "async": false,
                             "callback": function(response) {
@@ -119,5 +137,32 @@ frappe.invoice_and_print = {
         } else {
             frappe.throw(__("Bittte wählen Sie zuerst ein Datum aus"));
         }
+    },
+    create_begleitschreiben: function() {
+        var limit = String(parseInt($("#limit").val()));
+        frappe.confirm(
+            'Wollen Sie ' + limit + ' Begleitschreiben erstellen?',
+            function(){
+                frappe.show_alert({message:__("Bitte warten, die Dokumente werden erstellt/versendet."), indicator:'blue'});
+                $("#invoice_area").empty();
+                $("<div>Bitte warten...</div>").appendTo($("#invoice_area"));
+                frappe.call({
+                    "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_begleitschreiben",
+                    "args": {
+                        'limit': limit
+                    },
+                    "async": false,
+                    "callback": function(response) {
+                        var data = response.message;
+                        $("#invoice_area").empty();
+                        $(frappe.render_template('invoice_table', {'abos': data.abos, 'qty_one': data.qty_one, 'qty_multi': data.qty_multi, 'rm_log': data.rm_log})).appendTo($("#invoice_area"));
+                        frappe.show_alert({message:__("Die Dokumente wurden erstellt/versendet."), indicator:'green'});
+                    }
+                });
+            },
+            function(){
+                show_alert('Dokumentenerstellung abgebrochen');
+            }
+        )
     }
 }

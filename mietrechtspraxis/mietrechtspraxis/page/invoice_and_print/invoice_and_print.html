@@ -1,20 +1,22 @@
  <div class="row" style="margin-top: 15px;">
-    <div class="col-xs-5"></div>
-    <div class="col-xs-2 text-center">
+    <div class="col-xs-2"></div>
+    <div class="col-xs-4">
          <form class="form">
+            <label for="job_typ">{{ __("Job Typ") }}:</label>
+            <select name="job_typ" id="job_typ">
+                <option value="invoice_inkl">Rechnungen inkl. Zeitschriften</option>
+                <option value="invoice_exkl">Rechnungen exkl. Zeitschriften</option>
+                <option value="begleitschreiben">Begleitschreiben (Normal, Gratis & Gekündigt)</option>
+            </select>
             <label for="date">{{ __("Rechnungsdatum") }}:</label>
             <input type="date" class="form-control" id="date">
             <label for="limit">{{ __("Limit") }}:</label>
             <input type="number" step="1" min="1" max="500" value="100" class="form-control" id="limit">
         </form>
     </div>
-    <div class="col-xs-5"></div>
-</div>
-<div class="row" style="margin-top: 15px;">
-    <div class="col-xs-2"></div>
-    <div class="col-xs-8 text-center">
+    <div class="col-xs-4 text-center">
         <form class="form-inline">
-            <button type="button" class="btn btn-danger" id="create_data">{{ __("Rechnungen erstellen / per Mail versenden") }}</button>
+            <button type="button" class="btn btn-danger" style="margin-top: 50px;" id="create_data">{{ __("Rechnungen / Begleitschreiben erstellen<br>(ggf. per Mail versenden)") }}</button>
         </form>
     </div>
     <div class="col-xs-2"></div>
