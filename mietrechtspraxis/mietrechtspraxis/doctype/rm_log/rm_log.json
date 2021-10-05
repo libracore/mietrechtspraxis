@@ -10,12 +10,14 @@
   "ende",
   "storno",
   "section_rechnungen",
+  "qty_one",
+  "qty_multi",
   "sinvs",
   "status"
  ],
  "fields": [
   {
-   "depends_on": "eval:doc.status!='Rechnungen storniert'",
+   "depends_on": "eval:doc.status=='PDF erstellt'",
    "fieldname": "download_pdf",
    "fieldtype": "Button",
    "label": "Download PDF"
@@ -50,7 +52,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.status!='Rechnungen storniert'",
+   "depends_on": "eval:doc.status=='PDF erstellt'",
    "fieldname": "storno",
    "fieldtype": "Button",
    "label": "Rechnungen Stornieren"
@@ -61,10 +63,22 @@
    "hidden": 1,
    "in_list_view": 1,
    "label": "Status",
-   "options": "PDF erstellt\nRechnungen storniert"
+   "options": "Job gestartet\nPDF erstellt\nRechnungen storniert"
+  },
+  {
+   "fieldname": "qty_one",
+   "fieldtype": "Int",
+   "label": "Rechnungen mit 1 Exemplar",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty_multi",
+   "fieldtype": "Int",
+   "label": "Rechnungen mit &gt;1 Exemplar",
+   "read_only": 1
   }
  ],
- "modified": "2021-09-29 13:52:48.758500",
+ "modified": "2021-10-05 16:21:06.417733",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "RM Log",
