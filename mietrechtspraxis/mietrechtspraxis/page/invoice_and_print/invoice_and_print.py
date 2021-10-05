@@ -77,7 +77,8 @@ def _create_invoices(date, year, selected_type, limit=False):
     rm_log = frappe.get_doc({
         "doctype": "RM Log",
         'start': now(),
-        'status': 'Job gestartet'
+        'status': 'Job gestartet',
+        'typ': 'Rechnung'
     })
     rm_log.insert()
     frappe.db.commit()
@@ -222,7 +223,8 @@ def _create_begleitschreiben(limit=False):
     rm_log = frappe.get_doc({
         "doctype": "RM Log",
         'start': now(),
-        'status': 'Job gestartet'
+        'status': 'Job gestartet',
+        'typ': 'Begleitschreiben'
     })
     rm_log.insert()
     frappe.db.commit()
@@ -292,15 +294,33 @@ def _create_begleitschreiben(limit=False):
         
     # nur Empfänger
     nur_empfaenger = frappe.db.sql("""SELECT
-                                        `name`
-                                    FROM `tabmp Abo`
-                                    WHERE `status` != 'Inactive'
-                                    AND `name` IN (SELECT `parent` FROM `tabmp Abo Recipient`){limit_filter}""".format(limit_filter=limit_filter), as_dict=True)
+                                        `parent` AS `abo`,
+                                        `recipient_contact`,
+                                        `recipient_address`,
+                                        `magazines_recipient` AS `customer`,
+                                        `magazines_qty_mr` AS `qty`
+                                    FROM `tabmp Abo Recipient`
+                                    WHERE `parent` IN (SELECT `name` FROM `tabmp Abo` WHERE `status` != 'Inactive') ORDER BY `magazines_qty_mr` ASC""", as_dict=True)
     for _nur_empfaenger in nur_empfaenger:
         try:
-            output = frappe.get_print("mp Abo", _nur_empfaenger.name, 'Begleitschreiben Empfänger', as_pdf = True, output = output, ignore_zugferd=True)
+            customer = frappe.get_doc("Customer", _nur_empfaenger.customer)
+            begleit_row = rm_log.append('begleitungen', {})
+            begleit_row.recipient_name = customer.customer_name
+            # tbd!
+            begleit_row.pdf = 1
+            begleit_row.abo = _nur_empfaenger.abo
+            begleit_row.anz = _nur_empfaenger.qty
+            begleit_row.recipient_contact = _nur_empfaenger.recipient_contact
+            begleit_row.recipient_address = _nur_empfaenger.recipient_address
+            rm_log.save(ignore_permissions=True)
+            frappe.db.commit()
         except:
             frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=_nur_empfaenger.name))
+        
+    try:
+        output = frappe.get_print("RM Log", rm_log.name, 'Begleitschreiben Empfänger Log', as_pdf = True, output = output, ignore_zugferd=True)
+    except:
+        frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=rm_log.name))
     
     
     
