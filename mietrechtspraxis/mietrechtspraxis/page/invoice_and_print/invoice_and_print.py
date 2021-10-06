@@ -33,7 +33,6 @@ def create_invoices(date, year, selected_type, limit=False):
     enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_invoices", queue='long', job_name='Generierung Sammel-PDF (Rechnungslauf)', timeout=5000, **args)
 
 def _create_invoices(date, year, selected_type, limit=False):
-    # data = []
     qty_one = 0
     qty_multi = 0
     abos = []
@@ -72,8 +71,6 @@ def _create_invoices(date, year, selected_type, limit=False):
     for inland_abo in inland_abos:
         abos.append(inland_abo)
     
-    count = 0
-    
     rm_log = frappe.get_doc({
         "doctype": "RM Log",
         'start': now(),
@@ -107,10 +104,11 @@ def _create_invoices(date, year, selected_type, limit=False):
             frappe.db.commit()
             
             if not sinv['send_as_mail']:
-                if abo.magazines_qty_total == 1:
-                    qty_one += 1
-                else:
-                    qty_multi += 1
+                if selected_type == 'invoice_inkl':
+                    if abo.magazines_qty_ir == 1:
+                        qty_one += 1
+                    else:
+                        qty_multi += 1
         
     print_pdf(rm_log.name)
     
