@@ -31,8 +31,10 @@ frappe.invoice_and_print = {
         $("#job_typ").on("change", function() {
             var selected_type = $("#job_typ").val();
             if (selected_type != 'begleitschreiben') {
+                $("#date_label").show();
                 $("#date").show();
             } else {
+                $("#date_label").hide();
                 $("#date").hide();
             }
         });
@@ -97,10 +99,9 @@ frappe.invoice_and_print = {
     },
     create_invoice: function(selected_type) {
         var date = $("#date").val();
-        var limit = String(parseInt($("#limit").val()));
         if (date) {
             frappe.confirm(
-                'Wollen Sie ' + limit + ' Rechnungen mit dem Datum ' + frappe.datetime.obj_to_user(date) + " erstellen?",
+                'Wollen Sie alle Rechnungen (in 500er Batchen) mit dem Datum ' + frappe.datetime.obj_to_user(date) + " erstellen?",
                 function(){
                     frappe.prompt([
                         {'fieldname': 'year', 'fieldtype': 'Int', 'label': 'Invoice Year', 'reqd': 1, 'default': new Date().getFullYear()}  
@@ -114,7 +115,6 @@ frappe.invoice_and_print = {
                             "args": {
                                 "date": date,
                                 "year": values.year,
-                                'limit': limit,
                                 'selected_type': selected_type
                             }
                         });
@@ -132,18 +132,14 @@ frappe.invoice_and_print = {
         }
     },
     create_begleitschreiben: function() {
-        var limit = String(parseInt($("#limit").val()));
         frappe.confirm(
-            'Wollen Sie ' + limit + ' Begleitschreiben erstellen?',
+            'Wollen Sie die Begleitschreiben erstellen?',
             function(){
                 frappe.show_alert({message:__("Bitte warten, die Dokumente werden erstellt/versendet."), indicator:'green'});
                 $("#invoice_area").empty();
                 $("<center><div>Der Background-Job wurde gestartet. Sie können dessen Status <a href='/desk#background_jobs'>hier</a> einsehen.<br>Bitte warten Sie oder starten Sie einen Folge-Auftrag.</div></center>").appendTo($("#invoice_area"));
                 frappe.call({
-                    "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_begleitschreiben",
-                    "args": {
-                        'limit': limit
-                    }
+                    "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_begleitschreiben"
                 });
             },
             function(){

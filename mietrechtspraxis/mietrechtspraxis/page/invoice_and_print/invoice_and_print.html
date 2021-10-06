@@ -8,10 +8,8 @@
                 <option value="invoice_exkl">Rechnungen exkl. Zeitschriften</option>
                 <option value="begleitschreiben">Begleitschreiben (Normal, Gratis & Gekündigt)</option>
             </select>
-            <label for="date">{{ __("Rechnungsdatum") }}:</label>
+            <label for="date" id="date_label">{{ __("Rechnungsdatum") }}:</label>
             <input type="date" class="form-control" id="date">
-            <label for="limit">{{ __("Limit") }}:</label>
-            <input type="number" step="1" min="1" value="500" class="form-control" id="limit">
         </form>
     </div>
     <div class="col-xs-4 text-center">
