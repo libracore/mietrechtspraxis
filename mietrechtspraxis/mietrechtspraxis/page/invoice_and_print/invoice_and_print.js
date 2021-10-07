@@ -61,29 +61,20 @@ frappe.invoice_and_print = {
     },
     show_donut_all: function(_data) {
         const data = {
-            labels: ["Gratis-Abo", "Jahres-Abo", "Probe-Abo"
-            ],
+            labels: ["Alle Abos", "Jahres Abos", "Gekündete Jahres Abos", "Aktive Probe Abos", "Gratis Abos"],
             datasets: [
                 {
-                    name: "Gratis-Abo", type: "donut",
-                    values: [_data.gratis_qty, 0, 0]
-                },
-                {
-                    name: "Jahres-Abo", type: "donut",
-                    values: [0, _data.jahres_qty, 0]
-                },
-                {
-                    name: "Probe-Abo", type: "donut",
-                    values: [0, 0, _data.probe_qty]
+                    name: "Anzahl Abos", type: "bar",
+                    values: [_data.anz_abos, _data.anz_jahres_abos, _data.anz_jahres_abos_gekuendet, _data.anz_aktive_probe_abos, _data.anz_gratis_abos]
                 }
             ]
         }
 
         const chart = new frappe.Chart("#chart", {  // or a DOM element,
                                                     // new Chart() in case of ES6 module with above usage
-            title: __("Magazine Typen Übersicht"),
+            title: __("Abo Übersicht"),
             data: data,
-            type: 'donut', // or 'axis-mixed', 'bar', 'line', 'scatter', 'pie', 'percentage'
+            type: 'bar', // or 'axis-mixed', 'line', 'scatter', 'pie', 'percentage', 'donut'
             height: 250,
             colors: ['#7cd6fd', '#743ee2', '#ffa3ef']
         })
