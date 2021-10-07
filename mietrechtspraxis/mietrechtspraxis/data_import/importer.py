@@ -246,9 +246,11 @@ def create_address(data):
     if postfach_check:
         if int(postfach_check) < 0:
             postfach = 1
+            address_line1 = strasse = 'Postfach'
     postfach_nummer = get_value(data, 'postfach_nummer')
     if not address_line1 and not postfach and postfach_nummer:
         postfach = 1
+        address_line1 = strasse = 'Postfach'
     
     # validierung
     if not address_line1 and not postfach and not postfach_nummer:

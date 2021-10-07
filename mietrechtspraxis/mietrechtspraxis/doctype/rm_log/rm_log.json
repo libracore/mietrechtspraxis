@@ -5,17 +5,17 @@
  "engine": "InnoDB",
  "field_order": [
   "start",
+  "status",
   "download_pdf",
   "cb_1",
   "ende",
+  "typ",
   "storno",
   "section_rechnungen",
   "qty_one",
   "qty_multi",
   "sinvs",
-  "begleitungen",
-  "status",
-  "typ"
+  "begleitungen"
  ],
  "fields": [
   {
@@ -63,28 +63,27 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
-   "hidden": 1,
    "in_list_view": 1,
    "label": "Status",
-   "options": "Job gestartet\nPDF erstellt\nRechnungen storniert"
+   "options": "Job gestartet\nPDF erstellt\nRechnungen storniert",
+   "read_only": 1
   },
   {
    "fieldname": "qty_one",
    "fieldtype": "Int",
-   "label": "Rechnungen mit 1 Exemplar",
+   "label": "1 Exemplar",
    "read_only": 1
   },
   {
    "fieldname": "qty_multi",
    "fieldtype": "Int",
-   "label": "Rechnungen mit &gt;1 Exemplar",
+   "label": "&gt;1 Exemplar",
    "read_only": 1
   },
   {
    "default": "Rechnung",
    "fieldname": "typ",
    "fieldtype": "Select",
-   "hidden": 1,
    "in_list_view": 1,
    "label": "Typ",
    "options": "Rechnung\nBegleitschreiben",
@@ -99,7 +98,7 @@
    "read_only": 1
   }
  ],
- "modified": "2021-10-05 21:01:36.435623",
+ "modified": "2021-10-06 13:21:33.319619",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "RM Log",

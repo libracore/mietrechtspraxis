@@ -9,7 +9,8 @@
   "pdf",
   "e_mail",
   "recipient_contact",
-  "recipient_address"
+  "recipient_address",
+  "drucken"
  ],
  "fields": [
   {
@@ -71,10 +72,18 @@
    "label": "recipient_address",
    "options": "Address",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "drucken",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Drucken",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2021-10-05 21:10:19.199831",
+ "modified": "2021-10-07 09:46:04.419566",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "RM Log Begleitschreiben",

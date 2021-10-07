@@ -31,8 +31,10 @@ frappe.invoice_and_print = {
         $("#job_typ").on("change", function() {
             var selected_type = $("#job_typ").val();
             if (selected_type != 'begleitschreiben') {
+                $("#date_label").show();
                 $("#date").show();
             } else {
+                $("#date_label").hide();
                 $("#date").hide();
             }
         });
@@ -59,29 +61,20 @@ frappe.invoice_and_print = {
     },
     show_donut_all: function(_data) {
         const data = {
-            labels: ["Gratis-Abo", "Jahres-Abo", "Probe-Abo"
-            ],
+            labels: ["Alle Abos", "Jahres Abos", "Gekündete Jahres Abos", "Aktive Probe Abos", "Gratis Abos"],
             datasets: [
                 {
-                    name: "Gratis-Abo", type: "donut",
-                    values: [_data.gratis_qty, 0, 0]
-                },
-                {
-                    name: "Jahres-Abo", type: "donut",
-                    values: [0, _data.jahres_qty, 0]
-                },
-                {
-                    name: "Probe-Abo", type: "donut",
-                    values: [0, 0, _data.probe_qty]
+                    name: "Anzahl Abos", type: "bar",
+                    values: [_data.anz_abos, _data.anz_jahres_abos, _data.anz_jahres_abos_gekuendet, _data.anz_aktive_probe_abos, _data.anz_gratis_abos]
                 }
             ]
         }
 
         const chart = new frappe.Chart("#chart", {  // or a DOM element,
                                                     // new Chart() in case of ES6 module with above usage
-            title: __("Magazine Typen Übersicht"),
+            title: __("Abo Übersicht"),
             data: data,
-            type: 'donut', // or 'axis-mixed', 'bar', 'line', 'scatter', 'pie', 'percentage'
+            type: 'bar', // or 'axis-mixed', 'line', 'scatter', 'pie', 'percentage', 'donut'
             height: 250,
             colors: ['#7cd6fd', '#743ee2', '#ffa3ef']
         })
@@ -97,10 +90,9 @@ frappe.invoice_and_print = {
     },
     create_invoice: function(selected_type) {
         var date = $("#date").val();
-        var limit = String(parseInt($("#limit").val()));
         if (date) {
             frappe.confirm(
-                'Wollen Sie ' + limit + ' Rechnungen mit dem Datum ' + frappe.datetime.obj_to_user(date) + " erstellen?",
+                'Wollen Sie alle Rechnungen (in 500er Batchen) mit dem Datum ' + frappe.datetime.obj_to_user(date) + " erstellen?",
                 function(){
                     frappe.prompt([
                         {'fieldname': 'year', 'fieldtype': 'Int', 'label': 'Invoice Year', 'reqd': 1, 'default': new Date().getFullYear()}  
@@ -114,7 +106,6 @@ frappe.invoice_and_print = {
                             "args": {
                                 "date": date,
                                 "year": values.year,
-                                'limit': limit,
                                 'selected_type': selected_type
                             }
                         });
@@ -132,18 +123,14 @@ frappe.invoice_and_print = {
         }
     },
     create_begleitschreiben: function() {
-        var limit = String(parseInt($("#limit").val()));
         frappe.confirm(
-            'Wollen Sie ' + limit + ' Begleitschreiben erstellen?',
+            'Wollen Sie die Begleitschreiben erstellen?',
             function(){
                 frappe.show_alert({message:__("Bitte warten, die Dokumente werden erstellt/versendet."), indicator:'green'});
                 $("#invoice_area").empty();
                 $("<center><div>Der Background-Job wurde gestartet. Sie können dessen Status <a href='/desk#background_jobs'>hier</a> einsehen.<br>Bitte warten Sie oder starten Sie einen Folge-Auftrag.</div></center>").appendTo($("#invoice_area"));
                 frappe.call({
-                    "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_begleitschreiben",
-                    "args": {
-                        'limit': limit
-                    }
+                    "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_begleitschreiben"
                 });
             },
             function(){
