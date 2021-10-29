@@ -20,7 +20,7 @@
             {% endfor %}
             {% for abo in recipient %}
                 <tr>
-                    <td><a href="/desk#Form/mp Abo/{{ abo.name }}">{{ abo.name }}</a></td>
+                    <td><a href="/desk#Form/mp Abo/{{ abo.parent }}">{{ abo.parent }}</a></td>
                     <td>{{ abo.type }}</td>
                     <td>{{ _(abo.status) }}</td>
                     <td style="text-align: center;">&#215;</td>
