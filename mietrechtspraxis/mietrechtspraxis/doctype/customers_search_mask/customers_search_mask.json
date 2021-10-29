@@ -8,6 +8,7 @@
   "section_allgemein",
   "is_company",
   "company",
+  "company_addition",
   "cb_0",
   "abo_nummer",
   "section_kontakt",
@@ -150,11 +151,17 @@
    "fieldname": "abo_nummer",
    "fieldtype": "Data",
    "label": "Abo Nr."
+  },
+  {
+   "depends_on": "eval:doc.is_company==1",
+   "fieldname": "company_addition",
+   "fieldtype": "Data",
+   "label": "Firmen Zusatz"
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2021-09-08 13:02:06.683114",
+ "modified": "2021-10-29 11:01:51.169100",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Customers Search Mask",
