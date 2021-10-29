@@ -40,7 +40,8 @@ hm = {
     'webuser_id': 'webuser_id',
     'password': 'password',
     'backup_mail': 'email',
-    'zeitung_anzahl_adresse': 'zeitung_anzahl_adresse'
+    'zeitung_anzahl_adresse': 'zeitung_anzahl_adresse',
+    'leistung_id': 'leistung_id'
 }
     
 
@@ -58,7 +59,10 @@ def read_csv(site_name, file_name, limit=False):
     if not limit:
         index = df.index
         max_loop = len(index)
-        
+    
+    # check and/or create customer_groups
+    check_customer_group()
+    
     for index, row in df.iterrows():
         if count <= max_loop:
             contact_error = False
@@ -243,11 +247,17 @@ def create_address(data):
     city = get_value(data, 'city')
     postfach_check = get_value(data, 'postfach')
     postfach = 0
+    postfach_nummer = get_value(data, 'postfach_nummer')
     if postfach_check:
+        # wenn postfach = -1 (=True)
         if int(postfach_check) < 0:
             postfach = 1
             address_line1 = strasse = 'Postfach'
-    postfach_nummer = get_value(data, 'postfach_nummer')
+        else:
+            # wenn zwar postfach = False, aber Postfachnummer vorhanden
+            if postfach_nummer:
+                postfach = 1
+                address_line1 = strasse = 'Postfach'
     if not address_line1 and not postfach and postfach_nummer:
         postfach = 1
         address_line1 = strasse = 'Postfach'
@@ -342,7 +352,9 @@ def create_customer(data=None, contact=None):
         else:
             customer_name = contact.company_name
             customer_type = 'Company'
-        
+    
+    customer_group = get_customer_group(get_value(data, 'leistung_id'))
+    
     try:
         existing = check_if_update(str(get_value(data, 'adress_id')), "Customer")
         if not existing:
@@ -351,7 +363,8 @@ def create_customer(data=None, contact=None):
                 'customer_name': customer_name,
                 'customer_addition': customer_addition,
                 'customer_type': customer_type,
-                'adress_id': str(get_value(data, 'adress_id'))
+                'adress_id': str(get_value(data, 'adress_id')),
+                'customer_group': customer_group
             })
             new_customer.insert()
         else:
@@ -359,6 +372,7 @@ def create_customer(data=None, contact=None):
             new_customer.customer_name = customer_name
             new_customer.customer_addition = customer_addition
             new_customer.customer_type = customer_type
+            new_customer.customer_group = customer_group
             new_customer.save(ignore_permissions=True)
             
         frappe.db.commit()
@@ -475,6 +489,20 @@ def add_new_abo_nr_to_contact(contact, abo):
 def get_sektion(id):
     if id == 25:
         return 'MP'
+
+def get_customer_group(id):
+    if id == 198:
+        return 'Abonnement'
+    if id == 199:
+        return 'Abonnement gratis'
+    if id == 200:
+        return 'Buchhandel'
+    if id == 201:
+        return 'Buchhandel Ausland'
+    if id == 203:
+        return 'Abonnement MV-Sektion'
+    # Fallback
+    return 'Unspezifisch'
         
 def get_value(row, value):
     value = row[hm[value]]
@@ -509,3 +537,16 @@ def clear_data():
     frappe.db.sql("""DELETE FROM `tabmp Abo Recipient`""", as_list=True)
     frappe.db.sql("""SET SQL_SAFE_UPDATES = 1""", as_list=True)
     print("Done")
+
+def check_customer_group():
+    customer_group = ['Abonnement', 'Abonnement gratis', 'Buchhandel', 'Buchhandel Ausland', 'Abonnement MV-Sektion', 'Unspezifisch']
+    for group in customer_group:
+        if not frappe.db.exists('Customer Group', group):
+            new_group = frappe.get_doc({
+                'doctype': 'Customer Group',
+                'customer_group_name': group,
+                'parent_customer_group': 'All Customer Groups'
+            })
+            new_group.insert()
+            frappe.db.commit()
+    return
