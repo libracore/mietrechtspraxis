@@ -32,8 +32,7 @@ def create_invoices(date, year, selected_type, limit=False):
     args = {
         'date': date,
         'year': year,
-        'selected_type': selected_type,
-        'limit': limit
+        'selected_type': selected_type
     }
     enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_invoices", queue='long', job_name='Generierung Sammel-PDF (Rechnungslauf)', timeout=5000, **args)
 
@@ -56,8 +55,7 @@ def _create_invoices(date, year, selected_type, limit=500):
                                         AND `name` NOT IN ({filter_keine_doppel_rechnung})
                                         {filter_ausland_adressen} ORDER BY `magazines_qty_ir` ASC""".format(filter_invoice_typ=filter_invoice_typ,
                                                                                                             filter_keine_doppel_rechnung=filter_keine_doppel_rechnung,
-                                                                                                            filter_ausland_adressen=filter_ausland_adressen,
-                                                                                                            limit_filter=limit_filter), as_dict=True)[0].qty
+                                                                                                            filter_ausland_adressen=filter_ausland_adressen), as_dict=True)[0].qty
     inland_abos_qty = frappe.db.sql("""SELECT
                                         COUNT(`name`) AS `qty`
                                     FROM `tabmp Abo`
