@@ -185,7 +185,11 @@ def create_invoice(abo, date):
             if contact.email_id:
                 send_as_mail = True
                 mail = contact.email_id
-                send_invoice_as_mail(new_sinv.name, mail)
+                if abo.magazines_qty_ir > 0:
+                    printformat = 'Jahresrechnung inkl'
+                else:
+                    printformat = 'Jahresrechnung exkl'
+                send_invoice_as_mail(new_sinv.name, mail, printformat)
                 new_sinv.sended_as_mail = 1
                 new_sinv.save()
                 frappe.db.commit()
@@ -205,13 +209,13 @@ def create_invoice(abo, date):
         frappe.log_error(frappe.get_traceback(), 'create_invoice failed: {abo}'.format(abo=abo.name))
         return False
     
-def send_invoice_as_mail(sinv, address):
+def send_invoice_as_mail(sinv, address, printformat):
     try:
         frappe.sendmail([address],
             subject=  _("New Invoice: {sinv}").format(sinv=sinv),
             reply_to= 'office@mietrecht.ch',
             message = _("Please find attached Invoice {sinv}").format(sinv=sinv),
-            attachments = [frappe.attach_print('Sales Invoice', sinv, file_name=sinv, print_format=frappe.db.get_single_value('mp Abo Settings', 'druckformat'))])
+            attachments = [frappe.attach_print('Sales Invoice', sinv, file_name=sinv, print_format=printformat)])
     except:
         frappe.log_error(frappe.get_traceback(), 'send_invoice_as_mail failed: {sinv}'.format(sinv=sinv))
 
@@ -220,13 +224,16 @@ def print_pdf(rm_log):
     physical_path = "/home/frappe/frappe-bench/sites" + bind_source
     dest=str(physical_path)
     
-    invoices = frappe.db.sql("""SELECT `sinv` FROM `tabRM Log Sinv` WHERE `parent` = '{rm_log}' AND `pdf` = 1 AND `e_mail` != 1 ORDER BY `idx` ASC""".format(rm_log=rm_log), as_list=True)
+    invoices = frappe.db.sql("""SELECT `sinv`, `anz` FROM `tabRM Log Sinv` WHERE `parent` = '{rm_log}' AND `pdf` = 1 AND `e_mail` != 1 ORDER BY `idx` ASC""".format(rm_log=rm_log), as_list=True)
     
     output = PdfFileWriter()
     
     for invoice in invoices:
         try:
-            output = frappe.get_print("Sales Invoice", invoice[0], frappe.db.get_single_value('mp Abo Settings', 'druckformat'), as_pdf = True, output = output, ignore_zugferd=True)
+            if int(invoice[1]) > 0:
+                output = frappe.get_print("Sales Invoice", invoice[0], 'Jahresrechnung inkl', as_pdf = True, output = output, ignore_zugferd=True)
+            else:
+                output = frappe.get_print("Sales Invoice", invoice[0], 'Jahresrechnung exkl', as_pdf = True, output = output, ignore_zugferd=True)
         except:
             frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {sinv}'.format(sinv=invoice[0]))
         
