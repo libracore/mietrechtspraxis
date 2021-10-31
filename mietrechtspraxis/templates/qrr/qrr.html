@@ -1,0 +1,368 @@
+<!-- Font CSS -->
+<link rel="stylesheet" type="text/css" href="/assets/mietrechtspraxis/fonts/frutiger/style.css"/>
+
+<!-- prepare warnings -->
+{% set warning = False %}
+
+<!-- receiver details -->
+{% if doc.company_address %}
+    {% set cmp_addr = frappe.get_doc("Address", doc.company_address) %}
+    {% if cmp_addr %}
+        <!-- get values -->
+        {% set address_array = cmp_addr.address_line1.split(" ") %}
+        {% set address_line_item_count = address_array | count %}
+        {% set cmp_country = frappe.get_doc("Country", cmp_addr.country) %}
+        {% set cmp_country_code = cmp_country.code | upper %}
+        {% set cmp_address_line_detail = {'name': doc.company, 'street': '', 'number': '', 'plz': cmp_addr.plz, 'city': cmp_addr.city, 'country': cmp_country_code } %}
+        {% for i in range(0, (address_line_item_count - 1)) %}
+            {% if cmp_address_line_detail.update({'street': cmp_address_line_detail.street + " " + address_array[i] }) %}{% endif %}
+        {% endfor %}
+        {% if cmp_address_line_detail.update({'number': address_array[address_line_item_count - 1]}) %}{% endif %}
+        
+        <!-- set values -->
+        {% set receiver_name = cmp_address_line_detail.name %}
+        {% set receiver_street = cmp_address_line_detail.street %}
+        {% set receiver_number = cmp_address_line_detail.number %}
+        {% set receiver_pincode = cmp_address_line_detail.plz %}
+        {% set receiver_town = cmp_address_line_detail.city %}
+        {% set receiver_country = cmp_address_line_detail.country %}
+    {% endif %}
+{% else %}
+    {% set warning = 'Company Address Missing!' %}
+{% endif %}
+
+<!-- payer details -->
+{% if doc.customer_address %}
+    {% set pay_addr = frappe.get_doc("Address", doc.customer_address) %}
+    {% if pay_addr %}
+        <!-- get values -->
+        {% set pay_address_array = pay_addr.address_line1.split(" ") %}
+        {% set pay_address_line_item_count = pay_address_array | count %}
+        {% set pay_country = frappe.get_doc("Country", pay_addr.country) %}
+        {% set pay_country_code = pay_country.code | upper %}
+        {% set pay_address_line_detail = {'name': doc.customer, 'street': '', 'number': '', 'pin': pay_addr.pincode, 'city': pay_addr.city, 'country': pay_country_code } %}
+        {% for i in range(0, (pay_address_line_item_count - 1)) %}
+            {% if pay_address_line_detail.update({'street': pay_address_line_detail.street + " " + pay_address_array[i] }) %}{% endif %}
+        {% endfor %}
+        {% if pay_address_line_detail.update({'number': pay_address_array[pay_address_line_item_count - 1]}) %}{% endif %}
+        
+        <!-- set values -->
+        {% set payer_name = doc.customer_name %}
+        {% set payer_street = pay_address_line_detail.street %}
+        {% set payer_number = pay_address_line_detail.number %}
+        {% set payer_pincode = pay_address_line_detail.pin %}
+        {% set payer_town = pay_address_line_detail.city %}
+        {% set payer_country = pay_address_line_detail.country %}
+    {% endif %}
+{% else %}
+    {% set warning = 'Customer Address Missing!' %}
+{% endif %}
+
+
+<!-- payment details -->
+{% set iban = 'CH68 3000 0002 8878 4152 8' %}
+{% set amount = doc.outstanding_amount %}
+{% set currency = doc.currency %}
+{% set reference_type = 'QRR' %}
+{% set reference = doc.esr_reference %}
+<!-- reference beispiel: 21 00000 00003 13947 14300 09017 -->
+{% set message = doc.name %}
+{% set additional_information = '' %}
+
+<!-- QRR -->
+{% if warning %}
+
+{% else %}
+<div id="qrr_platzhalter" class="visible-pdf">
+    <div id="qrr">
+        <div id="empfangsschein">
+            <div id="empfangsschein_titel">
+                <p class="titel-e-z">Empfangsschein</p>
+            </div>
+            <div id="empfangsschein_angaben">
+                <p class="wert-e">
+                    <span class="ueberschrift-e">Konto / Zahlbar an</span><br>
+                    {{ iban }}<br>
+                    {{ receiver_name }}<br>
+                    {{ receiver_street | trim }} {{ receiver_number }}<br>
+                    {{ receiver_country }}-{{ receiver_pincode }} {{ receiver_town }}<br><br>
+                    <span class="ueberschrift-e">Referenz</span><br>
+                    {{ reference }}<br><br>
+                    <span class="ueberschrift-e">Zahlbar durch</span><br>
+                    {{ payer_name }}<br>
+                    {{ payer_street | trim }} {{ payer_number }}<br>
+                    {{ payer_country }}-{{ payer_pincode }} {{ payer_town }}
+                </p>
+            </div>
+            <div id="empfangsschein_betrag">
+                <div id="empfangsschein_betrag_1">
+                    <p class="betrag-e">
+                        <span class="ueberschrift-e">Währung</span><br>
+                        {{ currency }}
+                    </p>
+                </div>
+                <div id="empfangsschein_betrag_2">
+                    <p class="betrag-e">
+                        <span class="ueberschrift-e">Betrag</span><br>
+                        {{ amount }}
+                    </p>
+                </div>
+            </div>
+            <div id="empfangsschein_annahmestelle">
+                Annahmestelle
+            </div>
+        </div>
+        <div id="zahlteil">
+            <div id="zahlteil_links">
+                <div id="zahlteil_titel">
+                    <p class="titel-e-z">Zahlteil</p>
+                </div>
+                <div id="zahlteil_qr_platzhalter">
+                    <div id="qr_code">
+                        <img src="https://data.libracore.ch/phpqrcode/api/iso20022.php?iban={{ iban | trim }}&receiver_name={{ receiver_name }}&receiver_street={{ receiver_street | trim }}&receiver_number={{ receiver_number }}&receiver_pincode={{ receiver_pincode }}&receiver_town={{ receiver_town }}&receiver_country={{ receiver_country }}&amount={{ amount }}&currency={{ currency }}&payer_name={{ payer_name }}&payer_street={{ payer_street | trim }}&payer_number={{ payer_number }}&payer_pincode={{ payer_pincode }}&payer_town={{ payer_town }}&payer_country={{ payer_country }}&reference_type={{ reference_type }}&reference={{ reference | replace(" ", "") }}&message={{ message }}" style="width: 58mm !important; height: 58mm !important;" />
+                    </div>
+                </div>
+                <div id="zahlteil_betrag">
+                    <div id="zahlteil_betrag_1">
+                        <p>
+                            <span class="ueberschrift-z">Währung</span><br>
+                            <span class="betrag-z">{{ currency }}</span>
+                        </p>
+                    </div>
+                    <div id="zahlteil_betrag_2">
+                        <p>
+                            <span class="ueberschrift-z">Betrag</span><br>
+                            <span class="betrag-z">{{ amount }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div id="zahlteil_rechts">
+                <div id="zahlteil_angaben">
+                    <p class="wert-z">
+                        <span class="ueberschrift-z">Konto / Zahlbar an</span><br>
+                        {{ iban }}<br>
+                        {{ receiver_name }}<br>
+                        {{ receiver_street | trim }} {{ receiver_number }}<br>
+                        {{ receiver_country }}-{{ receiver_pincode }} {{ receiver_town }}<br><br>
+                        <span class="ueberschrift-z">Referenz</span><br>
+                        {{ reference }}<br><br>
+                        <span class="ueberschrift-z">Zusätzliche Informationen</span><br>
+                        {{ message }}<br><br>
+                        <span class="ueberschrift-z">Zahlbar durch</span><br>
+                        {{ payer_name }}<br>
+                        {{ payer_street | trim }} {{ payer_number }}<br>
+                        {{ payer_country }}-{{ payer_pincode }} {{ payer_town }}
+                    </p>
+                </div>
+            </div>
+            <div id="zahlteil_unten">
+                <div id="zahlteil_weitere_informationen">
+                    {{ additional_information }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- CSS -->
+<style>
+    /* Grid Style */
+    /* ---------- */
+    
+    #qrr_platzhalter {
+        position: absolute;
+        top: 704px;
+    }
+    
+    #empfangsschein {
+        width: 77mm;
+        height: 132mm;
+        max-width: 77mm;
+        max-height: 132mm;
+        float: left;
+        padding: 6mm;
+        border-top: 1px solid silver;
+        border-right: 1px solid silver;
+    }
+    
+    #empfangsschein_titel {
+        width: 65mm;
+        height: 9mm;
+        max-width: 65mm;
+        max-height: 9mm;
+    }
+    
+    #empfangsschein_angaben {
+        width: 65mm;
+        height: 70mm;
+        max-width: 65mm;
+        max-height: 70mm;
+    }
+    
+    #empfangsschein_betrag {
+        width: 65mm;
+        height: 18mm;
+        max-width: 65mm;
+        max-height: 18mm;
+    }
+    
+    #empfangsschein_annahmestelle {
+        width: 65mm;
+        height: 23mm;
+        max-width: 65mm;
+        max-height: 23mm;
+        text-align: right;
+        font-size: 6pt;
+        font-weight: bold;
+    }
+    
+    #zahlteil {
+        width: 185mm;
+        height: 132mm;
+        max-width: 185mm;
+        max-height: 132mm;
+        float: left;
+        padding: 5mm;
+        border-top: 1px solid silver;
+    }
+    
+    #zahlteil_links {
+        float: left;
+    }
+    
+    #zahlteil_titel {
+        width: 65mm;
+        height: 9mm;
+        max-width: 65mm;
+        max-height: 9mm;
+    }
+    
+    #zahlteil_qr_platzhalter {
+        width: 65mm;
+        height: 70mm;
+        max-width: 65mm;
+        max-height: 70mm;
+        padding-top: 6mm;
+        padding-bottom: 6mm;
+        padding-right: 6mm;
+    }
+    
+    #qr_code {
+        width: 58mm;
+        height: 58mm;
+        max-width: 58mm;
+        max-height: 58mm;
+    }
+    
+    #zahlteil_betrag {
+        width: 65mm;
+        height: 27mm;
+        max-width: 65mm;
+        max-height: 27mm;
+    }
+    
+    #zahlteil_rechts {
+        float: left;
+    }
+    
+    #zahlteil_angaben {
+        width: 110mm;
+        height: 106mm;
+        max-width: 110mm;
+        max-height: 106mm;
+    }
+    
+    #zahlteil_unten {
+        clear: both;
+    }
+    
+    #zahlteil_weitere_informationen {
+        width: 175mm;
+        height: 14mm;
+        max-width: 175mm;
+        max-height: 14mm;
+    }
+    
+    #empfangsschein_betrag_1 {
+        width: 50%;
+        float: left;
+    }
+    
+    #empfangsschein_betrag_2 {
+        width: 50%;
+        float: left;
+    }
+    
+    #zahlteil_betrag_1 {
+        width: 50%;
+        float: left;
+    }
+    
+    #zahlteil_betrag_2 {
+        width: 50%;
+        float: left;
+    }
+    
+    /* ---------- */
+    /* Font Style */
+    /* ---------- */
+    
+    @font-face {
+        font-family: 'Frutiger';
+        src: url('/assets/mietrechtspraxis/fonts/frutiger/Frutiger.woff');
+    }
+    @font-face {
+        font-family: 'Frutiger Bold';
+        src: url('/assets/mietrechtspraxis/fonts/frutiger/Frutiger_bold.woff');
+    }
+
+    .titel-e-z {
+        font-family: 'Frutiger Bold';
+        font-weight: bold;
+        font-size: 11pt;
+    }
+    
+    .wert-e {
+        font-family: 'Frutiger';
+        font-weight: normal;
+        font-size: 8pt;
+        line-height: 1.125;
+    }
+    
+    .ueberschrift-e {
+        font-family: 'Frutiger Bold';
+        font-weight: bold;
+        font-size: 6pt;
+        line-height: 1.5;
+    }
+    
+    .betrag-e {
+        font-family: 'Frutiger';
+        font-weight: normal;
+        font-size: 8pt;
+        line-height: 1.125;
+    }
+    
+    .ueberschrift-z {
+        font-family: 'Frutiger Bold';
+        font-weight: bold;
+        font-size: 8pt;
+        line-height: 1.375;
+    }
+    
+    .betrag-z {
+        font-family: 'Frutiger';
+        font-weight: normal;
+        font-size: 10pt;
+        line-height: 1.3;
+    }
+    
+    .wert-z {
+        font-family: 'Frutiger';
+        font-weight: normal;
+        font-size: 10pt;
+        line-height: 1.1;
+    }
+</style>

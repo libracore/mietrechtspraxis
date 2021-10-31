@@ -56,6 +56,7 @@ function clear_search_fields(frm) {
     cur_frm.set_value('postfach', 0);
     cur_frm.set_value('postfach_nummer', '');
     cur_frm.set_value('abo_nummer', '');
+    cur_frm.set_value('company_addition', '');
     remove_mandatory(frm);
 }
 
@@ -110,6 +111,11 @@ function create_new_customer(frm) {
         } else {
             customer_name = '!';
         }
+        if (cur_frm.doc.company_addition) {
+            company_addition = cur_frm.doc.company_addition;
+        } else {
+            company_addition = '!';
+        }
     }
     
     // check mandatory
@@ -129,7 +135,8 @@ function create_new_customer(frm) {
                 "city": city,
                 "country": country,
                 "customer_type": customer_type,
-                "customer_name": customer_name
+                "customer_name": customer_name,
+                "customer_addition": company_addition
             },
             "async": false,
             "callback": function(response) {
@@ -145,6 +152,7 @@ function create_new_customer(frm) {
                 cur_frm.set_value('city', city.replace("!", ""));
                 cur_frm.set_value('country', country.replace("!", ""));
                 cur_frm.set_value('company', customer_name.replace("!", ""));
+                cur_frm.set_value('company_addition', company_addition.replace("!", ""));
                 cur_frm.save();
             }
         });

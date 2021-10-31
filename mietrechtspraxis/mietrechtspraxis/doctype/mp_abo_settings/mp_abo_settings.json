@@ -48,6 +48,7 @@
    "collapsible": 1,
    "fieldname": "section_druckformat",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Druckformat Rechnungsversand per Mail"
   },
   {
@@ -58,7 +59,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2021-07-14 22:09:11.996857",
+ "modified": "2021-10-30 17:17:06.435582",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo Settings",

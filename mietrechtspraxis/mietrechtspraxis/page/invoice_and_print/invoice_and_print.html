@@ -4,17 +4,18 @@
          <form class="form">
             <label for="job_typ">{{ __("Job Typ") }}:</label>
             <select name="job_typ" id="job_typ">
-                <option value="invoice_inkl">Rechnungen inkl. Zeitschriften</option>
-                <option value="invoice_exkl">Rechnungen exkl. Zeitschriften</option>
-                <option value="begleitschreiben">Begleitschreiben (Normal, Gratis & Gekündigt)</option>
+                <option value="versandkarten">Q1/Q2/Q3: Versandkarten</option>
+                <option value="invoice_inkl">Q4: Rechnungen inkl. Zeitschriften</option>
+                <option value="invoice_exkl">Q4: Rechnungen exkl. Zeitschriften</option>
+                <option value="begleitschreiben">Q4: Begleitschreiben (Normal, Gratis & Gekündigt)</option>
             </select>
-            <label for="date" id="date_label">{{ __("Rechnungsdatum") }}:</label>
+            <label for="date" id="date_label">{{ __("Rechnungsdatum / Versandkarten Stichtag") }}:</label>
             <input type="date" class="form-control" id="date">
         </form>
     </div>
     <div class="col-xs-4 text-center">
         <form class="form-inline">
-            <button type="button" class="btn btn-danger" style="margin-top: 50px;" id="create_data">{{ __("Rechnungen / Begleitschreiben erstellen<br>(ggf. per Mail versenden)") }}</button>
+            <button type="button" class="btn btn-danger" style="margin-top: 50px;" id="create_data">{{ __("Versandkarten / Rechnungen / Begleitschreiben erstellen<br>(ggf. per Mail versenden)") }}</button>
         </form>
     </div>
     <div class="col-xs-2"></div>

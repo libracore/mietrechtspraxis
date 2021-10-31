@@ -15,7 +15,8 @@
   "qty_one",
   "qty_multi",
   "sinvs",
-  "begleitungen"
+  "begleitungen",
+  "versandkarten"
  ],
  "fields": [
   {
@@ -86,7 +87,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Typ",
-   "options": "Rechnung\nBegleitschreiben",
+   "options": "Rechnung\nBegleitschreiben\nVersandkarten",
    "read_only": 1
   },
   {
@@ -96,9 +97,16 @@
    "label": "\u00dcbersicht",
    "options": "RM Log Begleitschreiben",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.typ=='Versandkarten'",
+   "fieldname": "versandkarten",
+   "fieldtype": "Table",
+   "label": "\u00dcbersicht",
+   "options": "RM Log Versandkarten"
   }
  ],
- "modified": "2021-10-06 13:21:33.319619",
+ "modified": "2021-10-30 20:19:00.702032",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "RM Log",

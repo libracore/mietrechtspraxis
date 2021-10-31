@@ -81,10 +81,20 @@ frappe.invoice_and_print = {
     },
     create_data: function() {
         var selected_type = $("#job_typ").val();
-        if (selected_type != 'begleitschreiben') {
+        if (selected_type == 'invoice_inkl') {
             frappe.invoice_and_print.create_invoice(selected_type);
-        } else {
+        }
+        
+        if (selected_type == 'invoice_exkl') {
+            frappe.invoice_and_print.create_invoice(selected_type);
+        }
+        
+        if (selected_type == 'begleitschreiben') {
             frappe.invoice_and_print.create_begleitschreiben();
+        }
+        
+        if (selected_type == 'versandkarten') {
+            frappe.invoice_and_print.create_versandkarten();
         }
         
     },
@@ -137,5 +147,29 @@ frappe.invoice_and_print = {
                 show_alert('Dokumentenerstellung abgebrochen');
             }
         )
+    },
+    create_versandkarten: function() {
+        var date = $("#date").val();
+        if (date) {
+            frappe.confirm(
+                'Wollen Sie die Versandkarten erstellen? Der berücksichtigte Stichtag ist ' + frappe.datetime.obj_to_user(date),
+                function(){
+                    frappe.show_alert({message:__("Bitte warten, die Dokumente werden erstellt."), indicator:'green'});
+                    $("#invoice_area").empty();
+                    $("<center><div>Der Background-Job wurde gestartet. Sie können dessen Status <a href='/desk#background_jobs'>hier</a> einsehen.<br>Bitte warten Sie oder starten Sie einen Folge-Auftrag.</div></center>").appendTo($("#invoice_area"));
+                    frappe.call({
+                        "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_versandkarten",
+                        "args": {
+                            "date": date
+                        }
+                    });
+                },
+                function(){
+                    show_alert('Dokumentenerstellung abgebrochen');
+                }
+            )
+        } else {
+            frappe.throw(__("Bittte wählen Sie zuerst ein Datum aus"));
+        }
     }
 }

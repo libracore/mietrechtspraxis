@@ -7,9 +7,9 @@
 <!-- results as cards -->
 <div class="clearfix"></div>
 {% for search_result in data %}
-	<div class="address-box">
-		<p class="h6">
-			{{ search_result.customer_name or '' }}{% if search_result.customer_link %}&nbsp;<span class="text-muted">({{ search_result.customer_link }})</span>{% endif %}
+    <div class="address-box">
+        <p class="h6">
+            {{ search_result.customer_name or '' }}<br>{{ search_result.customer_addition or '' }}{% if search_result.customer_link %}&nbsp;<span class="text-muted">({{ search_result.customer_link }})</span>{% endif %}
             {% if search_result.customer_link %}
                 <a href="#Form/Customer/{{ search_result.customer_link }}"
                     class="btn btn-xs btn-default pull-right"
@@ -31,7 +31,7 @@
                     Adresse bearbeiten
                 </a>
             {% endif %}
-		</p>
+        </p>
         <div class="row">
             <div class="col-xs-4">
                 {% if search_result.first_name != search_result.company_name %}
@@ -85,5 +85,5 @@
                 </p>
             </div>
         </div>
-	</div>
+    </div>
 {% endfor %}

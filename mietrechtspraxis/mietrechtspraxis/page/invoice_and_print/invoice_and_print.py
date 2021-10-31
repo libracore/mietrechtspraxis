@@ -32,8 +32,7 @@ def create_invoices(date, year, selected_type, limit=False):
     args = {
         'date': date,
         'year': year,
-        'selected_type': selected_type,
-        'limit': limit
+        'selected_type': selected_type
     }
     enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_invoices", queue='long', job_name='Generierung Sammel-PDF (Rechnungslauf)', timeout=5000, **args)
 
@@ -56,8 +55,7 @@ def _create_invoices(date, year, selected_type, limit=500):
                                         AND `name` NOT IN ({filter_keine_doppel_rechnung})
                                         {filter_ausland_adressen} ORDER BY `magazines_qty_ir` ASC""".format(filter_invoice_typ=filter_invoice_typ,
                                                                                                             filter_keine_doppel_rechnung=filter_keine_doppel_rechnung,
-                                                                                                            filter_ausland_adressen=filter_ausland_adressen,
-                                                                                                            limit_filter=limit_filter), as_dict=True)[0].qty
+                                                                                                            filter_ausland_adressen=filter_ausland_adressen), as_dict=True)[0].qty
     inland_abos_qty = frappe.db.sql("""SELECT
                                         COUNT(`name`) AS `qty`
                                     FROM `tabmp Abo`
@@ -176,6 +174,8 @@ def create_invoice(abo, date):
             ]
         })
         new_sinv.insert()
+        new_sinv.esr_reference = get_qrr_reference(reference_raw="00 00000 00000 00000 " + new_sinv.name.replace("MP-R-", "") + " 0000")
+        new_sinv.save(ignore_permissions=True)
         new_sinv.submit()
         frappe.db.commit()
     
@@ -185,7 +185,11 @@ def create_invoice(abo, date):
             if contact.email_id:
                 send_as_mail = True
                 mail = contact.email_id
-                send_invoice_as_mail(new_sinv.name, mail)
+                if abo.magazines_qty_ir > 0:
+                    printformat = 'Jahresrechnung inkl'
+                else:
+                    printformat = 'Jahresrechnung exkl'
+                send_invoice_as_mail(new_sinv.name, mail, printformat)
                 new_sinv.sended_as_mail = 1
                 new_sinv.save()
                 frappe.db.commit()
@@ -205,13 +209,13 @@ def create_invoice(abo, date):
         frappe.log_error(frappe.get_traceback(), 'create_invoice failed: {abo}'.format(abo=abo.name))
         return False
     
-def send_invoice_as_mail(sinv, address):
+def send_invoice_as_mail(sinv, address, printformat):
     try:
         frappe.sendmail([address],
             subject=  _("New Invoice: {sinv}").format(sinv=sinv),
             reply_to= 'office@mietrecht.ch',
             message = _("Please find attached Invoice {sinv}").format(sinv=sinv),
-            attachments = [frappe.attach_print('Sales Invoice', sinv, file_name=sinv, print_format=frappe.db.get_single_value('mp Abo Settings', 'druckformat'))])
+            attachments = [frappe.attach_print('Sales Invoice', sinv, file_name=sinv, print_format=printformat)])
     except:
         frappe.log_error(frappe.get_traceback(), 'send_invoice_as_mail failed: {sinv}'.format(sinv=sinv))
 
@@ -220,13 +224,16 @@ def print_pdf(rm_log):
     physical_path = "/home/frappe/frappe-bench/sites" + bind_source
     dest=str(physical_path)
     
-    invoices = frappe.db.sql("""SELECT `sinv` FROM `tabRM Log Sinv` WHERE `parent` = '{rm_log}' AND `pdf` = 1 AND `e_mail` != 1 ORDER BY `idx` ASC""".format(rm_log=rm_log), as_list=True)
+    invoices = frappe.db.sql("""SELECT `sinv`, `anz` FROM `tabRM Log Sinv` WHERE `parent` = '{rm_log}' AND `pdf` = 1 AND `e_mail` != 1 ORDER BY `idx` ASC""".format(rm_log=rm_log), as_list=True)
     
     output = PdfFileWriter()
     
     for invoice in invoices:
         try:
-            output = frappe.get_print("Sales Invoice", invoice[0], frappe.db.get_single_value('mp Abo Settings', 'druckformat'), as_pdf = True, output = output, ignore_zugferd=True)
+            if int(invoice[1]) > 0:
+                output = frappe.get_print("Sales Invoice", invoice[0], 'Jahresrechnung inkl', as_pdf = True, output = output, ignore_zugferd=True)
+            else:
+                output = frappe.get_print("Sales Invoice", invoice[0], 'Jahresrechnung exkl', as_pdf = True, output = output, ignore_zugferd=True)
         except:
             frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {sinv}'.format(sinv=invoice[0]))
         
@@ -452,6 +459,173 @@ def _create_begleitschreiben():
         output.write(dest)
     
     rm_log.ende = now()
+    rm_log.status = 'PDF erstellt'
+    rm_log.save(ignore_permissions=True)
+    frappe.db.commit()
+
+@frappe.whitelist()
+def create_versandkarten(date):
+    args = {
+        'date': date
+    }
+    enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_versandkarten", queue='long', job_name='Generierung Sammel-PDF (Versandkarten)', timeout=5000, **args)
+
+def _create_versandkarten(date):
+    data = []
+    qty_one = 0
+    qty_multi = 0
+    
+    rm_log = frappe.get_doc({
+        "doctype": "RM Log",
+        'start': now(),
+        'status': 'Job gestartet',
+        'typ': 'Versandkarten'
+    })
+    rm_log.insert()
+    frappe.db.commit()
+    
+    bind_source = "/assets/mietrechtspraxis/sinvs_for_print/{date}.pdf".format(date=rm_log.name)
+    physical_path = "/home/frappe/frappe-bench/sites" + bind_source
+    dest=str(physical_path)
+    
+    output = PdfFileWriter()
+    
+    ausland_empfaenger = frappe.db.sql("""
+                        SELECT
+                            `view`.`recipient`,
+                            `view`.`abo`,
+                            `view`.`anz`,
+                            `view`.`recipient_contact`,
+                            `view`.`recipient_address`
+                        FROM (
+                            SELECT
+                                `tabmp Abo`.`invoice_recipient` AS `recipient`,
+                                `tabmp Abo`.`name` AS `abo`,
+                                `tabmp Abo`.`magazines_qty_ir` AS `anz`,
+                                `tabmp Abo`.`recipient_contact`,
+                                `tabmp Abo`.`recipient_address`
+                            FROM `tabmp Abo`
+                            WHERE
+                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}'))
+                            AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Switzerland')
+                            AND `tabmp Abo`.`magazines_qty_ir` > 0
+                            UNION
+                            SELECT
+                                `tabmp Abo Recipient`.`magazines_recipient` AS `recipient`,
+                                `tabmp Abo Recipient`.`parent` AS `abo`,
+                                `tabmp Abo Recipient`.`magazines_qty_mr` AS `anz`,
+                                `tabmp Abo Recipient`.`recipient_contact`,
+                                `tabmp Abo Recipient`.`recipient_address`
+                            FROM `tabmp Abo Recipient`
+                            WHERE `tabmp Abo Recipient`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Switzerland')
+                            AND `tabmp Abo Recipient`.`parent` IN (
+                                SELECT
+                                    `name`
+                                FROM `tabmp Abo`
+                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}')
+                            )
+                            AND `tabmp Abo Recipient`.`magazines_qty_mr` > 0
+                        ) AS `view`
+                        ORDER BY `view`.`anz` ASC
+                    """.format(date=date), as_dict=True)
+    for empfaenger in ausland_empfaenger:
+        # create rm_log:
+        try:
+            customer = frappe.get_doc("Customer", empfaenger.recipient)
+            versand_row = rm_log.append('versandkarten', {})
+            versand_row.recipient_name = customer.customer_name
+            versand_row.abo = empfaenger.abo
+            versand_row.anz = empfaenger.anz
+            versand_row.recipient_contact = empfaenger.recipient_contact
+            versand_row.recipient_address = empfaenger.recipient_address
+            rm_log.save(ignore_permissions=True)
+            frappe.db.commit()
+            if empfaenger.anz > 1:
+                qty_multi += 1
+            else:
+                qty_one += 1
+        except:
+            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
+    
+    inland_empfaenger = frappe.db.sql("""
+                        SELECT
+                            `view`.`recipient`,
+                            `view`.`abo`,
+                            `view`.`anz`,
+                            `view`.`recipient_contact`,
+                            `view`.`recipient_address`
+                        FROM (
+                            SELECT
+                                `tabmp Abo`.`invoice_recipient` AS `recipient`,
+                                `tabmp Abo`.`name` AS `abo`,
+                                `tabmp Abo`.`magazines_qty_ir` AS `anz`,
+                                `tabmp Abo`.`recipient_contact`,
+                                `tabmp Abo`.`recipient_address`
+                            FROM `tabmp Abo`
+                            WHERE
+                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}'))
+                            AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Switzerland')
+                            UNION
+                            SELECT
+                                `tabmp Abo Recipient`.`magazines_recipient` AS `recipient`,
+                                `tabmp Abo Recipient`.`parent` AS `abo`,
+                                `tabmp Abo Recipient`.`magazines_qty_mr` AS `anz`,
+                                `tabmp Abo Recipient`.`recipient_contact`,
+                                `tabmp Abo Recipient`.`recipient_address`
+                            FROM `tabmp Abo Recipient`
+                            WHERE `tabmp Abo Recipient`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Switzerland')
+                            AND `tabmp Abo Recipient`.`parent` IN (
+                                SELECT
+                                    `name`
+                                FROM `tabmp Abo`
+                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}')
+                            )
+                        ) AS `view`
+                        ORDER BY `view`.`anz` ASC
+                    """.format(date=date), as_dict=True)
+    for empfaenger in inland_empfaenger:
+        # create rm_log:
+        try:
+            customer = frappe.get_doc("Customer", empfaenger.recipient)
+            versand_row = rm_log.append('versandkarten', {})
+            versand_row.recipient_name = customer.customer_name
+            versand_row.abo = empfaenger.abo
+            versand_row.anz = empfaenger.anz
+            versand_row.recipient_contact = empfaenger.recipient_contact
+            versand_row.recipient_address = empfaenger.recipient_address
+            rm_log.save(ignore_permissions=True)
+            frappe.db.commit()
+            if empfaenger.anz > 1:
+                qty_multi += 1
+            else:
+                qty_one += 1
+        except:
+            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
+    
+    
+        
+    try:
+        output = frappe.get_print("RM Log", rm_log.name, 'RM Log Versandkarten', as_pdf = True, output = output, ignore_zugferd=True)
+    except:
+        frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=rm_log.name))
+    
+    
+    
+    try:
+        if isinstance(dest, str): # when dest is a file path
+            destdir = os.path.dirname(dest)
+            if destdir != '' and not os.path.isdir(destdir):
+                os.makedirs(destdir)
+            with open(dest, "wb") as w:
+                output.write(w)
+        else: # when dest is io.IOBase
+            output.write(dest)
+    except:
+        frappe.log_error(frappe.get_traceback(), 'save_pdf failed: {ref_dok}'.format(ref_dok=rm_log.name))
+    
+    rm_log.ende = now()
+    rm_log.qty_one = qty_one
+    rm_log.qty_multi = qty_multi
     rm_log.status = 'PDF erstellt'
     rm_log.save(ignore_permissions=True)
     frappe.db.commit()
