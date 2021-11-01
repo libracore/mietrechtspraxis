@@ -129,11 +129,15 @@ def search_results(self):
     # company filters
     if self["is_company"]:
         if self["company"]:
-            filters.append("""`customers_search_mask`.`customer_link` IN (SELECT `name` FROM `tabCustomer` WHERE `customer_type` = 'Company' AND (`customer_name` LIKE '%{company}%' OR `customer_addition` LIKE '%{company}%'))""".format(company=self["company"]))
+            if self["company_addition"]:
+                filters.append("""`customers_search_mask`.`customer_link` IN (SELECT `name` FROM `tabCustomer` WHERE `customer_type` = 'Company' AND (`customer_name` LIKE '%{company}%' OR `customer_addition` LIKE '%{company_addition}%'))""".format(company=self["company"], company_addition=self["company_addition"]))
+            else:
+                filters.append("""`customers_search_mask`.`customer_link` IN (SELECT `name` FROM `tabCustomer` WHERE `customer_type` = 'Company' AND `customer_name` LIKE '%{company}%')""".format(company=self["company"]))
         else:
-            filters.append("""`customers_search_mask`.`customer_link` IN (SELECT `name` FROM `tabCustomer` WHERE `customer_type` = 'Company')""")
-        if self["company_addition"]:
-            filters.append("""`customers_search_mask`.`customer_link` IN (SELECT `name` FROM `tabCustomer` WHERE `customer_type` = 'Company' AND `customer_addition` LIKE '%{company_addition}%')""".format(company_addition=self["company_addition"]))
+            if self["company_addition"]:
+                filters.append("""`customers_search_mask`.`customer_link` IN (SELECT `name` FROM `tabCustomer` WHERE `customer_type` = 'Company' AND `customer_addition` LIKE '%{company_addition}%')""".format(company_addition=self["company_addition"]))
+            else:
+                filters.append("""`customers_search_mask`.`customer_link` IN (SELECT `name` FROM `tabCustomer` WHERE `customer_type` = 'Company')""")
     
     if len(filters) > 0:
         query_filter = 'WHERE ' + ' AND '.join(filters)

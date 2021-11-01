@@ -103,7 +103,8 @@ function create_new_customer(frm) {
     }
     
     var customer_type = 'Individual';
-    var customer_name = ''
+    var customer_name = '';
+    var company_addition = '';
     if (cur_frm.doc.is_company == 1) {
         customer_type = 'Company';
         if (cur_frm.doc.company) {
