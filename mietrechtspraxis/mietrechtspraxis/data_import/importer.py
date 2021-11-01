@@ -388,6 +388,7 @@ def create_customer(data=None, contact=None):
         }
         
 def create_or_append_abo(data, new, customer=False, address=False, contact=False):
+    
     if new:
         # create new Abo
         abo_type = 'Jahres-Abo'
@@ -409,6 +410,7 @@ def create_or_append_abo(data, new, customer=False, address=False, contact=False
             # update existing Abo
             mitglied_id = get_value(data, 'mitglied_id')
             existing_abo = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `mitglied_id` = '{mitglied_id}' LIMIT 1""".format(mitglied_id=mitglied_id), as_dict=True)
+            
             if len(existing_abo) > 0:
                 new_abo = frappe.get_doc("mp Abo", existing_abo[0].name)
                 new_abo.type = abo_type
@@ -434,11 +436,11 @@ def create_or_append_abo(data, new, customer=False, address=False, contact=False
                     'customer': customer,
                     'recipient_contact': contact,
                     'recipient_address': address,
-                    'magazines_qty_ir': get_value(data, 'zeitung_anzahl_adresse'),
+                    'magazines_qty_ir': get_value(data, 'zeitung_anzahl_adresse') or 0,
                     'mitglied_id': get_value(data, 'mitglied_id')
                 })
                 new_abo.insert()
-                
+            
             frappe.db.commit()
             add_new_abo_nr_to_contact(contact, new_abo.name)
             return {
@@ -462,7 +464,7 @@ def create_or_append_abo(data, new, customer=False, address=False, contact=False
             for recipient in existing_abo.recipient:
                 if recipient.magazines_recipient == customer:
                     found_entry = True
-                    recipient.magazines_qty_mr = get_value(data, 'zeitung_anzahl_adresse')
+                    recipient.magazines_qty_mr = get_value(data, 'zeitung_anzahl_adresse') or 0
             
             if not found_entry:
                 row = existing_abo.append('recipient', {})

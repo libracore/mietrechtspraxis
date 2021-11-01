@@ -61,7 +61,7 @@
 
 <!-- payment details -->
 {% set iban = 'CH68 3000 0002 8878 4152 8' %}
-{% set amount = doc.outstanding_amount %}
+{% set amount = "{:,.2f}".format(doc.outstanding_amount).replace(",", "'") %}
 {% set currency = doc.currency %}
 {% set reference_type = 'QRR' %}
 {% set reference = doc.esr_reference %}
