@@ -2,9 +2,9 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('mp Abo', {
-	setup: function(frm) {
+    setup: function(frm) {
         frm.set_indicator_formatter('sales_invoice',
-			function(doc) { 
+            function(doc) { 
                 return (doc.status != 'Paid') ? "red" : "green" ;
             }
         );
@@ -52,16 +52,16 @@ frappe.ui.form.on('mp Abo', {
         cur_frm.fields_dict['recipient_contact'].get_query = function(doc) {
           return {
             filters: {
-        	  "link_doctype": "Customer",
-        	  "link_name": frm.doc.invoice_recipient
+              "link_doctype": "Customer",
+              "link_name": frm.doc.invoice_recipient
             }
           }
         };
         cur_frm.fields_dict['recipient_address'].get_query = function(doc) {
           return {
             filters: {
-        	  "link_doctype": "Customer",
-        	  "link_name": frm.doc.invoice_recipient
+              "link_doctype": "Customer",
+              "link_name": frm.doc.invoice_recipient
             }
           }
         };
@@ -69,8 +69,8 @@ frappe.ui.form.on('mp Abo', {
           var child = locals[cdt][cdn];
           return {
             filters: {
-        	  "link_doctype": "Customer",
-        	  "link_name": child.magazines_recipient
+              "link_doctype": "Customer",
+              "link_name": child.magazines_recipient
             }
           }
         };
@@ -78,8 +78,8 @@ frappe.ui.form.on('mp Abo', {
           var child = locals[cdt][cdn];
           return {
             filters: {
-        	  "link_doctype": "Customer",
-        	  "link_name": child.magazines_recipient
+              "link_doctype": "Customer",
+              "link_name": child.magazines_recipient
             }
           }
         };
@@ -88,7 +88,7 @@ frappe.ui.form.on('mp Abo', {
         if (!frm.doc.__islocal) {
            fetch_address(frm);
         }
-	},
+    },
     invoice_recipient: function(frm) {
         // set address html
         fetch_address(frm);

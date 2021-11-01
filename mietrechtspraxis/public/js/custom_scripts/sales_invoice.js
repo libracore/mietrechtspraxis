@@ -12,7 +12,8 @@ function get_qrr_reference(frm) {
     frappe.call({
         "method": "mietrechtspraxis.mietrechtspraxis.utils.qrr_reference.get_qrr_reference",
         "args": {
-            "reference_raw": "00 00000 00000 00000 " + cur_frm.doc.name.replace("MP-R-", "") + " 0000"
+            "sales_invoice": cur_frm.doc.name,
+            "customer": cur_frm.doc.customer
         },
         "async": false,
         "callback": function(response) {

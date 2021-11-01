@@ -125,7 +125,7 @@ def _create_invoice(abo):
         ]
     })
     new_sinv.insert()
-    new_sinv.esr_reference = get_qrr_reference(reference_raw="00 00000 00000 00000 " + new_sinv.name.replace("MP-R-", "") + " 0000")
+    new_sinv.esr_reference = get_qrr_reference(sales_invoice=new_sinv.name, customer=abo.invoice_recipient)
     new_sinv.save(ignore_permissions=True)
     new_sinv.submit()
     frappe.db.commit()
