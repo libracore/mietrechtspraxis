@@ -71,7 +71,9 @@
 
 <!-- QRR -->
 {% if warning %}
-
+    <div style="border: 1px solid red;">
+        <p style="color: red;">{{ warning }}</p>
+    </div>
 {% else %}
 <div id="qrr_platzhalter" class="visible-pdf">
     <div id="qrr">
@@ -119,7 +121,7 @@
                 </div>
                 <div id="zahlteil_qr_platzhalter">
                     <div id="qr_code">
-                        <img src="https://data.libracore.ch/phpqrcode/api/iso20022.php?iban={{ iban | trim }}&receiver_name={{ receiver_name }}&receiver_street={{ receiver_street | trim }}&receiver_number={{ receiver_number }}&receiver_pincode={{ receiver_pincode }}&receiver_town={{ receiver_town }}&receiver_country={{ receiver_country }}&amount={{ amount }}&currency={{ currency }}&payer_name={{ payer_name }}&payer_street={{ payer_street | trim }}&payer_number={{ payer_number }}&payer_pincode={{ payer_pincode }}&payer_town={{ payer_town }}&payer_country={{ payer_country }}&reference_type={{ reference_type }}&reference={{ reference | replace(" ", "") }}&message={{ message }}" style="width: 58mm !important; height: 58mm !important;" />
+                        <img src="https://data.libracore.ch/phpqrcode/api/iso20022.php?iban={{ iban | trim }}&receiver_name={{ receiver_name }}&receiver_street={{ receiver_street | trim }}&receiver_number={{ receiver_number }}&receiver_pincode={{ receiver_pincode }}&receiver_town={{ receiver_town }}&receiver_country={{ receiver_country }}&amount={{ amount }}&currency={{ currency }}&payer_name={{ payer_name }}&payer_street={{ payer_street | trim }}&payer_number={{ payer_number }}&payer_pincode={{ payer_pincode }}&payer_town={{ payer_town }}&payer_country={{ payer_country }}&reference_type={{ reference_type }}&reference={{ reference | replace(" ", "") }}&message={{ message }}" style="width: 46mm !important; height: 46mm !important;" />
                     </div>
                 </div>
                 <div id="zahlteil_betrag">
@@ -173,56 +175,56 @@
     
     #qrr_platzhalter {
         position: absolute;
-        top: 704px;
+        top: 565px;
     }
     
     #empfangsschein {
-        width: 77mm;
-        height: 132mm;
-        max-width: 77mm;
-        max-height: 132mm;
+        width: 62mm;
+        height: 105mm;
+        max-width: 62mm;
+        max-height: 105mm;
         float: left;
-        padding: 6mm;
+        padding: 5mm;
         border-top: 1px solid silver;
         border-right: 1px solid silver;
     }
     
     #empfangsschein_titel {
-        width: 65mm;
-        height: 9mm;
-        max-width: 65mm;
-        max-height: 9mm;
+        width: 52mm;
+        height: 7mm;
+        max-width: 52mm;
+        max-height: 7mm;
     }
     
     #empfangsschein_angaben {
-        width: 65mm;
-        height: 70mm;
-        max-width: 65mm;
-        max-height: 70mm;
+        width: 52mm;
+        height: 56mm;
+        max-width: 52mm;
+        max-height: 56mm;
     }
     
     #empfangsschein_betrag {
-        width: 65mm;
-        height: 18mm;
-        max-width: 65mm;
-        max-height: 18mm;
+        width: 52mm;
+        height: 14mm;
+        max-width: 52mm;
+        max-height: 14mm;
     }
     
     #empfangsschein_annahmestelle {
-        width: 65mm;
-        height: 23mm;
-        max-width: 65mm;
-        max-height: 23mm;
+        width: 52mm;
+        height: 18mm;
+        max-width: 52mm;
+        max-height: 18mm;
         text-align: right;
         font-size: 6pt;
         font-weight: bold;
     }
     
     #zahlteil {
-        width: 185mm;
-        height: 132mm;
-        max-width: 185mm;
-        max-height: 132mm;
+        width: 148mm;
+        height: 105mm;
+        max-width: 148mm;
+        max-height: 105mm;
         float: left;
         padding: 5mm;
         border-top: 1px solid silver;
@@ -233,34 +235,34 @@
     }
     
     #zahlteil_titel {
-        width: 65mm;
-        height: 9mm;
-        max-width: 65mm;
-        max-height: 9mm;
+        width: 46mm;
+        height: 7mm;
+        max-width: 46mm;
+        max-height: 7mm;
     }
     
     #zahlteil_qr_platzhalter {
-        width: 65mm;
-        height: 70mm;
-        max-width: 65mm;
-        max-height: 70mm;
-        padding-top: 6mm;
-        padding-bottom: 6mm;
-        padding-right: 6mm;
+        width: 51mm;
+        height: 56mm;
+        max-width: 51mm;
+        max-height: 56mm;
+        padding-top: 5mm;
+        padding-bottom: 5mm;
+        padding-right: 5mm;
     }
     
     #qr_code {
-        width: 58mm;
-        height: 58mm;
-        max-width: 58mm;
-        max-height: 58mm;
+        width: 46mm;
+        height: 46mm;
+        max-width: 46mm;
+        max-height: 46mm;
     }
     
     #zahlteil_betrag {
-        width: 65mm;
-        height: 27mm;
-        max-width: 65mm;
-        max-height: 27mm;
+        width: 51mm;
+        height: 22mm;
+        max-width: 51mm;
+        max-height: 22mm;
     }
     
     #zahlteil_rechts {
@@ -268,10 +270,10 @@
     }
     
     #zahlteil_angaben {
-        width: 110mm;
-        height: 106mm;
-        max-width: 110mm;
-        max-height: 106mm;
+        width: 87mm;
+        height: 85mm;
+        max-width: 87mm;
+        max-height: 85mm;
     }
     
     #zahlteil_unten {
@@ -279,10 +281,10 @@
     }
     
     #zahlteil_weitere_informationen {
-        width: 175mm;
-        height: 14mm;
-        max-width: 175mm;
-        max-height: 14mm;
+        width: 138mm;
+        height: 10mm;
+        max-width: 138mm;
+        max-height: 10mm;
     }
     
     #empfangsschein_betrag_1 {
