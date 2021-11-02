@@ -12,7 +12,7 @@ class CustomersSearchMask(Document):
     pass
 
 @frappe.whitelist()
-def create_customer(firstname, lastname, email, phone, mobile, address_line1, address_line2, plz, city, country, customer_type, customer_name, customer_addition):
+def create_customer(firstname, lastname, email, phone, mobile, address_line1, address_line2, plz, city, country, customer_type, customer_name, customer_addition, salutation):
     if customer_type == 'Individual':
         fullname = firstname if firstname != '!' else ''
         fullname += " " + lastname if lastname != '!' else ''
@@ -66,6 +66,7 @@ def create_customer(firstname, lastname, email, phone, mobile, address_line1, ad
     
     contact = frappe.get_doc({
         "doctype": "Contact",
+        "salutation": salutation if salutation != '!' else '',
         "first_name": firstname if firstname != '!' else '-',
         "last_name": lastname if lastname != '!' else '',
         "address": address.name,
