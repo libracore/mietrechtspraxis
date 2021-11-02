@@ -39,6 +39,7 @@ def create_customer(firstname, lastname, email, phone, mobile, address_line1, ad
         "city": city,
         "country": country if country != '!' else '',
         "pincode": plz,
+        "plz": plz,
         "links": [
             {
                 "link_doctype": "Customer",
