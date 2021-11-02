@@ -106,9 +106,15 @@ def search_results(self):
     if self["email"]:
         filters.append("""(`customers_search_mask`.`email_id` LIKE '%{email_id}%' OR `customers_search_mask`.`other_mails` LIKE '%{email_id}%')""".format(email_id=self["email"]))
     if self["phone"]:
-        filters.append("""(`customers_search_mask`.`phone` LIKE '%{phone}%' OR `customers_search_mask`.`other_phones` LIKE '%{phone}%')""".format(phone=self["phone"]))
+        phone = '%'
+        for x in self["phone"]:
+            phone += x + "%"
+        filters.append("""(`customers_search_mask`.`phone` LIKE '%{phone}%' OR `customers_search_mask`.`other_phones` LIKE '%{phone}%')""".format(phone=phone))
     if self["mobile"]:
-        filters.append("""(`customers_search_mask`.`mobile_no` LIKE '%{mobile_no}%' OR `customers_search_mask`.`other_phones` LIKE '%{mobile_no}%')""".format(mobile_no=self["mobile"]))
+        mobile = '%'
+        for x in self["mobile"]:
+            mobile += x + "%"
+        filters.append("""(`customers_search_mask`.`mobile_no` LIKE '%{mobile_no}%' OR `customers_search_mask`.`other_phones` LIKE '%{mobile_no}%')""".format(mobile_no=mobile))
     if self["abo_nummer"]:
         filters.append("""(`customers_search_mask`.`mp_abo_old` LIKE '%{abo_nummer}%' OR `customers_search_mask`.`mp_username` LIKE '%{abo_nummer}%')""".format(abo_nummer=self["abo_nummer"]))
     
