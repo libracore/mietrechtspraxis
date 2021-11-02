@@ -232,9 +232,9 @@ def print_pdf(rm_log):
     for invoice in invoices:
         try:
             if int(invoice[1]) > 0:
-                output = frappe.get_print("Sales Invoice", invoice[0], 'Jahresrechnung inkl', as_pdf = True, output = output, ignore_zugferd=True)
+                output = frappe.get_print("Sales Invoice", invoice[0], 'Jahresrechnung inkl', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
             else:
-                output = frappe.get_print("Sales Invoice", invoice[0], 'Jahresrechnung exkl', as_pdf = True, output = output, ignore_zugferd=True)
+                output = frappe.get_print("Sales Invoice", invoice[0], 'Jahresrechnung exkl', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
         except:
             frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {sinv}'.format(sinv=invoice[0]))
         
@@ -293,7 +293,7 @@ def _create_begleitschreiben():
     for ausland_abo in gratis_ausland_abos:
         try:
             # print pdf
-            output = frappe.get_print("mp Abo", ausland_abo.name, 'Weiterführung Gratis Abo', as_pdf = True, output = output, ignore_zugferd=True)
+            output = frappe.get_print("mp Abo", ausland_abo.name, 'Weiterführung Gratis Abo', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
             # create rm_log:
             try:
                 begleit_row = rm_log.append('begleitungen', {})
@@ -327,7 +327,7 @@ def _create_begleitschreiben():
     for inland_abo in gratis_inland_abos:
         try:
             # print pdf
-            output = frappe.get_print("mp Abo", inland_abo.name, 'Weiterführung Gratis Abo', as_pdf = True, output = output, ignore_zugferd=True)
+            output = frappe.get_print("mp Abo", inland_abo.name, 'Weiterführung Gratis Abo', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
             # create rm_log:
             try:
                 begleit_row = rm_log.append('begleitungen', {})
@@ -361,7 +361,7 @@ def _create_begleitschreiben():
     for ausland_abo in gekuendete_ausland_abos:
         try:
             # print pdf
-            output = frappe.get_print("mp Abo", ausland_abo.name, 'Ablauf Jahres Abo', as_pdf = True, output = output, ignore_zugferd=True)
+            output = frappe.get_print("mp Abo", ausland_abo.name, 'Ablauf Jahres Abo', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
             # create rm_log:
             try:
                 begleit_row = rm_log.append('begleitungen', {})
@@ -394,7 +394,7 @@ def _create_begleitschreiben():
     for inland_abo in gekuendete_inland_abos:
         try:
             # print pdf
-            output = frappe.get_print("mp Abo", inland_abo.name, 'Ablauf Jahres Abo', as_pdf = True, output = output, ignore_zugferd=True)
+            output = frappe.get_print("mp Abo", inland_abo.name, 'Ablauf Jahres Abo', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
             # create rm_log:
             try:
                 begleit_row = rm_log.append('begleitungen', {})
@@ -443,7 +443,7 @@ def _create_begleitschreiben():
             frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=_nur_empfaenger.abo))
         
     try:
-        output = frappe.get_print("RM Log", rm_log.name, 'Begleitschreiben Empfänger Log', as_pdf = True, output = output, ignore_zugferd=True)
+        output = frappe.get_print("RM Log", rm_log.name, 'Begleitschreiben Empfänger Log', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
     except:
         frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=rm_log.name))
     
@@ -606,7 +606,7 @@ def _create_versandkarten(date):
     
         
     try:
-        output = frappe.get_print("RM Log", rm_log.name, 'RM Log Versandkarten', as_pdf = True, output = output, ignore_zugferd=True)
+        output = frappe.get_print("RM Log", rm_log.name, 'RM Log Versandkarten', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
     except:
         frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=rm_log.name))
     

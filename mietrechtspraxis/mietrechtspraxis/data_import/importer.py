@@ -421,7 +421,7 @@ def create_or_append_abo(data, new, customer=False, address=False, contact=False
                 new_abo.customer = customer
                 new_abo.recipient_contact = contact
                 new_abo.recipient_address = address
-                new_abo.magazines_qty_ir = get_value(data, 'zeitung_anzahl_adresse')
+                new_abo.magazines_qty_ir = get_value(data, 'zeitung_anzahl')
                 new_abo.mitglied_id = get_value(data, 'mitglied_id')
                 new_abo.save(ignore_permissions=True)
                 
@@ -436,7 +436,7 @@ def create_or_append_abo(data, new, customer=False, address=False, contact=False
                     'customer': customer,
                     'recipient_contact': contact,
                     'recipient_address': address,
-                    'magazines_qty_ir': get_value(data, 'zeitung_anzahl_adresse') or 0,
+                    'magazines_qty_ir': get_value(data, 'zeitung_anzahl') or 0,
                     'mitglied_id': get_value(data, 'mitglied_id')
                 })
                 new_abo.insert()

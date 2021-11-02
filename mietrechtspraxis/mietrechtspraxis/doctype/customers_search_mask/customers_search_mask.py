@@ -12,7 +12,7 @@ class CustomersSearchMask(Document):
     pass
 
 @frappe.whitelist()
-def create_customer(firstname, lastname, email, phone, mobile, address_line1, address_line2, plz, city, country, customer_type, customer_name, customer_addition):
+def create_customer(firstname, lastname, email, phone, mobile, address_line1, address_line2, plz, city, country, customer_type, customer_name, customer_addition, salutation):
     if customer_type == 'Individual':
         fullname = firstname if firstname != '!' else ''
         fullname += " " + lastname if lastname != '!' else ''
@@ -24,7 +24,7 @@ def create_customer(firstname, lastname, email, phone, mobile, address_line1, ad
         "doctype": "Customer",
         "customer_type": customer_type,
         "customer_name": fullname,
-        "customer_addition": customer_addition
+        "customer_addition": customer_addition if customer_addition != '!' else ''
     })
     customer.insert()
     
@@ -39,6 +39,7 @@ def create_customer(firstname, lastname, email, phone, mobile, address_line1, ad
         "city": city,
         "country": country if country != '!' else '',
         "pincode": plz,
+        "plz": plz,
         "links": [
             {
                 "link_doctype": "Customer",
@@ -66,6 +67,7 @@ def create_customer(firstname, lastname, email, phone, mobile, address_line1, ad
     
     contact = frappe.get_doc({
         "doctype": "Contact",
+        "salutation": salutation if salutation != '!' else '',
         "first_name": firstname if firstname != '!' else '-',
         "last_name": lastname if lastname != '!' else '',
         "address": address.name,
@@ -104,9 +106,15 @@ def search_results(self):
     if self["email"]:
         filters.append("""(`customers_search_mask`.`email_id` LIKE '%{email_id}%' OR `customers_search_mask`.`other_mails` LIKE '%{email_id}%')""".format(email_id=self["email"]))
     if self["phone"]:
-        filters.append("""(`customers_search_mask`.`phone` LIKE '%{phone}%' OR `customers_search_mask`.`other_phones` LIKE '%{phone}%')""".format(phone=self["phone"]))
+        phone = '%'
+        for x in self["phone"]:
+            phone += x + "%"
+        filters.append("""(`customers_search_mask`.`phone` LIKE '%{phone}%' OR `customers_search_mask`.`other_phones` LIKE '%{phone}%')""".format(phone=phone))
     if self["mobile"]:
-        filters.append("""(`customers_search_mask`.`mobile_no` LIKE '%{mobile_no}%' OR `customers_search_mask`.`other_phones` LIKE '%{mobile_no}%')""".format(mobile_no=self["mobile"]))
+        mobile = '%'
+        for x in self["mobile"]:
+            mobile += x + "%"
+        filters.append("""(`customers_search_mask`.`mobile_no` LIKE '%{mobile_no}%' OR `customers_search_mask`.`other_phones` LIKE '%{mobile_no}%')""".format(mobile_no=mobile))
     if self["abo_nummer"]:
         filters.append("""(`customers_search_mask`.`mp_abo_old` LIKE '%{abo_nummer}%' OR `customers_search_mask`.`mp_username` LIKE '%{abo_nummer}%')""".format(abo_nummer=self["abo_nummer"]))
     

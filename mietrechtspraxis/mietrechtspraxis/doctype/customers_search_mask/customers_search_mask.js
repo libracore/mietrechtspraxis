@@ -101,6 +101,10 @@ function create_new_customer(frm) {
     if (cur_frm.doc.country) {
         country = cur_frm.doc.country;
     }
+    var salutation = '!';
+    if (cur_frm.doc.salutation) {
+        salutation = cur_frm.doc.salutation;
+    }
     
     var customer_type = 'Individual';
     var customer_name = '';
@@ -137,7 +141,8 @@ function create_new_customer(frm) {
                 "country": country,
                 "customer_type": customer_type,
                 "customer_name": customer_name,
-                "customer_addition": company_addition
+                "customer_addition": company_addition,
+                "salutation": salutation
             },
             "async": false,
             "callback": function(response) {

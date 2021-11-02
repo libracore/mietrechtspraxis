@@ -12,6 +12,7 @@
   "cb_0",
   "abo_nummer",
   "section_kontakt",
+  "salutation",
   "firstname",
   "lastname",
   "cb_1",
@@ -157,11 +158,17 @@
    "fieldname": "company_addition",
    "fieldtype": "Data",
    "label": "Firmen Zusatz"
+  },
+  {
+   "fieldname": "salutation",
+   "fieldtype": "Link",
+   "label": "Anrede",
+   "options": "Salutation"
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2021-10-29 11:01:51.169100",
+ "modified": "2021-11-02 20:25:19.117406",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Customers Search Mask",
