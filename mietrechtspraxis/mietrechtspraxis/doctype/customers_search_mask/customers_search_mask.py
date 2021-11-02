@@ -24,7 +24,7 @@ def create_customer(firstname, lastname, email, phone, mobile, address_line1, ad
         "doctype": "Customer",
         "customer_type": customer_type,
         "customer_name": fullname,
-        "customer_addition": customer_addition
+        "customer_addition": customer_addition if customer_addition != '!' else ''
     })
     customer.insert()
     
