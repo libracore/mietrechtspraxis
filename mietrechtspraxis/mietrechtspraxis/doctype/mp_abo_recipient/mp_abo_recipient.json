@@ -7,10 +7,12 @@
   "magazines_recipient",
   "recipient_contact",
   "recipient_address",
-  "magazines_qty_mr"
+  "magazines_qty_mr",
+  "remove_recipient"
  ],
  "fields": [
   {
+   "columns": 2,
    "description": "(MR)",
    "fieldname": "magazines_recipient",
    "fieldtype": "Link",
@@ -20,6 +22,7 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "default": "1",
    "fieldname": "magazines_qty_mr",
    "fieldtype": "Int",
@@ -28,6 +31,7 @@
    "reqd": 1
   },
   {
+   "columns": 2,
    "fieldname": "recipient_contact",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -36,6 +40,7 @@
    "reqd": 1
   },
   {
+   "columns": 2,
    "fetch_from": "recipient_contact.address",
    "fetch_if_empty": 1,
    "fieldname": "recipient_address",
@@ -44,10 +49,17 @@
    "label": "Recipient Address",
    "options": "Address",
    "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "remove_recipient",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Empf\u00e4nger entfernen per"
   }
  ],
  "istable": 1,
- "modified": "2021-07-15 11:33:53.740723",
+ "modified": "2021-11-03 10:35:54.821920",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo Recipient",

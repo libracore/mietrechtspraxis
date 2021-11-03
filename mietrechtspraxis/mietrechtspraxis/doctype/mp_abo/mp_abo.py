@@ -96,6 +96,12 @@ def set_inactive_status():
                 contact.mp_password = ''
                 contact.save()
 
+def remove_recipient():
+    frappe.db.sql("""SET SQL_SAFE_UPDATES = 0""", as_list=True)
+    frappe.db.sql("""DELETE FROM `tabmp Abo Recipient` WHERE `remove_recipint` = '{today}'""".format(today=today()), as_list=True)
+    frappe.db.sql("""SET SQL_SAFE_UPDATES = 1""", as_list=True)
+    frappe.db.commit()
+
 @frappe.whitelist()
 def create_invoice(abo):
     abo = frappe.get_doc("mp Abo", abo)
