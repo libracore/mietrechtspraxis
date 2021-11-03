@@ -121,7 +121,7 @@
                 </div>
                 <div id="zahlteil_qr_platzhalter">
                     <div id="qr_code">
-                        <img src="https://data.libracore.ch/phpqrcode/api/iso20022.php?iban={{ iban | trim }}&receiver_name={{ receiver_name }}&receiver_street={{ receiver_street | trim }}&receiver_number={{ receiver_number }}&receiver_pincode={{ receiver_pincode }}&receiver_town={{ receiver_town }}&receiver_country={{ receiver_country }}&amount={{ amount }}&currency={{ currency }}&payer_name={{ payer_name }}&payer_street={{ payer_street | trim }}&payer_number={{ payer_number }}&payer_pincode={{ payer_pincode }}&payer_town={{ payer_town }}&payer_country={{ payer_country }}&reference_type={{ reference_type }}&reference={{ reference | replace(" ", "") }}&message={{ message }}" style="width: 46mm !important; height: 46mm !important;" />
+                        <img src="https://data.libracore.ch/phpqrcode/api/iso20022.php?iban={{ iban | trim }}&receiver_name={{ receiver_name | replace("|", "I") }}&receiver_street={{ receiver_street | trim }}&receiver_number={{ receiver_number }}&receiver_pincode={{ receiver_pincode }}&receiver_town={{ receiver_town }}&receiver_country={{ receiver_country }}&amount={{ amount }}&currency={{ currency }}&payer_name={{ payer_name }}&payer_street={{ payer_street | trim }}&payer_number={{ payer_number }}&payer_pincode={{ payer_pincode }}&payer_town={{ payer_town }}&payer_country={{ payer_country }}&reference_type={{ reference_type }}&reference={{ reference | replace(" ", "") }}&message={{ message }}" style="width: 46mm !important; height: 46mm !important;" />
                     </div>
                 </div>
                 <div id="zahlteil_betrag">
