@@ -41,7 +41,8 @@ hm = {
     'password': 'password',
     'backup_mail': 'email',
     'zeitung_anzahl_adresse': 'zeitung_anzahl_adresse',
-    'leistung_id': 'leistung_id'
+    'leistung_id': 'leistung_id',
+    'datum_kuend_per': 'datum_kuend_per'
 }
     
 
@@ -245,20 +246,16 @@ def create_address(data):
     address_line2 = zusatz = get_value(data, 'address_line2')
     pincode = plz = get_value(data, 'plz')
     city = get_value(data, 'city')
+    
     postfach_check = get_value(data, 'postfach')
     postfach = 0
     postfach_nummer = get_value(data, 'postfach_nummer')
-    if postfach_check:
-        # wenn postfach = -1 (=True)
-        if int(postfach_check) < 0:
+    
+    if int(postfach_check) == 0:
+        if postfach_nummer:
             postfach = 1
             address_line1 = strasse = 'Postfach'
-        else:
-            # wenn zwar postfach = False, aber Postfachnummer vorhanden
-            if postfach_nummer:
-                postfach = 1
-                address_line1 = strasse = 'Postfach'
-    if not address_line1 and not postfach and postfach_nummer:
+    if int(postfach_check) == -1:
         postfach = 1
         address_line1 = strasse = 'Postfach'
     
@@ -402,9 +399,11 @@ def create_or_append_abo(data, new, customer=False, address=False, contact=False
         if not start_datum_raw:
             start_datum_raw = '1900-01-01'
         end_datum_raw = get_value(data, 'datum_austritt').split(" ")[0]
-        if not start_datum_raw:
-            end_datum_raw = ''
-            abo_status = 'Active'
+        if not end_datum_raw:
+            end_datum_raw = get_value(data, 'datum_kuend_per').split(" ")[0]
+            if not end_datum_raw:
+                end_datum_raw = ''
+                abo_status = 'Active'
         
         try:
             # update existing Abo

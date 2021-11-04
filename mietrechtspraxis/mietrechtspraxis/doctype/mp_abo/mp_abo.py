@@ -98,7 +98,7 @@ def set_inactive_status():
 
 def remove_recipient():
     frappe.db.sql("""SET SQL_SAFE_UPDATES = 0""", as_list=True)
-    frappe.db.sql("""DELETE FROM `tabmp Abo Recipient` WHERE `remove_recipint` = '{today}'""".format(today=today()), as_list=True)
+    frappe.db.sql("""DELETE FROM `tabmp Abo Recipient` WHERE `remove_recipient` = '{today}'""".format(today=today()), as_list=True)
     frappe.db.sql("""SET SQL_SAFE_UPDATES = 1""", as_list=True)
     frappe.db.commit()
 
