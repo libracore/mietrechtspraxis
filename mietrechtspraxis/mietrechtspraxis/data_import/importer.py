@@ -41,7 +41,8 @@ hm = {
     'password': 'password',
     'backup_mail': 'email',
     'zeitung_anzahl_adresse': 'zeitung_anzahl_adresse',
-    'leistung_id': 'leistung_id'
+    'leistung_id': 'leistung_id',
+    'datum_kuend_per': 'datum_kuend_per'
 }
     
 
@@ -402,9 +403,11 @@ def create_or_append_abo(data, new, customer=False, address=False, contact=False
         if not start_datum_raw:
             start_datum_raw = '1900-01-01'
         end_datum_raw = get_value(data, 'datum_austritt').split(" ")[0]
-        if not start_datum_raw:
-            end_datum_raw = ''
-            abo_status = 'Active'
+        if not end_datum_raw:
+            end_datum_raw = get_value(data, 'datum_kuend_per').split(" ")[0]
+            if not end_datum_raw:
+                end_datum_raw = ''
+                abo_status = 'Active'
         
         try:
             # update existing Abo
