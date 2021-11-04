@@ -246,20 +246,16 @@ def create_address(data):
     address_line2 = zusatz = get_value(data, 'address_line2')
     pincode = plz = get_value(data, 'plz')
     city = get_value(data, 'city')
+    
     postfach_check = get_value(data, 'postfach')
     postfach = 0
     postfach_nummer = get_value(data, 'postfach_nummer')
-    if postfach_check:
-        # wenn postfach = -1 (=True)
-        if int(postfach_check) < 0:
+    
+    if int(postfach_check) == 0:
+        if postfach_nummer:
             postfach = 1
             address_line1 = strasse = 'Postfach'
-        else:
-            # wenn zwar postfach = False, aber Postfachnummer vorhanden
-            if postfach_nummer:
-                postfach = 1
-                address_line1 = strasse = 'Postfach'
-    if not address_line1 and not postfach and postfach_nummer:
+    if int(postfach_check) == -1:
         postfach = 1
         address_line1 = strasse = 'Postfach'
     
