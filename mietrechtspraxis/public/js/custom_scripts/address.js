@@ -11,6 +11,7 @@ frappe.ui.form.on('Address', {
     },
     validate: function(frm) {
         copy_to_address_line1(frm);
+        copy_to_address_line2(frm);
     }
 });
 
@@ -21,6 +22,10 @@ function copy_to_address_line1(frm) {
     } else {
         cur_frm.set_value("address_line1", 'Postfach');
     }
+}
+
+function copy_to_address_line2(frm) {
+    cur_frm.set_value("address_line2", cur_frm.doc.zusatz);
 }
 
 function toggle_strasse_mandatory(frm) {
