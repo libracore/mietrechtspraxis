@@ -3,7 +3,9 @@
 
 frappe.ui.form.on('Sales Invoice', {
     validate: function(frm) {
-        get_qrr_reference(frm);
+        if (!frm.doc.__islocal) {
+            get_qrr_reference(frm);
+        }
     }
 });
 
