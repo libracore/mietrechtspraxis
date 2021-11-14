@@ -126,7 +126,8 @@ def _create_invoice(abo):
         "items": [
             {
                 "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
-                "qty": abo.magazines_qty_total
+                "qty": abo.magazines_qty_total,
+                "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'), abo.invoice_recipient)
             }
         ]
     })
@@ -137,6 +138,21 @@ def _create_invoice(abo):
     frappe.db.commit()
     
     return new_sinv.name
+    
+def get_price(item_code, customer):
+    customer_group = frappe.get_doc("Customer", customer).customer_group
+    prices = frappe.db.sql("""SELECT
+                                    `rate`
+                                FROM `tabPricing Rule`
+                                WHERE `applicable_for` = 'Customer Group'
+                                AND `selling` = 1
+                                AND customer_group = '{customer_group}'
+                                AND `rate_or_discount` = 'Rate'
+                                AND `name` IN (SELECT `parent` FROM `tabPricing Rule Item Code` WHERE `item_code` = '{item_code}')""".format(customer_group=customer_group, item_code=item_code), as_dict=True)
+    if prices:
+        return prices[0].rate
+    else:
+        return 98
 
 @frappe.whitelist()
 def create_batch_pdf(abo):

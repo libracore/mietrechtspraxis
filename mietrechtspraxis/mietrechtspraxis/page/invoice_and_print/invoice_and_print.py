@@ -44,8 +44,8 @@ def _create_invoices(date, year, selected_type, limit=500):
         filter_invoice_typ = """`magazines_qty_ir` > 0"""
     else:
         filter_invoice_typ = """`magazines_qty_ir` = 0"""
-    filter_ausland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Switzerland')"""
-    filter_inland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Switzerland')"""
+    filter_ausland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')"""
+    filter_inland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')"""
     
     ausland_abos_qty = frappe.db.sql("""SELECT
                                             COUNT(`name`) AS `qty`
@@ -157,6 +157,7 @@ def _create_invoices(date, year, selected_type, limit=500):
         frappe.db.commit()
         
 def create_invoice(abo, date):
+    from mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo import get_price
     abo = frappe.get_doc("mp Abo", abo)
     try:
         new_sinv = frappe.get_doc({
@@ -170,7 +171,8 @@ def create_invoice(abo, date):
             "items": [
                 {
                     "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
-                    "qty": abo.magazines_qty_total
+                    "qty": abo.magazines_qty_total,
+                    "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'), abo.invoice_recipient)
                 }
             ]
         })
@@ -279,7 +281,7 @@ def _create_begleitschreiben():
     limit_filter = ''
     
     # Gratis Abos
-    filter_ausland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Switzerland')"""
+    filter_ausland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')"""
     gratis_ausland_abos = frappe.db.sql("""SELECT
                                             `name`,
                                             `recipient_name`,
@@ -313,7 +315,7 @@ def _create_begleitschreiben():
         except:
             frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
     
-    filter_inland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Switzerland')"""
+    filter_inland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')"""
     gratis_inland_abos = frappe.db.sql("""SELECT
                                             `name`,
                                             `recipient_name`,
@@ -348,7 +350,7 @@ def _create_begleitschreiben():
             frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=inland_abo.name))
     
     # Gekündete Abos
-    filter_ausland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Switzerland')"""
+    filter_ausland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')"""
     gekuendete_ausland_abos = frappe.db.sql("""SELECT
                                                 `name`,
                                                 `recipient_name`,
@@ -381,7 +383,7 @@ def _create_begleitschreiben():
         except:
             frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
     
-    filter_inland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Switzerland')"""
+    filter_inland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')"""
     gekuendete_inland_abos = frappe.db.sql("""SELECT
                                                 `name`,
                                                 `recipient_name`,
@@ -508,7 +510,7 @@ def _create_versandkarten(date):
                             FROM `tabmp Abo`
                             WHERE
                             (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}'))
-                            AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Switzerland')
+                            AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
                             AND `tabmp Abo`.`magazines_qty_ir` > 0
                             UNION
                             SELECT
@@ -518,7 +520,7 @@ def _create_versandkarten(date):
                                 `tabmp Abo Recipient`.`recipient_contact`,
                                 `tabmp Abo Recipient`.`recipient_address`
                             FROM `tabmp Abo Recipient`
-                            WHERE `tabmp Abo Recipient`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Switzerland')
+                            WHERE `tabmp Abo Recipient`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
                             AND `tabmp Abo Recipient`.`parent` IN (
                                 SELECT
                                     `name`
@@ -565,7 +567,7 @@ def _create_versandkarten(date):
                             FROM `tabmp Abo`
                             WHERE
                             (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}'))
-                            AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Switzerland')
+                            AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
                             UNION
                             SELECT
                                 `tabmp Abo Recipient`.`magazines_recipient` AS `recipient`,
@@ -574,7 +576,7 @@ def _create_versandkarten(date):
                                 `tabmp Abo Recipient`.`recipient_contact`,
                                 `tabmp Abo Recipient`.`recipient_address`
                             FROM `tabmp Abo Recipient`
-                            WHERE `tabmp Abo Recipient`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Switzerland')
+                            WHERE `tabmp Abo Recipient`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
                             AND `tabmp Abo Recipient`.`parent` IN (
                                 SELECT
                                     `name`
