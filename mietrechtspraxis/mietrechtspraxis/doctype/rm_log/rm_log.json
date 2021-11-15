@@ -31,7 +31,7 @@
    "label": "Rechnungen"
   },
   {
-   "depends_on": "eval:doc.typ=='Rechnung'",
+   "depends_on": "eval:doc.typ=='Rechnungen (0 Ex.)'||doc.typ=='Rechnungen (1+ Ex.)'",
    "fieldname": "sinvs",
    "fieldtype": "Table",
    "label": "\u00dcbersicht",
@@ -105,7 +105,7 @@
    "options": "RM Log Versandkarten"
   }
  ],
- "modified": "2021-11-15 20:20:57.142358",
+ "modified": "2021-11-15 21:23:21.670614",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "RM Log",
