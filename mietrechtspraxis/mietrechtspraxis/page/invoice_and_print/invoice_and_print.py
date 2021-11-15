@@ -108,7 +108,7 @@ def _create_invoices(date, year, selected_type, limit=500):
             "doctype": "RM Log",
             'start': now(),
             'status': 'Job gestartet',
-            'typ': 'Rechnung'
+            'typ': 'Rechnungen (1+ Ex.)' if selected_type == 'invoice_inkl' else 'Rechnungen (0 Ex.)'
         })
         rm_log.insert()
         frappe.db.commit()
@@ -254,215 +254,432 @@ def print_pdf(rm_log):
 @frappe.whitelist()
 def create_begleitschreiben():
     args = {}
-    enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_begleitschreiben", queue='long', job_name='Generierung Sammel-PDF (Begleitschreiben)', timeout=5000, **args)
+    enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_begleitschreiben_kuendigung", queue='long', job_name='Begleitschreiben: Kündigungen', timeout=5000, **args)
+    enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_begleitschreiben_gratis_abo", queue='long', job_name='Begleitschreiben: Gratis Abos', timeout=5000, **args)
+    enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_begleitschreiben_jahres_abo", queue='long', job_name='Begleitschreiben: Jahres-Abo Empfänger', timeout=5000, **args)
 
-def _create_begleitschreiben():
-    data = []
-    qty_one = 0
-    qty_multi = 0
-    gratis_abos = []
-    gekuendete_abos = []
+def create_begleitschreiben_kuendigung():
+    rm_log = frappe.get_doc({
+        "doctype": "RM Log",
+        'start': now(),
+        'status': 'Job gestartet',
+        'typ': 'Begleitschreiben: Kündigungen Ausland'
+    })
+    rm_log.insert()
+    frappe.db.commit()
+    
+    ausland_datas = frappe.db.sql("""
+                            SELECT
+                                `view`.`abo` AS `abo`,
+                                `view`.`anz` AS `anz`,
+                                `view`.`recipient_name` AS `recipient_name`,
+                                `view`.`recipient_contact` AS `recipient_contact`,
+                                `view`.`recipient_address` AS `recipient_address`
+                            FROM (
+                                SELECT
+                                    `name` AS `abo`,
+                                    `magazines_qty_ir` AS `anz`,
+                                    `invoice_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo`
+                                WHERE `status` = 'Actively terminated'
+                                AND `type` = 'Jahres-Abo'
+                                AND `magazines_qty_ir` > 0
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
+                                UNION
+                                SELECT
+                                    `parent` AS `abo`,
+                                    `magazines_qty_mr` AS `anz`,
+                                    `magazines_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo Recipient`
+                                WHERE `parent` IN (
+                                    SELECT
+                                        `name`
+                                    FROM `tabmp Abo`
+                                    WHERE `status` = 'Actively terminated'
+                                    AND `type` = 'Jahres-Abo'
+                                )
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
+                                UNION
+                                SELECT
+                                    `parent` AS `abo`,
+                                    `magazines_qty_mr` AS `anz`,
+                                    `magazines_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo Recipient`
+                                WHERE `parent` IN (
+                                    SELECT
+                                        `name`
+                                    FROM `tabmp Abo`
+                                    WHERE `status` = 'Active'
+                                    AND `type` = 'Jahres-Abo'
+                                )
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
+                                AND `remove_recipient` IS NOT NULL
+                            ) AS `view`
+                            ORDER BY `view`.`anz` ASC
+                            """, as_dict=True)
+    for ausland_data in ausland_datas:
+        begleit_row = rm_log.append('begleitungen', {})
+        customer_name = frappe.get_doc("Customer", ausland_data.recipient_name).customer_name
+        begleit_row.recipient_name = customer_name
+        begleit_row.recipient_customer = ausland_data.recipient_name
+        # tbd!
+        begleit_row.pdf = 1
+        #---------------------
+        begleit_row.drucken = 1
+        begleit_row.abo = ausland_data.abo
+        begleit_row.anz = ausland_data.anz
+        begleit_row.recipient_contact = ausland_data.recipient_contact
+        begleit_row.recipient_address = ausland_data.recipient_address
+        rm_log.save(ignore_permissions=True)
+        frappe.db.commit()
+    
+    rm_log.ende = now()
+    rm_log.status = 'PDF erstellt'
+    rm_log.save(ignore_permissions=True)
+    frappe.db.commit()
     
     rm_log = frappe.get_doc({
         "doctype": "RM Log",
         'start': now(),
         'status': 'Job gestartet',
-        'typ': 'Begleitschreiben'
+        'typ': 'Begleitschreiben: Kündigungen Inland'
     })
     rm_log.insert()
     frappe.db.commit()
     
-    bind_source = "/assets/mietrechtspraxis/sinvs_for_print/{date}.pdf".format(date=rm_log.name)
-    physical_path = "/home/frappe/frappe-bench/sites" + bind_source
-    dest=str(physical_path)
-    
-    output = PdfFileWriter()
-    
-    limit_filter = ''
-    
-    # Gratis Abos
-    filter_ausland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')"""
-    gratis_ausland_abos = frappe.db.sql("""SELECT
-                                            `name`,
-                                            `recipient_name`,
-                                            `magazines_qty_ir`,
-                                            `recipient_contact`,
-                                            `recipient_address`
-                                        FROM `tabmp Abo`
-                                        WHERE `type` = 'Gratis-Abo'
-                                        AND `status` = 'Active'
-                                        {filter_ausland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_ausland_adressen=filter_ausland_adressen, limit_filter=limit_filter), as_dict=True)
-    for ausland_abo in gratis_ausland_abos:
-        try:
-            # print pdf
-            output = frappe.get_print("mp Abo", ausland_abo.name, 'Weiterführung Gratis Abo', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
-            # create rm_log:
-            try:
-                begleit_row = rm_log.append('begleitungen', {})
-                begleit_row.recipient_name = ausland_abo.recipient_name
-                # tbd!
-                begleit_row.pdf = 1
-                #---------------------
-                begleit_row.drucken = 0
-                begleit_row.abo = ausland_abo.name
-                begleit_row.anz = ausland_abo.magazines_qty_ir
-                begleit_row.recipient_contact = ausland_abo.recipient_contact
-                begleit_row.recipient_address = ausland_abo.recipient_address
-                rm_log.save(ignore_permissions=True)
-                frappe.db.commit()
-            except:
-                frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
-        except:
-            frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
-    
-    filter_inland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')"""
-    gratis_inland_abos = frappe.db.sql("""SELECT
-                                            `name`,
-                                            `recipient_name`,
-                                            `magazines_qty_ir`,
-                                            `recipient_contact`,
-                                            `recipient_address`
-                                        FROM `tabmp Abo`
-                                        WHERE `type` = 'Gratis-Abo'
-                                        AND `status` = 'Active'
-                                        {filter_inland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_inland_adressen=filter_inland_adressen, limit_filter=limit_filter), as_dict=True)
-    for inland_abo in gratis_inland_abos:
-        try:
-            # print pdf
-            output = frappe.get_print("mp Abo", inland_abo.name, 'Weiterführung Gratis Abo', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
-            # create rm_log:
-            try:
-                begleit_row = rm_log.append('begleitungen', {})
-                begleit_row.recipient_name = inland_abo.recipient_name
-                # tbd!
-                begleit_row.pdf = 1
-                #---------------------
-                begleit_row.drucken = 0
-                begleit_row.abo = inland_abo.name
-                begleit_row.anz = inland_abo.magazines_qty_ir
-                begleit_row.recipient_contact = inland_abo.recipient_contact
-                begleit_row.recipient_address = inland_abo.recipient_address
-                rm_log.save(ignore_permissions=True)
-                frappe.db.commit()
-            except:
-                frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=inland_abo.name))
-        except:
-            frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=inland_abo.name))
-    
-    # Gekündete Abos
-    filter_ausland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')"""
-    gekuendete_ausland_abos = frappe.db.sql("""SELECT
-                                                `name`,
-                                                `recipient_name`,
-                                                `magazines_qty_ir`,
-                                                `recipient_contact`,
-                                                `recipient_address`
-                                            FROM `tabmp Abo`
-                                            WHERE `status` = 'Actively terminated'
-                                            {filter_ausland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_ausland_adressen=filter_ausland_adressen, limit_filter=limit_filter), as_dict=True)
-    for ausland_abo in gekuendete_ausland_abos:
-        try:
-            # print pdf
-            output = frappe.get_print("mp Abo", ausland_abo.name, 'Ablauf Jahres Abo', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
-            # create rm_log:
-            try:
-                begleit_row = rm_log.append('begleitungen', {})
-                begleit_row.recipient_name = ausland_abo.recipient_name
-                # tbd!
-                begleit_row.pdf = 1
-                #---------------------
-                begleit_row.drucken = 0
-                begleit_row.abo = ausland_abo.name
-                begleit_row.anz = ausland_abo.magazines_qty_ir
-                begleit_row.recipient_contact = ausland_abo.recipient_contact
-                begleit_row.recipient_address = ausland_abo.recipient_address
-                rm_log.save(ignore_permissions=True)
-                frappe.db.commit()
-            except:
-                frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
-        except:
-            frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
-    
-    filter_inland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')"""
-    gekuendete_inland_abos = frappe.db.sql("""SELECT
-                                                `name`,
-                                                `recipient_name`,
-                                                `magazines_qty_ir`,
-                                                `recipient_contact`,
-                                                `recipient_address`
-                                            FROM `tabmp Abo`
-                                            WHERE `status` = 'Actively terminated'
-                                            {filter_inland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_inland_adressen=filter_inland_adressen, limit_filter=limit_filter), as_dict=True)
-    for inland_abo in gekuendete_inland_abos:
-        try:
-            # print pdf
-            output = frappe.get_print("mp Abo", inland_abo.name, 'Ablauf Jahres Abo', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
-            # create rm_log:
-            try:
-                begleit_row = rm_log.append('begleitungen', {})
-                begleit_row.recipient_name = inland_abo.recipient_name
-                # tbd!
-                begleit_row.pdf = 1
-                #---------------------
-                begleit_row.drucken = 0
-                begleit_row.abo = inland_abo.name
-                begleit_row.anz = inland_abo.magazines_qty_ir
-                begleit_row.recipient_contact = inland_abo.recipient_contact
-                begleit_row.recipient_address = inland_abo.recipient_address
-                rm_log.save(ignore_permissions=True)
-                frappe.db.commit()
-            except:
-                frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=inland_abo.name))
-        except:
-            frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=inland_abo.name))
-        
-    # nur Empfänger
-    nur_empfaenger = frappe.db.sql("""SELECT
-                                        `parent` AS `abo`,
-                                        `recipient_contact`,
-                                        `recipient_address`,
-                                        `magazines_recipient` AS `customer`,
-                                        `magazines_qty_mr` AS `qty`
-                                    FROM `tabmp Abo Recipient`
-                                    WHERE `parent` IN (SELECT `name` FROM `tabmp Abo` WHERE `status` != 'Inactive') ORDER BY `magazines_qty_mr` ASC""", as_dict=True)
-    for _nur_empfaenger in nur_empfaenger:
-        try:
-            # create rm_log:
-            customer = frappe.get_doc("Customer", _nur_empfaenger.customer)
-            begleit_row = rm_log.append('begleitungen', {})
-            begleit_row.recipient_name = customer.customer_name
-            # tbd!
-            begleit_row.pdf = 1
-            #---------------------
-            begleit_row.drucken = 1
-            begleit_row.abo = _nur_empfaenger.abo
-            begleit_row.anz = _nur_empfaenger.qty
-            begleit_row.recipient_contact = _nur_empfaenger.recipient_contact
-            begleit_row.recipient_address = _nur_empfaenger.recipient_address
-            rm_log.save(ignore_permissions=True)
-            frappe.db.commit()
-        except:
-            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=_nur_empfaenger.abo))
-        
-    try:
-        output = frappe.get_print("RM Log", rm_log.name, 'Begleitschreiben Empfänger Log', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
-    except:
-        frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=rm_log.name))
-    
-    
-    
-    
-    if isinstance(dest, str): # when dest is a file path
-        destdir = os.path.dirname(dest)
-        if destdir != '' and not os.path.isdir(destdir):
-            os.makedirs(destdir)
-        with open(dest, "wb") as w:
-            output.write(w)
-    else: # when dest is io.IOBase
-        output.write(dest)
+    inland_datas = frappe.db.sql("""
+                            SELECT
+                                `view`.`abo` AS `abo`,
+                                `view`.`anz` AS `anz`,
+                                `view`.`recipient_name` AS `recipient_name`,
+                                `view`.`recipient_contact` AS `recipient_contact`,
+                                `view`.`recipient_address` AS `recipient_address`
+                            FROM (
+                                SELECT
+                                    `name` AS `abo`,
+                                    `magazines_qty_ir` AS `anz`,
+                                    `invoice_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo`
+                                WHERE `status` = 'Actively terminated'
+                                AND `type` = 'Jahres-Abo'
+                                AND `magazines_qty_ir` > 0
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
+                                UNION
+                                SELECT
+                                    `parent` AS `abo`,
+                                    `magazines_qty_mr` AS `anz`,
+                                    `magazines_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo Recipient`
+                                WHERE `parent` IN (
+                                    SELECT
+                                        `name`
+                                    FROM `tabmp Abo`
+                                    WHERE `status` = 'Actively terminated'
+                                    AND `type` = 'Jahres-Abo'
+                                )
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
+                                UNION
+                                SELECT
+                                    `parent` AS `abo`,
+                                    `magazines_qty_mr` AS `anz`,
+                                    `magazines_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo Recipient`
+                                WHERE `parent` IN (
+                                    SELECT
+                                        `name`
+                                    FROM `tabmp Abo`
+                                    WHERE `status` = 'Active'
+                                    AND `type` = 'Jahres-Abo'
+                                )
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
+                                AND `remove_recipient` IS NOT NULL
+                            ) AS `view`
+                            ORDER BY `view`.`anz` ASC
+                            """, as_dict=True)
+    for inland_data in inland_datas:
+        begleit_row = rm_log.append('begleitungen', {})
+        customer_name = frappe.get_doc("Customer", inland_data.recipient_name).customer_name
+        begleit_row.recipient_name = customer_name
+        begleit_row.recipient_customer = inland_data.recipient_name
+        # tbd!
+        begleit_row.pdf = 1
+        #---------------------
+        begleit_row.drucken = 1
+        begleit_row.abo = inland_data.abo
+        begleit_row.anz = inland_data.anz
+        begleit_row.recipient_contact = inland_data.recipient_contact
+        begleit_row.recipient_address = inland_data.recipient_address
+        rm_log.save(ignore_permissions=True)
+        frappe.db.commit()
     
     rm_log.ende = now()
     rm_log.status = 'PDF erstellt'
+    rm_log.save(ignore_permissions=True)
+    frappe.db.commit()
+
+def create_begleitschreiben_gratis_abo():
+    qty_one = 0
+    qty_multi = 0
+    
+    rm_log = frappe.get_doc({
+        "doctype": "RM Log",
+        'start': now(),
+        'status': 'Job gestartet',
+        'typ': 'Begleitschreiben: Gratis Abos Ausland'
+    })
+    rm_log.insert()
+    frappe.db.commit()
+    
+    ausland_datas = frappe.db.sql("""
+                            SELECT
+                                `view`.`abo` AS `abo`,
+                                `view`.`anz` AS `anz`,
+                                `view`.`recipient_name` AS `recipient_name`,
+                                `view`.`recipient_contact` AS `recipient_contact`,
+                                `view`.`recipient_address` AS `recipient_address`
+                            FROM (
+                                SELECT
+                                    `name` AS `abo`,
+                                    `magazines_qty_ir` AS `anz`,
+                                    `invoice_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo`
+                                WHERE `status` = 'Active'
+                                AND `type` = 'Gratis-Abo'
+                                AND `magazines_qty_ir` > 0
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
+                            ) AS `view`
+                            ORDER BY `view`.`anz` ASC
+                            """, as_dict=True)
+    for ausland_data in ausland_datas:
+        if ausland_data.anz == 1:
+            qty_one += 1
+        else:
+            qty_multi += 1
+        begleit_row = rm_log.append('begleitungen', {})
+        customer_name = frappe.get_doc("Customer", ausland_data.recipient_name).customer_name
+        begleit_row.recipient_name = customer_name
+        begleit_row.recipient_customer = ausland_data.recipient_name
+        # tbd!
+        begleit_row.pdf = 1
+        #---------------------
+        begleit_row.drucken = 1
+        begleit_row.abo = ausland_data.abo
+        begleit_row.anz = ausland_data.anz
+        begleit_row.recipient_contact = ausland_data.recipient_contact
+        begleit_row.recipient_address = ausland_data.recipient_address
+        rm_log.save(ignore_permissions=True)
+        frappe.db.commit()
+    
+    rm_log.ende = now()
+    rm_log.status = 'PDF erstellt'
+    rm_log.qty_one = qty_one
+    rm_log.qty_multi = qty_multi
+    rm_log.save(ignore_permissions=True)
+    frappe.db.commit()
+    
+    qty_one = 0
+    qty_multi = 0
+    
+    rm_log = frappe.get_doc({
+        "doctype": "RM Log",
+        'start': now(),
+        'status': 'Job gestartet',
+        'typ': 'Begleitschreiben: Gratis Abos Inland'
+    })
+    rm_log.insert()
+    frappe.db.commit()
+    
+    inland_datas = frappe.db.sql("""
+                            SELECT
+                                `view`.`abo` AS `abo`,
+                                `view`.`anz` AS `anz`,
+                                `view`.`recipient_name` AS `recipient_name`,
+                                `view`.`recipient_contact` AS `recipient_contact`,
+                                `view`.`recipient_address` AS `recipient_address`
+                            FROM (
+                                SELECT
+                                    `name` AS `abo`,
+                                    `magazines_qty_ir` AS `anz`,
+                                    `invoice_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo`
+                                WHERE `status` = 'Active'
+                                AND `type` = 'Gratis-Abo'
+                                AND `magazines_qty_ir` > 0
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
+                            ) AS `view`
+                            ORDER BY `view`.`anz` ASC
+                            """, as_dict=True)
+    for inland_data in inland_datas:
+        if inland_data.anz == 1:
+            qty_one += 1
+        else:
+            qty_multi += 1
+        begleit_row = rm_log.append('begleitungen', {})
+        customer_name = frappe.get_doc("Customer", inland_data.recipient_name).customer_name
+        begleit_row.recipient_name = customer_name
+        begleit_row.recipient_customer = inland_data.recipient_name
+        # tbd!
+        begleit_row.pdf = 1
+        #---------------------
+        begleit_row.drucken = 1
+        begleit_row.abo = inland_data.abo
+        begleit_row.anz = inland_data.anz
+        begleit_row.recipient_contact = inland_data.recipient_contact
+        begleit_row.recipient_address = inland_data.recipient_address
+        rm_log.save(ignore_permissions=True)
+        frappe.db.commit()
+    
+    rm_log.ende = now()
+    rm_log.status = 'PDF erstellt'
+    rm_log.qty_one = qty_one
+    rm_log.qty_multi = qty_multi
+    rm_log.save(ignore_permissions=True)
+    frappe.db.commit()
+
+def create_begleitschreiben_jahres_abo():
+    qty_one = 0
+    qty_multi = 0
+    rm_log = frappe.get_doc({
+        "doctype": "RM Log",
+        'start': now(),
+        'status': 'Job gestartet',
+        'typ': 'Begleitschreiben: Jahres-Abo Empfänger Ausland'
+    })
+    rm_log.insert()
+    frappe.db.commit()
+    
+    ausland_datas = frappe.db.sql("""
+                            SELECT
+                                `view`.`abo` AS `abo`,
+                                `view`.`anz` AS `anz`,
+                                `view`.`recipient_name` AS `recipient_name`,
+                                `view`.`recipient_contact` AS `recipient_contact`,
+                                `view`.`recipient_address` AS `recipient_address`
+                            FROM (
+                                SELECT
+                                    `parent` AS `abo`,
+                                    `magazines_qty_mr` AS `anz`,
+                                    `magazines_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo Recipient`
+                                WHERE `parent` IN (
+                                    SELECT
+                                        `name`
+                                    FROM `tabmp Abo`
+                                    WHERE `status` = 'Active'
+                                    AND `type` = 'Jahres-Abo'
+                                )
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
+                                AND `remove_recipient` IS NULL
+                            ) AS `view`
+                            ORDER BY `view`.`anz` ASC
+                            """, as_dict=True)
+    for ausland_data in ausland_datas:
+        if ausland_data.anz == 1:
+            qty_one += 1
+        else:
+            qty_multi += 1
+        begleit_row = rm_log.append('begleitungen', {})
+        customer_name = frappe.get_doc("Customer", ausland_data.recipient_name).customer_name
+        begleit_row.recipient_name = customer_name
+        begleit_row.recipient_customer = ausland_data.recipient_name
+        # tbd!
+        begleit_row.pdf = 1
+        #---------------------
+        begleit_row.drucken = 1
+        begleit_row.abo = ausland_data.abo
+        begleit_row.anz = ausland_data.anz
+        begleit_row.recipient_contact = ausland_data.recipient_contact
+        begleit_row.recipient_address = ausland_data.recipient_address
+        rm_log.save(ignore_permissions=True)
+        frappe.db.commit()
+    
+    rm_log.ende = now()
+    rm_log.status = 'PDF erstellt'
+    rm_log.qty_one = qty_one
+    rm_log.qty_multi = qty_multi
+    rm_log.save(ignore_permissions=True)
+    frappe.db.commit()
+    
+    qty_one = 0
+    qty_multi = 0
+    rm_log = frappe.get_doc({
+        "doctype": "RM Log",
+        'start': now(),
+        'status': 'Job gestartet',
+        'typ': 'Begleitschreiben: Jahres-Abo Empfänger Inland'
+    })
+    rm_log.insert()
+    frappe.db.commit()
+    
+    inland_datas = frappe.db.sql("""
+                            SELECT
+                                `view`.`abo` AS `abo`,
+                                `view`.`anz` AS `anz`,
+                                `view`.`recipient_name` AS `recipient_name`,
+                                `view`.`recipient_contact` AS `recipient_contact`,
+                                `view`.`recipient_address` AS `recipient_address`
+                            FROM (
+                                SELECT
+                                    `parent` AS `abo`,
+                                    `magazines_qty_mr` AS `anz`,
+                                    `magazines_recipient` AS `recipient_name`,
+                                    `recipient_contact` AS `recipient_contact`,
+                                    `recipient_address` AS `recipient_address`
+                                FROM `tabmp Abo Recipient`
+                                WHERE `parent` IN (
+                                    SELECT
+                                        `name`
+                                    FROM `tabmp Abo`
+                                    WHERE `status` = 'Active'
+                                    AND `type` = 'Jahres-Abo'
+                                )
+                                AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
+                                AND `remove_recipient` IS NULL
+                            ) AS `view`
+                            ORDER BY `view`.`anz` ASC
+                            """, as_dict=True)
+    for inland_data in inland_datas:
+        if inland_data.anz == 1:
+            qty_one += 1
+        else:
+            qty_multi += 1
+        begleit_row = rm_log.append('begleitungen', {})
+        customer_name = frappe.get_doc("Customer", inland_data.recipient_name).customer_name
+        begleit_row.recipient_name = customer_name
+        begleit_row.recipient_customer = inland_data.recipient_name
+        # tbd!
+        begleit_row.pdf = 1
+        #---------------------
+        begleit_row.drucken = 1
+        begleit_row.abo = inland_data.abo
+        begleit_row.anz = inland_data.anz
+        begleit_row.recipient_contact = inland_data.recipient_contact
+        begleit_row.recipient_address = inland_data.recipient_address
+        rm_log.save(ignore_permissions=True)
+        frappe.db.commit()
+    
+    rm_log.ende = now()
+    rm_log.status = 'PDF erstellt'
+    rm_log.qty_one = qty_one
+    rm_log.qty_multi = qty_multi
     rm_log.save(ignore_permissions=True)
     frappe.db.commit()
 
