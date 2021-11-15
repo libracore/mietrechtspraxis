@@ -20,7 +20,7 @@
  ],
  "fields": [
   {
-   "depends_on": "eval:doc.status=='PDF erstellt'",
+   "depends_on": "eval:doc.status=='PDF erstellt'&&(doc.typ=='Rechnungen (0 Ex.)'||doc.typ=='Rechnungen (1+ Ex.)')",
    "fieldname": "download_pdf",
    "fieldtype": "Button",
    "label": "Download PDF"
@@ -56,7 +56,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.status=='PDF erstellt'",
+   "depends_on": "eval:doc.status=='PDF erstellt'&&(doc.typ=='Rechnungen (0 Ex.)'||doc.typ=='Rechnungen (1+ Ex.)')",
    "fieldname": "storno",
    "fieldtype": "Button",
    "label": "Rechnungen Stornieren"
@@ -82,16 +82,15 @@
    "read_only": 1
   },
   {
-   "default": "Rechnung",
    "fieldname": "typ",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Typ",
-   "options": "Rechnung\nBegleitschreiben\nVersandkarten",
+   "options": "Rechnungen (0 Ex.)\nRechnungen (1+ Ex.)\nBegleitschreiben: K\u00fcndigungen Ausland\nBegleitschreiben: K\u00fcndigungen Inland\nBegleitschreiben: Gratis Abos Ausland\nBegleitschreiben: Gratis Abos Inland\nBegleitschreiben: Jahres-Abo Empf\u00e4nger Ausland\nBegleitschreiben: Jahres-Abo Empf\u00e4nger Inland\nVersandkarten",
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.typ=='Begleitschreiben'",
+   "depends_on": "eval:doc.typ=='Begleitschreiben: K\u00fcndigungen Ausland'||doc.typ=='Begleitschreiben: K\u00fcndigungen Inland'||doc.typ=='Begleitschreiben: Gratis Abos Ausland'||doc.typ=='Begleitschreiben: Jahres-Abo Empf\u00e4nger Ausland'||doc.typ=='Begleitschreiben: Gratis Abos Inland'||doc.typ=='Begleitschreiben: Jahres-Abo Empf\u00e4nger Inland'",
    "fieldname": "begleitungen",
    "fieldtype": "Table",
    "label": "\u00dcbersicht",
@@ -106,7 +105,7 @@
    "options": "RM Log Versandkarten"
   }
  ],
- "modified": "2021-10-30 20:19:00.702032",
+ "modified": "2021-11-15 20:20:57.142358",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "RM Log",
@@ -127,5 +126,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "typ",
  "track_changes": 1
 }
