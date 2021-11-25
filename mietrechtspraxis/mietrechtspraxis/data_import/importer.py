@@ -724,6 +724,7 @@ def update_werbe_customer(row, customer):
         customer.import_quelle = quelle
         customer.vid = vid
         customer.save()
+        frappe.db.commit()
         
         # tags
         tags = str(get_werbe_value(row, 'dtTags'))
@@ -781,6 +782,7 @@ def update_werbe_contact(row, customer):
                 contact.idschlichtungsbehoerde = idschlichtungsbehoerde
                 contact.idfaktura = idfaktura
                 contact.save()
+                frappe.db.commit()
                 
                 # tags
                 tags = str(get_werbe_value(row, 'dtTags'))
@@ -811,6 +813,7 @@ def update_werbe_address(row, address):
         address.vid = vid
         address.vid_firma = vid_firma
         address.save()
+        frappe.db.commit()
                 
         # tags
         tags = str(get_werbe_value(row, 'dtTags'))
