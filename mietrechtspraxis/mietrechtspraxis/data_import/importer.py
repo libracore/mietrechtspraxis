@@ -5,7 +5,12 @@
 from __future__ import unicode_literals
 import frappe
 import pandas as pd
+from frappe.desk.tags import add_tag
 
+
+# ----------------------------------------------
+# Import Abo Inhaber/Empfänger
+# ----------------------------------------------
 
 # Header mapping (ERPNext <> MVD)
 hm = {
@@ -168,7 +173,7 @@ def create_contact(data):
                 'company_name': company_name,
                 'mp_password': str(get_value(data, 'password')),
                 'mp_abo_old': webuser_id,
-                'adress_id': str(get_value(data, 'adress_id'))
+                'address_id': str(get_value(data, 'adress_id'))
             })
         else:
             webuser_id = str(get_value(data, 'webuser_id'))
@@ -539,8 +544,7 @@ def clear_data():
     frappe.db.sql("""SET SQL_SAFE_UPDATES = 1""", as_list=True)
     print("Done")
 
-def check_customer_group():
-    customer_group = ['Abonnement', 'Abonnement gratis', 'Buchhandel', 'Buchhandel Ausland', 'Abonnement MV-Sektion', 'Unspezifisch']
+def check_customer_group(customer_group=['Abonnement', 'Abonnement gratis', 'Buchhandel', 'Buchhandel Ausland', 'Abonnement MV-Sektion', 'Unspezifisch']):
     for group in customer_group:
         if not frappe.db.exists('Customer Group', group):
             new_group = frappe.get_doc({
@@ -551,3 +555,498 @@ def check_customer_group():
             new_group.insert()
             frappe.db.commit()
     return
+
+# ----------------------------------------------
+# Import Werbedaten
+# ----------------------------------------------
+def import_werbedaten(site_name, file_name, limit=False):
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    # check and/or create customer_groups
+    check_customer_group(customer_group=['Werbedaten'])
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            if str(get_werbe_value(row, 'Nicht_Importieren')) != '1':
+                # --------------------------------------------------------------------------------
+                # get data
+                # allgemein
+                vid = str(get_werbe_value(row, 'vid')).replace(".0", "")
+                vid_firma = str(get_werbe_value(row, 'vid_firma')).replace(".0", "")
+                # ~ nur_eine_zusendung = get_werbe_value(row, 'Firma wünscht nur eine Zusendung')
+                # ~ keine_werbung = get_werbe_value(row, 'dtWünschtKeineWerbung')
+                # ~ tags = get_werbe_value(row, 'dtTags')
+                idabo = get_werbe_value(row, 'idAbo')
+                # ~ idedoobox = get_werbe_value(row, 'idEdoobox')
+                # ~ idschlichtungsbehoerde = get_werbe_value(row, 'idSchlichtungsbehoerde')
+                # ~ idfaktura = get_werbe_value(row, 'idFaktura')
+                # ~ quelle = get_werbe_value(row, 'Quelle')
+                
+                # ~ # kunde
+                # ~ firma = get_werbe_value(row, 'Firma')
+                
+                # ~ # kontakt
+                # ~ anrede = get_werbe_value(row, 'Anrede')
+                # ~ vorname = get_werbe_value(row, 'Vorname')
+                # ~ nachname = get_werbe_value(row, 'Name')
+                # ~ email = get_werbe_value(row, 'eMail')
+                # ~ titel = get_werbe_value(row, 'Titel')
+                # ~ telefonnummer = get_werbe_value(row, 'Telefonnummer')
+                # ~ telefonnummer_2 = get_werbe_value(row, 'Telefonnummer 2')
+                # ~ summe_bezahlt = get_werbe_value(row, 'summe_bezahlt')
+                
+                # ~ # adresse
+                # ~ strasse = get_werbe_value(row, 'Strasse')
+                # ~ postfach = get_werbe_value(row, 'postfach_v')
+                # ~ postfach_nummer = get_werbe_value(row, 'postfach_nummer_v')
+                # ~ adresszusatz = get_werbe_value(row, 'Adresszusatz')
+                # ~ ersatz_adresszusatz = get_werbe_value(row, 'edoobox_data')
+                # ~ plz = get_werbe_value(row, 'PLZ')
+                # ~ ort = get_werbe_value(row, 'Ort')
+                # ~ land = get_werbe_value(row, 'Land')
+                # /get data
+                # --------------------------------------------------------------------------------
+                
+                # --------------------------------------------------------------------------------
+                # import/update data
+                if idabo:
+                    # bestehende abo Kunde
+                    if len(idabo.split(":")) > 1:
+                        # fehler mehere Abo verknüpfungen
+                        frappe.log_error('{0}'.format(row), "Mehrere idAbo verknüpfungen: {0}".format(idabo))
+                    else:
+                        # suche kunde anhand idabo
+                        customer = find_customer(idabo=idabo)
+                        if not customer:
+                            frappe.log_error('{0}'.format(row), "Kunde mit idAbo nicht gefunden: {0}".format(idabo))
+                        else:
+                            update_status = update_werbe_customer(row, customer)
+                            if not update_status['updated']:
+                                frappe.log_error('{0}'.format(row), "Update Kunde ({0}) mit idAbo fehlgeschlagen: {1}".format(customer, update_status['error']))
+                            else:
+                                update_status = update_werbe_contact(row, customer)
+                                if not update_status['updated']:
+                                    frappe.log_error('{0}'.format(row), "Update Kontakt von Kunde ({0}) mit idAbo fehlgeschlagen: {1}".format(customer, update_status['error']))
+                                else:
+                                    if update_status['address']:
+                                        update_status = update_werbe_address(row, update_status['address'])
+                                        if not update_status['updated']:
+                                            frappe.log_error('{0}'.format(row), "Update Adresse von Kunde ({0}) mit idAbo fehlgeschlagen: {1}".format(customer, update_status['error']))
+                else:
+                    # reine Werbedaten oder Schlichtungsbehörde
+                    if vid == vid_firma:
+                        customer = create_werbe_customer(row)
+                    else:
+                        if vid_firma:
+                            # suche kunde anhand vid_firma
+                            customer = find_customer(vid_firma=vid_firma)
+                        else:
+                            customer = create_werbe_customer(row)
+                    if not customer and vid == vid_firma:
+                        frappe.log_error('{0}'.format(row), "Kunden Anlage fehlgeschlagen: vid = {0}".format(vid))
+                    elif not customer and vid != vid_firma:
+                        frappe.log_error('{0}'.format(row), "Kunden Suche fehlgeschlagen: vid_firma = {0}".format(vid_firma))
+                    else:
+                        address = create_werbe_address(row, customer)
+                        if not address:
+                            frappe.log_error('{0}'.format(row), "Adressen Anlage fehlgeschlagen: Kunde {0}".format(customer))
+                        else:
+                            contact = create_werbe_contact(row, customer, address)
+                            if not contact:
+                                frappe.log_error('{0}'.format(row), "Kontakt Anlage fehlgeschlagen: Kunde {0}".format(customer))
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break
+
+def get_werbe_value(row, value):
+    value = row[value]
+    if not pd.isnull(value):
+        try:
+            if isinstance(value, str):
+                return value.strip()
+            else:
+                return value
+        except:
+            return value
+    else:
+        return ''
+                
+def find_customer(idabo=False, vid_firma=False):
+    if not idabo and not vid_firma:
+        return False
+    
+    if idabo:
+        customer = frappe.db.sql("""SELECT `name` FROM `tabCustomer` WHERE `adress_id` = '{idabo}'""".format(idabo=idabo), as_dict=True)
+        if len(customer) > 0:
+            if len(customer) > 1:
+                return False
+            else:
+                return customer[0].name
+        else:
+            return False
+    if vid_firma:
+        customer = frappe.db.sql("""SELECT `name` FROM `tabCustomer` WHERE `vid` = '{vid_firma}'""".format(vid_firma=vid_firma), as_dict=True)
+        if len(customer) > 0:
+            if len(customer) > 1:
+                return False
+            else:
+                return customer[0].name
+        else:
+            return False
+
+
+def update_werbe_customer(row, customer):
+    try:
+        # get data
+        vid = str(get_werbe_value(row, 'vid')).replace(".0", "")
+        quelle = str(get_werbe_value(row, 'Quelle'))
+        nur_eine_zusendung = str(get_werbe_value(row, 'Firma wünscht nur eine Zusendung')).replace(".0", "")
+        if nur_eine_zusendung == '1' or nur_eine_zusendung == '-1':
+            nur_eine_zusendung = 1
+        else:
+            nur_eine_zusendung = 0
+        
+        customer = frappe.get_doc("Customer", customer)
+        customer.nur_eine_zusendung = nur_eine_zusendung
+        customer.import_quelle = quelle
+        customer.vid = vid
+        customer.save()
+        
+        # tags
+        tags = str(get_werbe_value(row, 'dtTags'))
+        if tags:
+            for tag in tags.split(":"):
+                add_tag(tag, 'Customer', customer.name)
+        
+        return {
+            'updated': True
+        }
+    except Exception as err:
+        return {
+            'updated': False,
+            'error': err
+        }
+
+def update_werbe_contact(row, customer):
+    try:
+        contact = frappe.db.sql("""SELECT `parent` FROM `tabDynamic Link` WHERE `link_name` = '{related_customer}' AND `parenttype` = 'Contact'""".format(related_customer=customer), as_dict=True)
+        if len(contact) > 0:
+            if len(contact) > 1:
+                return {
+                    'updated': False,
+                    'error': 'Mehrere Kontakte gefunden'
+                }
+            else:
+                contact = frappe.get_doc("Contact", contact[0].parent)
+                # get data
+                nur_eine_zusendung = str(get_werbe_value(row, 'Firma wünscht nur eine Zusendung')).replace(".0", "")
+                if nur_eine_zusendung == '1' or nur_eine_zusendung == '-1':
+                    nur_eine_zusendung = 1
+                else:
+                    nur_eine_zusendung = 0
+                keine_werbung = str(get_werbe_value(row, 'dtWünschtKeineWerbung')).replace(".0", "")
+                if keine_werbung == '1' or keine_werbung == '-1':
+                    keine_werbung = 1
+                else:
+                    keine_werbung = 0
+                summe_bezahlt = get_werbe_value(row, 'summe_bezahlt')
+                vid = str(get_werbe_value(row, 'vid')).replace(".0", "")
+                vid_firma = str(get_werbe_value(row, 'vid_firma')).replace(".0", "")
+                idabo = get_werbe_value(row, 'idAbo')
+                idedoobox = get_werbe_value(row, 'idEdoobox')
+                idschlichtungsbehoerde = get_werbe_value(row, 'idSchlichtungsbehoerde')
+                idfaktura = get_werbe_value(row, 'idFaktura')
+                
+                contact.nur_eine_zusendung = nur_eine_zusendung
+                contact.keine_werbung = keine_werbung
+                contact.werbesperre = keine_werbung
+                contact.summe_bezahlt = summe_bezahlt
+                contact.vid = vid
+                contact.vid_firma = vid_firma
+                contact.idabo = idabo
+                contact.idedoobox = idedoobox
+                contact.idschlichtungsbehoerde = idschlichtungsbehoerde
+                contact.idfaktura = idfaktura
+                contact.save()
+                
+                # tags
+                tags = str(get_werbe_value(row, 'dtTags'))
+                if tags:
+                    for tag in tags.split(":"):
+                        add_tag(tag, 'Contact', contact.name)
+                
+                return {
+                    'updated': True,
+                    'address': contact.address
+                }
+        else:
+            return {
+                'updated': False,
+                'error': 'Kein Kontakt gefunden'
+            }
+    except Exception as err:
+        return {
+            'updated': False,
+            'error': err
+        }
+
+def update_werbe_address(row, address):
+    try:
+        address = frappe.get_doc("Address", address)
+        vid = str(get_werbe_value(row, 'vid')).replace(".0", "")
+        vid_firma = str(get_werbe_value(row, 'vid_firma')).replace(".0", "")
+        address.vid = vid
+        address.vid_firma = vid_firma
+        address.save()
+                
+        # tags
+        tags = str(get_werbe_value(row, 'dtTags'))
+        if tags:
+            for tag in tags.split(":"):
+                add_tag(tag, 'Address', address.name)
+        
+        return {
+            'updated': True
+        }
+    except Exception as err:
+        return {
+            'updated': False,
+            'error': err
+        }
+
+
+def create_werbe_customer(data):
+    customer_group = 'Werbedaten'
+    import_quelle = str(get_werbe_value(data, 'Quelle'))
+    vid = str(get_werbe_value(data, 'vid')).replace(".0", "")
+    
+    nur_eine_zusendung = str(get_werbe_value(data, 'Firma wünscht nur eine Zusendung'))
+    if nur_eine_zusendung == '1':
+        nur_eine_zusendung = 1
+    else:
+        nur_eine_zusendung = 0
+    
+    company_name = get_werbe_value(data, 'Firma')
+    if company_name:
+        customer_type = 'Company'
+        customer_name = company_name
+    else:
+        customer_type = 'Individual'
+        customer_name = (" ").join((get_werbe_value(data, 'Vorname'), get_werbe_value(data, 'Name')))
+    
+    try:
+        new_customer = frappe.get_doc({
+            'doctype': 'Customer',
+            'customer_name': customer_name,
+            'customer_addition': '',
+            'customer_type': customer_type,
+            'vid': vid,
+            'customer_group': customer_group,
+            'import_quelle': import_quelle,
+            'nur_eine_zusendung': nur_eine_zusendung
+        })
+        new_customer.insert()
+        
+        # tags
+        tags = str(get_werbe_value(data, 'dtTags'))
+        if tags:
+            for tag in tags.split(":"):
+                add_tag(tag, 'Customer', new_customer.name)
+            
+        frappe.db.commit()
+        return new_customer.name
+    except Exception as err:
+        return False
+
+def create_werbe_address(data, customer):
+    # get datas
+    address_line1 = strasse = str(get_werbe_value(data, 'Strasse'))
+    address_line2 = zusatz = get_werbe_value(data, 'Adresszusatz')
+    pincode = plz = get_werbe_value(data, 'PLZ')
+    city = get_werbe_value(data, 'Ort')
+    vid = str(get_werbe_value(data, 'vid')).replace(".0", "")
+    vid_firma = str(get_werbe_value(data, 'vid_firma')).replace(".0", "")
+    
+    postfach = str(get_werbe_value(data, 'postfach_v'))
+    if postfach == '1':
+        postfach = 1
+    else:
+        postfach = 0
+    postfach_nummer = str(get_werbe_value(data, 'postfach_nummer_v'))
+    
+    if not address_line2:
+        edoobox_data = get_werbe_value(data, 'edoobox_data')
+        if edoobox_data:
+            address_line2 = zusatz = edoobox_data
+    
+    # validierung
+    if not address_line1:
+        # NUR FÜR TESTZWECKE!
+        address_line1 = strasse = 'KEINE STRASSE: TESTIMPORT'
+        # ~ return {
+            # ~ 'success': False,
+            # ~ 'data': data,
+            # ~ 'error': 'Keine Strasse hinterlegt'
+        # ~ }
+    if not plz:
+        # NUR FÜR TESTZWECKE!
+        plz = 'KEINE PLZ: TESTIMPORT'
+        # ~ return {
+            # ~ 'success': False,
+            # ~ 'data': data,
+            # ~ 'error': 'Keine PLZ hinterlegt'
+        # ~ }
+    if not city:
+        # NUR FÜR TESTZWECKE!
+        city = 'KEIN ORT: TESTIMPORT'
+        # ~ return {
+            # ~ 'success': False,
+            # ~ 'data': data,
+            # ~ 'error': 'Kein Ort hinterlegt'
+        # ~ }
+        
+    # daten anlage
+    try:
+        new_address = frappe.get_doc({
+            'doctype': 'Address',
+            'address_title': vid,
+            'address_line1': address_line1,
+            'address_line2': address_line2,
+            'strasse': strasse,
+            'sektion': 'MP',
+            'pincode': plz,
+            'plz': plz,
+            'postfach': postfach,
+            'postfach_nummer': postfach_nummer,
+            'city': city,
+            'vid': vid,
+            'vid_firma': vid_firma,
+            'country': 'Schweiz'
+        })
+        new_address.insert()
+        
+        link = new_address.append("links", {})
+        link.link_doctype = 'Customer'
+        link.link_name = customer
+        new_address.save(ignore_permissions=True)
+        
+        # tags
+        tags = str(get_werbe_value(data, 'dtTags'))
+        if tags:
+            for tag in tags.split(":"):
+                add_tag(tag, 'Address', new_address.name)
+            
+        frappe.db.commit()
+        return new_address.name
+    except Exception as err:
+        return False
+
+def create_werbe_contact(data, customer, address):
+    # check mandatory fields
+    first_name = str(get_werbe_value(data, 'Vorname'))
+    last_name = str(get_werbe_value(data, 'Name'))
+    company_name = str(get_werbe_value(data, 'Firma'))
+    vid = str(get_werbe_value(data, 'vid')).replace(".0", "")
+    designation = str(get_werbe_value(data, 'Titel'))
+    summe_bezahlt = str(get_werbe_value(data, 'summe_bezahlt'))
+    vid_firma = str(get_werbe_value(data, 'vid_firma')).replace(".0", "")
+    idabo = str(get_werbe_value(data, 'idAbo'))
+    idedoobox = str(get_werbe_value(data, 'idEdoobox'))
+    idschlichtungsbehoerde = str(get_werbe_value(data, 'idSchlichtungsbehoerde'))
+    idfaktura = str(get_werbe_value(data, 'idFaktura'))
+    salutation = str(get_werbe_value(data, 'Anrede'))
+    
+    keine_werbung = str(get_werbe_value(data, 'dtWünschtKeineWerbung'))
+    if keine_werbung == '1':
+        keine_werbung = 1
+    else:
+        keine_werbung = 0
+        
+    nur_eine_zusendung = str(get_werbe_value(data, 'Firma wünscht nur eine Zusendung'))
+    if nur_eine_zusendung == '1':
+        nur_eine_zusendung = 1
+    else:
+        nur_eine_zusendung = 0
+    
+    if not first_name:
+        if not last_name:
+            if not company_name:
+                return {
+                    'success': False,
+                    'data': data,
+                    'error': 'Fehlende Daten'
+                }
+            else:
+                first_name = company_name
+        else:
+            first_name = last_name
+    
+    try:
+        new_contact = frappe.get_doc({
+            'doctype': 'Contact',
+            'first_name': first_name,
+            'last_name': last_name,
+            'salutation': salutation,
+            'sektion': 'MP',
+            'company_name': company_name,
+            'mp_password': '',
+            'mp_abo_old': '',
+            'adress_id': '',
+            'vid': vid,
+            'designation': designation,
+            'nur_eine_zusendung': nur_eine_zusendung,
+            'summe_bezahlt': summe_bezahlt,
+            'vid_firma': vid_firma,
+            'keine_werbung': keine_werbung,
+            'idabo': idabo,
+            'idedoobox': idedoobox,
+            'idschlichtungsbehoerde': idschlichtungsbehoerde,
+            'idfaktura': idfaktura,
+            'address': address
+        })
+        new_contact.insert()
+        
+        # email
+        email_id = get_werbe_value(data, 'eMail')
+        if email_id:
+            email_row = new_contact.append("email_ids", {})
+            email_row.email_id = email_id
+            email_row.is_primary = 1
+            
+        # private phone
+        is_primary_phone = str(get_werbe_value(data, 'Telefonnummer'))
+        if is_primary_phone:
+            is_primary_phone_row = new_contact.append("phone_nos", {})
+            is_primary_phone_row.phone = is_primary_phone
+            is_primary_phone_row.is_primary_phone = 1
+            
+        link = new_contact.append("links", {})
+        link.link_doctype = 'Customer'
+        link.link_name = customer
+        new_contact.save(ignore_permissions=True)
+        
+        # tags
+        tags = str(get_werbe_value(data, 'dtTags'))
+        if tags:
+            for tag in tags.split(":"):
+                add_tag(tag, 'Contact', new_contact.name)
+            
+        frappe.db.commit()
+        return new_contact.name
+        
+    except Exception as err:
+        print(err)
+        return False
