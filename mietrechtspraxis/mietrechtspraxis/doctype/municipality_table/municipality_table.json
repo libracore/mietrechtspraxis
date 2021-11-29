@@ -9,15 +9,14 @@
  "fields": [
   {
    "fieldname": "municipality",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Municipality",
-   "options": "Municipality",
    "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2021-08-04 12:45:56.384798",
+ "modified": "2021-11-29 15:57:34.186766",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Municipality Table",

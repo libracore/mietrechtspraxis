@@ -768,7 +768,7 @@ def update_werbe_contact(row, customer):
             vid_firma = str(get_werbe_value(row, 'vid_firma')).replace(".0", "")
             idabo = get_werbe_value(row, 'idAbo')
             idedoobox = get_werbe_value(row, 'idEdoobox')
-            idschlichtungsbehoerde = get_werbe_value(row, 'idSchlichtungsbehoerde')
+            idschlichtungsbehoerde = str(get_werbe_value(row, 'idSchlichtungsbehoerde')).replace(".0", "")
             idfaktura = get_werbe_value(row, 'idFaktura')
             
             contact.nur_eine_zusendung = nur_eine_zusendung
@@ -968,7 +968,7 @@ def create_werbe_contact(data, customer, address):
     vid_firma = str(get_werbe_value(data, 'vid_firma')).replace(".0", "")
     idabo = str(get_werbe_value(data, 'idAbo'))
     idedoobox = str(get_werbe_value(data, 'idEdoobox'))
-    idschlichtungsbehoerde = str(get_werbe_value(data, 'idSchlichtungsbehoerde'))
+    idschlichtungsbehoerde = str(get_werbe_value(data, 'idSchlichtungsbehoerde')).replace(".0", "")
     idfaktura = str(get_werbe_value(data, 'idFaktura'))
     salutation = str(get_werbe_value(data, 'Anrede'))
     

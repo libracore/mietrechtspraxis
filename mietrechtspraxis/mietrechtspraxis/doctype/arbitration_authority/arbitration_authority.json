@@ -5,14 +5,23 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_allgemein",
   "bezeichnung",
   "titel",
-  "telefon",
+  "customer",
   "kuendigungstermine",
   "pauschalen",
   "rechtsberatung",
   "elektronische_eingaben",
   "homepage",
+  "bemerkungen",
+  "section_adresse_und_kontakt",
+  "adresse",
+  "address_html",
+  "cb_1",
+  "kontakt",
+  "contact_html",
+  "section_zustaendigkeiten",
   "gemeinden"
  ],
  "fields": [
@@ -21,13 +30,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Titel",
-   "reqd": 1
-  },
-  {
-   "fieldname": "telefon",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Telefon",
    "reqd": 1
   },
   {
@@ -75,9 +77,60 @@
    "label": "Bezeichnung",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Kundenstamm",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bemerkungen",
+   "fieldtype": "Data",
+   "label": "Bemerkungen"
+  },
+  {
+   "fieldname": "section_adresse_und_kontakt",
+   "fieldtype": "Section Break",
+   "label": "Adresse & Kontakt"
+  },
+  {
+   "fieldname": "adresse",
+   "fieldtype": "Link",
+   "label": "Adresse",
+   "options": "Address"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kontakt",
+   "fieldtype": "Link",
+   "label": "Kontakt",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_zustaendigkeiten",
+   "fieldtype": "Section Break",
+   "label": "Zust\u00e4ndigkeiten"
   }
  ],
- "modified": "2021-08-04 12:46:09.731434",
+ "modified": "2021-11-29 16:23:23.107256",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Arbitration Authority",
@@ -98,5 +151,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "titel",
  "track_changes": 1
 }
