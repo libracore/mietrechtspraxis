@@ -11,11 +11,11 @@
   "titel",
   "section_allgemein",
   "kuendigungstermine",
-  "pauschalen",
   "rechtsberatung",
-  "bemerkungen",
-  "cb_2",
   "elektronische_eingaben",
+  "cb_2",
+  "pauschalen",
+  "bemerkungen",
   "homepage",
   "section_kunde",
   "customer",
@@ -40,42 +40,36 @@
   },
   {
    "fieldname": "kuendigungstermine",
-   "fieldtype": "Data",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
-   "label": "K\u00fcndigungstermine",
-   "reqd": 1
+   "label": "K\u00fcndigungstermine"
   },
   {
    "fieldname": "pauschalen",
-   "fieldtype": "Data",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
-   "label": "Pauschalen",
-   "reqd": 1
+   "label": "Pauschalen"
   },
   {
    "fieldname": "rechtsberatung",
-   "fieldtype": "Data",
-   "label": "Rechtsberatung",
-   "reqd": 1
+   "fieldtype": "Text Editor",
+   "label": "Rechtsberatung"
   },
   {
    "fieldname": "elektronische_eingaben",
    "fieldtype": "Data",
-   "label": "elektronische Eingaben",
-   "reqd": 1
+   "label": "elektronische Eingaben"
   },
   {
    "fieldname": "homepage",
    "fieldtype": "Data",
-   "label": "Homepage",
-   "reqd": 1
+   "label": "Homepage"
   },
   {
    "fieldname": "gemeinden",
    "fieldtype": "Table",
    "label": "Zust\u00e4ndig f\u00fcr die Gemeinden",
-   "options": "Municipality Table",
-   "reqd": 1
+   "options": "Municipality Table"
   },
   {
    "fieldname": "section_allgemein",
@@ -90,7 +84,7 @@
   },
   {
    "fieldname": "bemerkungen",
-   "fieldtype": "Data",
+   "fieldtype": "Text Editor",
    "label": "Bemerkungen"
   },
   {
@@ -128,6 +122,7 @@
    "label": "Zust\u00e4ndigkeiten"
   },
   {
+   "depends_on": "eval:doc.__islocal",
    "fieldname": "section_benennung",
    "fieldtype": "Section Break",
    "label": "Benennung"
@@ -164,7 +159,7 @@
    "label": "SB-Sitz"
   }
  ],
- "modified": "2021-11-29 20:03:30.392745",
+ "modified": "2021-11-29 21:24:56.239586",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Arbitration Authority",
