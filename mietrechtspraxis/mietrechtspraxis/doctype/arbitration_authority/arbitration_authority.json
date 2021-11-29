@@ -1,27 +1,33 @@
 {
- "autoname": "field:bezeichnung",
+ "autoname": "field:id",
  "creation": "2021-08-03 14:17:13.147428",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_allgemein",
-  "bezeichnung",
+  "section_benennung",
+  "id",
+  "cb_1",
   "titel",
-  "customer",
+  "section_allgemein",
   "kuendigungstermine",
   "pauschalen",
   "rechtsberatung",
+  "bemerkungen",
+  "cb_2",
   "elektronische_eingaben",
   "homepage",
-  "bemerkungen",
+  "section_kunde",
+  "customer",
   "section_adresse_und_kontakt",
   "adresse",
   "address_html",
-  "cb_1",
+  "cb_3",
   "kontakt",
   "contact_html",
   "section_zustaendigkeiten",
+  "kanton",
+  "sb_sitz",
   "gemeinden"
  ],
  "fields": [
@@ -72,13 +78,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "bezeichnung",
-   "fieldtype": "Data",
-   "label": "Bezeichnung",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
    "fieldname": "section_allgemein",
    "fieldtype": "Section Break",
    "label": "Allgemein"
@@ -87,8 +86,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Kundenstamm",
-   "options": "Customer",
-   "reqd": 1
+   "options": "Customer"
   },
   {
    "fieldname": "bemerkungen",
@@ -128,9 +126,45 @@
    "fieldname": "section_zustaendigkeiten",
    "fieldtype": "Section Break",
    "label": "Zust\u00e4ndigkeiten"
+  },
+  {
+   "fieldname": "section_benennung",
+   "fieldtype": "Section Break",
+   "label": "Benennung"
+  },
+  {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_kunde",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kanton",
+   "fieldtype": "Link",
+   "label": "Kanton",
+   "options": "Kantonsinformationen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_sitz",
+   "fieldtype": "Data",
+   "label": "SB-Sitz"
   }
  ],
- "modified": "2021-11-29 16:23:23.107256",
+ "modified": "2021-11-29 20:03:30.392745",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Arbitration Authority",

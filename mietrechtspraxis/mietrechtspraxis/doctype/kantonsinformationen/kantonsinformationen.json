@@ -1,4 +1,5 @@
 {
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:kanton",
  "creation": "2021-08-03 15:26:03.930920",
@@ -7,50 +8,69 @@
  "engine": "InnoDB",
  "field_order": [
   "kanton",
-  "informationen",
+  "mietgerichte",
+  "kosten",
+  "anfangsmietzins",
+  "anwalt_vertretung",
+  "bemerkungen",
   "homepage",
-  "gesetzessammlung",
-  "formulare"
+  "formulare",
+  "gesetzessammlung"
  ],
  "fields": [
   {
    "fieldname": "kanton",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Kanton",
-   "options": "Canton",
    "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "informationen",
-   "fieldtype": "Text Editor",
-   "in_list_view": 1,
-   "label": "Informationen",
-   "reqd": 1
   },
   {
    "fieldname": "homepage",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Homepage",
-   "reqd": 1
+   "label": "Homepage"
   },
   {
    "fieldname": "gesetzessammlung",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Gesetzessammlung",
-   "reqd": 1
+   "label": "Gesetzessammlung"
   },
   {
    "fieldname": "formulare",
    "fieldtype": "Data",
-   "label": "Formulare",
-   "reqd": 1
+   "label": "Formulare"
+  },
+  {
+   "fieldname": "mietgerichte",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Mietgerichte"
+  },
+  {
+   "fieldname": "kosten",
+   "fieldtype": "Text Editor",
+   "label": "Kosten"
+  },
+  {
+   "fieldname": "anfangsmietzins",
+   "fieldtype": "Text Editor",
+   "label": "Anfangsmietzins"
+  },
+  {
+   "fieldname": "anwalt_vertretung",
+   "fieldtype": "Text Editor",
+   "label": "Anwalt Vertretung"
+  },
+  {
+   "fieldname": "bemerkungen",
+   "fieldtype": "Text Editor",
+   "label": "Bemerkungen"
   }
  ],
- "modified": "2021-08-04 13:14:43.377573",
+ "modified": "2021-11-29 18:11:41.062312",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Kantonsinformationen",
