@@ -13,10 +13,12 @@
   "kuendigungstermine",
   "rechtsberatung",
   "elektronische_eingaben",
+  "bgsvit",
   "cb_2",
   "pauschalen",
   "bemerkungen",
   "homepage",
+  "svit_kommentar",
   "section_kunde",
   "customer",
   "section_adresse_und_kontakt",
@@ -157,9 +159,20 @@
    "fieldname": "sb_sitz",
    "fieldtype": "Data",
    "label": "SB-Sitz"
+  },
+  {
+   "fieldname": "bgsvit",
+   "fieldtype": "Select",
+   "label": "BGSVIT",
+   "options": "gem. Bundesgericht\ngem. SVIT-Kommentar\nbeide Varianten\nkeine feste Regelung"
+  },
+  {
+   "fieldname": "svit_kommentar",
+   "fieldtype": "Data",
+   "label": "SVIT Kommentar"
   }
  ],
- "modified": "2021-11-29 21:24:56.239586",
+ "modified": "2021-11-30 08:23:16.370388",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Arbitration Authority",
