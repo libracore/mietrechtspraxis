@@ -1138,6 +1138,17 @@ def import_schlichtungsbehoerden(site_name, file_name, limit=False):
                             elif str(get_werbe_value(row, 'Anschrift_2')):
                                 titel += ' ' + str(get_werbe_value(row, 'Anschrift_2'))
                             
+                            bgsvit = str(get_werbe_value(row, 'wertv_BGSVIT'))
+                            if not bgsvit:
+                                bgsvit = 'keine feste Regelung'
+                            elif bgsvit == 'beide':
+                                bgsvit = 'beide Varianten'
+                            elif bgsvit == 'BG':
+                                bgsvit = 'gem. Bundesgericht'
+                            elif bgsvit == 'SVIT':
+                                bgsvit = 'gem. SVIT-Kommentar'
+                            svit_kommentar = str(get_werbe_value(row, 'wertv_bemerk'))
+                            
                             new_sb = frappe.get_doc({
                                 'doctype': 'Arbitration Authority',
                                 'id': idschlichtungsbehoerde,
@@ -1152,7 +1163,9 @@ def import_schlichtungsbehoerden(site_name, file_name, limit=False):
                                 'homepage': str(get_werbe_value(row, 'Homepage')),
                                 'customer': customer,
                                 'adresse': address.name if address else '',
-                                'kontakt': contact.name
+                                'kontakt': contact.name,
+                                'bgsvit': bgsvit,
+                                'svit_kommentar': svit_kommentar or ''
                             })
                             new_sb.insert()
                             for gemeinde in str(get_werbe_value(row, 'Gemeinden')).split(", "):
