@@ -1,18 +1,35 @@
 {
- "autoname": "field:bezeichnung",
+ "autoname": "field:id",
  "creation": "2021-08-03 14:17:13.147428",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "bezeichnung",
+  "section_benennung",
+  "id",
+  "cb_1",
   "titel",
-  "telefon",
+  "section_allgemein",
   "kuendigungstermine",
-  "pauschalen",
   "rechtsberatung",
   "elektronische_eingaben",
+  "bgsvit",
+  "cb_2",
+  "pauschalen",
+  "bemerkungen",
   "homepage",
+  "svit_kommentar",
+  "section_kunde",
+  "customer",
+  "section_adresse_und_kontakt",
+  "adresse",
+  "address_html",
+  "cb_3",
+  "kontakt",
+  "contact_html",
+  "section_zustaendigkeiten",
+  "kanton",
+  "sb_sitz",
   "gemeinden"
  ],
  "fields": [
@@ -24,60 +41,138 @@
    "reqd": 1
   },
   {
-   "fieldname": "telefon",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Telefon",
-   "reqd": 1
-  },
-  {
    "fieldname": "kuendigungstermine",
-   "fieldtype": "Data",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
-   "label": "K\u00fcndigungstermine",
-   "reqd": 1
+   "label": "K\u00fcndigungstermine"
   },
   {
    "fieldname": "pauschalen",
-   "fieldtype": "Data",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
-   "label": "Pauschalen",
-   "reqd": 1
+   "label": "Pauschalen"
   },
   {
    "fieldname": "rechtsberatung",
-   "fieldtype": "Data",
-   "label": "Rechtsberatung",
-   "reqd": 1
+   "fieldtype": "Text Editor",
+   "label": "Rechtsberatung"
   },
   {
    "fieldname": "elektronische_eingaben",
    "fieldtype": "Data",
-   "label": "elektronische Eingaben",
-   "reqd": 1
+   "label": "elektronische Eingaben"
   },
   {
    "fieldname": "homepage",
    "fieldtype": "Data",
-   "label": "Homepage",
-   "reqd": 1
+   "label": "Homepage"
   },
   {
    "fieldname": "gemeinden",
    "fieldtype": "Table",
    "label": "Zust\u00e4ndig f\u00fcr die Gemeinden",
-   "options": "Municipality Table",
+   "options": "Municipality Table"
+  },
+  {
+   "fieldname": "section_allgemein",
+   "fieldtype": "Section Break",
+   "label": "Allgemein"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Kundenstamm",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "bemerkungen",
+   "fieldtype": "Text Editor",
+   "label": "Bemerkungen"
+  },
+  {
+   "fieldname": "section_adresse_und_kontakt",
+   "fieldtype": "Section Break",
+   "label": "Adresse & Kontakt"
+  },
+  {
+   "fieldname": "adresse",
+   "fieldtype": "Link",
+   "label": "Adresse",
+   "options": "Address"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kontakt",
+   "fieldtype": "Link",
+   "label": "Kontakt",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_zustaendigkeiten",
+   "fieldtype": "Section Break",
+   "label": "Zust\u00e4ndigkeiten"
+  },
+  {
+   "depends_on": "eval:doc.__islocal",
+   "fieldname": "section_benennung",
+   "fieldtype": "Section Break",
+   "label": "Benennung"
+  },
+  {
+   "fieldname": "id",
+   "fieldtype": "Data",
+   "label": "ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_kunde",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "kanton",
+   "fieldtype": "Link",
+   "label": "Kanton",
+   "options": "Kantonsinformationen",
    "reqd": 1
   },
   {
-   "fieldname": "bezeichnung",
+   "fieldname": "sb_sitz",
    "fieldtype": "Data",
-   "label": "Bezeichnung",
-   "reqd": 1,
-   "unique": 1
+   "label": "SB-Sitz"
+  },
+  {
+   "fieldname": "bgsvit",
+   "fieldtype": "Select",
+   "label": "BGSVIT",
+   "options": "gem. Bundesgericht\ngem. SVIT-Kommentar\nbeide Varianten\nkeine feste Regelung"
+  },
+  {
+   "fieldname": "svit_kommentar",
+   "fieldtype": "Data",
+   "label": "SVIT Kommentar"
   }
  ],
- "modified": "2021-08-04 12:46:09.731434",
+ "modified": "2021-11-30 08:23:16.370388",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Arbitration Authority",
@@ -98,5 +193,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "titel",
  "track_changes": 1
 }

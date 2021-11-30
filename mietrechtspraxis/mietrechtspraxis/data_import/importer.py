@@ -768,7 +768,7 @@ def update_werbe_contact(row, customer):
             vid_firma = str(get_werbe_value(row, 'vid_firma')).replace(".0", "")
             idabo = get_werbe_value(row, 'idAbo')
             idedoobox = get_werbe_value(row, 'idEdoobox')
-            idschlichtungsbehoerde = get_werbe_value(row, 'idSchlichtungsbehoerde')
+            idschlichtungsbehoerde = str(get_werbe_value(row, 'idSchlichtungsbehoerde')).replace(".0", "")
             idfaktura = get_werbe_value(row, 'idFaktura')
             
             contact.nur_eine_zusendung = nur_eine_zusendung
@@ -968,7 +968,7 @@ def create_werbe_contact(data, customer, address):
     vid_firma = str(get_werbe_value(data, 'vid_firma')).replace(".0", "")
     idabo = str(get_werbe_value(data, 'idAbo'))
     idedoobox = str(get_werbe_value(data, 'idEdoobox'))
-    idschlichtungsbehoerde = str(get_werbe_value(data, 'idSchlichtungsbehoerde'))
+    idschlichtungsbehoerde = str(get_werbe_value(data, 'idSchlichtungsbehoerde')).replace(".0", "")
     idfaktura = str(get_werbe_value(data, 'idFaktura'))
     salutation = str(get_werbe_value(data, 'Anrede'))
     
@@ -1053,3 +1053,134 @@ def create_werbe_contact(data, customer, address):
     except Exception as err:
         print(err)
         return False
+
+# ----------------------------------------------
+# Import Schlichtungsbehörden
+# ----------------------------------------------
+def import_schlichtungsbehoerden(site_name, file_name, limit=False):
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    max_loop = limit
+    
+    if not limit:
+        index = df.index
+        max_loop = len(index)
+    
+    for index, row in df.iterrows():
+        if count <= max_loop:
+            idschlichtungsbehoerde = str(get_werbe_value(row, 'id')).replace(".0", "")
+            kontakt = frappe.db.sql("""SELECT `name` FROM `tabContact` WHERE `idschlichtungsbehoerde` = '{idschlichtungsbehoerde}'""".format(idschlichtungsbehoerde=idschlichtungsbehoerde), as_dict=True)
+            if len(kontakt) > 0:
+                if len(kontakt) > 1:
+                    frappe.log_error('{0}'.format(row), "Mehrere Schlichtungsbehörden zu ID {0} gefunden".format(idschlichtungsbehoerde))
+                else:
+                    try:
+                        contact = frappe.get_doc("Contact", kontakt[0].name)
+                        contact.first_name = str(get_werbe_value(row, 'Anschrift_1'))
+                        contact.last_name = str(get_werbe_value(row, 'Anschrift_2'))
+                        contact.designation = str(get_werbe_value(row, 'Behoerdenname'))
+                        # email
+                        email_id = str(get_werbe_value(row, 'Email'))
+                        if email_id:
+                            contact.email_ids = []
+                            email_row = contact.append("email_ids", {})
+                            email_row.email_id = email_id
+                            email_row.is_primary = 1
+                            
+                        # private phone
+                        is_primary_phone = str(get_werbe_value(row, 'Telefon'))
+                        if is_primary_phone:
+                            contact.phone_nos = []
+                            is_primary_phone_row = contact.append("phone_nos", {})
+                            is_primary_phone_row.phone = is_primary_phone
+                            is_primary_phone_row.is_primary_phone = 1
+                        # fax
+                        fax = str(get_werbe_value(row, 'Telefax'))
+                        if fax:
+                            if not is_primary_phone:
+                                contact.phone_nos = []
+                            is_primary_phone_row = contact.append("phone_nos", {})
+                            is_primary_phone_row.phone = fax
+                            
+                        contact.save()
+                        
+                        
+                        if contact.address:
+                            address = frappe.get_doc("Address", contact.address)
+                            if str(get_werbe_value(row, 'Strasse')):
+                                address.strasse = str(get_werbe_value(row, 'Strasse'))
+                                address.address_line1 = str(get_werbe_value(row, 'Strasse'))
+                            if str(get_werbe_value(row, 'Adresszusatz')):
+                                address.zusatz = str(get_werbe_value(row, 'Adresszusatz'))
+                                address.address_line2 = str(get_werbe_value(row, 'Adresszusatz'))
+                            if str(get_werbe_value(row, 'Postfach')):
+                                address.postfach = 1
+                                address.postfach_nummer = str(get_werbe_value(row, 'Postfach'))
+                            address.plz = str(get_werbe_value(row, 'Ort')).split(" ")[0]
+                            address.pincode = str(get_werbe_value(row, 'Ort')).split(" ")[0]
+                            address.city = str(get_werbe_value(row, 'Ort')).replace(str(get_werbe_value(row, 'Ort')).split(" ")[0] + " ", "")
+                            address.save()
+                        else:
+                            frappe.log_error('{0}'.format(row), "Keine Adresse zur Schlichtungsbehörden mit ID {0} gefunden".format(idschlichtungsbehoerde))
+                            address = False
+                        
+                        customer = contact.links[0].link_name
+                        try:
+                            titel = str(get_werbe_value(row, 'Anschrift_1'))
+                            if str(get_werbe_value(row, 'Behoerdenname')):
+                                titel += ' ' + str(get_werbe_value(row, 'Behoerdenname'))
+                            elif str(get_werbe_value(row, 'Anschrift_2')):
+                                titel += ' ' + str(get_werbe_value(row, 'Anschrift_2'))
+                            
+                            bgsvit = str(get_werbe_value(row, 'wertv_BGSVIT'))
+                            if not bgsvit:
+                                bgsvit = 'keine feste Regelung'
+                            elif bgsvit == 'beide':
+                                bgsvit = 'beide Varianten'
+                            elif bgsvit == 'BG':
+                                bgsvit = 'gem. Bundesgericht'
+                            elif bgsvit == 'SVIT':
+                                bgsvit = 'gem. SVIT-Kommentar'
+                            svit_kommentar = str(get_werbe_value(row, 'wertv_bemerk'))
+                            
+                            new_sb = frappe.get_doc({
+                                'doctype': 'Arbitration Authority',
+                                'id': idschlichtungsbehoerde,
+                                'kanton': str(get_werbe_value(row, 'Kanton')),
+                                'titel': titel,
+                                'kuendigungstermine': str(get_werbe_value(row, 'Kuendigungstermine')),
+                                'pauschalen': str(get_werbe_value(row, 'Pauschalen')),
+                                'sb_sitz': str(get_werbe_value(row, 'SB-Sitz')),
+                                'elektronische_eingaben': str(get_werbe_value(row, 'Eingaben')),
+                                'rechtsberatung': str(get_werbe_value(row, 'Rechtsberatung')),
+                                'bemerkungen': str(get_werbe_value(row, 'Bemerkungen')),
+                                'homepage': str(get_werbe_value(row, 'Homepage')),
+                                'customer': customer,
+                                'adresse': address.name if address else '',
+                                'kontakt': contact.name,
+                                'bgsvit': bgsvit,
+                                'svit_kommentar': svit_kommentar or ''
+                            })
+                            new_sb.insert()
+                            for gemeinde in str(get_werbe_value(row, 'Gemeinden')).split(", "):
+                                link = new_sb.append("gemeinden", {})
+                                link.municipality = gemeinde
+                            new_sb.save()
+                                
+                            frappe.db.commit()
+                        except Exception as err:
+                            frappe.log_error('{0}'.format(row), "Anlage Schlichtungsbehörden mit ID {0} fehlgeschlagen: {1}".format(idschlichtungsbehoerde, err))
+                    except Exception as err:
+                            frappe.log_error('{0}'.format(row), "Master Fail: {0}".format(err))
+            else:
+                frappe.log_error('{0}'.format(row), "Schlichtungsbehörde {0} nicht gefunden".format(idschlichtungsbehoerde))
+            print("{count} of {max_loop} --> {percent}".format(count=count, max_loop=max_loop, percent=((100 / max_loop) * count)))
+            count += 1
+        else:
+            break
