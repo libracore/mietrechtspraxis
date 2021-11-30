@@ -1083,10 +1083,31 @@ def import_schlichtungsbehoerden(site_name, file_name, limit=False):
                     try:
                         contact = frappe.get_doc("Contact", kontakt[0].name)
                         contact.first_name = str(get_werbe_value(row, 'Anschrift_1'))
-                        if str(get_werbe_value(row, 'Behoerdenname')):
-                            contact.last_name = str(get_werbe_value(row, 'Behoerdenname'))
-                        elif str(get_werbe_value(row, 'Anschrift_2')):
-                            contact.last_name = str(get_werbe_value(row, 'Anschrift_2'))
+                        contact.last_name = str(get_werbe_value(row, 'Anschrift_2'))
+                        contact.designation = str(get_werbe_value(row, 'Behoerdenname'))
+                        # email
+                        email_id = str(get_werbe_value(row, 'Email'))
+                        if email_id:
+                            contact.email_ids = []
+                            email_row = contact.append("email_ids", {})
+                            email_row.email_id = email_id
+                            email_row.is_primary = 1
+                            
+                        # private phone
+                        is_primary_phone = str(get_werbe_value(row, 'Telefon'))
+                        if is_primary_phone:
+                            contact.phone_nos = []
+                            is_primary_phone_row = contact.append("phone_nos", {})
+                            is_primary_phone_row.phone = is_primary_phone
+                            is_primary_phone_row.is_primary_phone = 1
+                        # fax
+                        fax = str(get_werbe_value(row, 'Telefax'))
+                        if fax:
+                            if not is_primary_phone:
+                                contact.phone_nos = []
+                            is_primary_phone_row = contact.append("phone_nos", {})
+                            is_primary_phone_row.phone = fax
+                            
                         contact.save()
                         
                         
