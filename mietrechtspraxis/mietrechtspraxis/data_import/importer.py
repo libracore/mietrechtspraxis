@@ -668,7 +668,11 @@ def get_werbe_value(row, value):
     if not pd.isnull(value):
         try:
             if isinstance(value, str):
-                return value.strip()
+                value = value.strip()
+                if value != 'NULL':
+                    return value
+                else:
+                    return ''
             else:
                 return value
         except:
@@ -768,7 +772,7 @@ def update_werbe_contact(row, customer):
             vid_firma = str(get_werbe_value(row, 'vid_firma')).replace(".0", "")
             idabo = get_werbe_value(row, 'idAbo')
             idedoobox = get_werbe_value(row, 'idEdoobox')
-            idschlichtungsbehoerde = str(get_werbe_value(row, 'idSchlichtungsbehoerde')).replace(".0", "")
+            idschlichtungsbehoerde = get_werbe_value(row, 'idSchlichtungsbehoerde')
             idfaktura = get_werbe_value(row, 'idFaktura')
             
             contact.nur_eine_zusendung = nur_eine_zusendung
@@ -810,8 +814,10 @@ def update_werbe_address(row, address):
         address = frappe.get_doc("Address", address)
         vid = str(get_werbe_value(row, 'vid')).replace(".0", "")
         vid_firma = str(get_werbe_value(row, 'vid_firma')).replace(".0", "")
+        idschlichtungsbehoerde = get_werbe_value(row, 'idSchlichtungsbehoerde')
         address.vid = vid
         address.vid_firma = vid_firma
+        address.idschlichtungsbehoerde = idschlichtungsbehoerde
         address.save()
         frappe.db.commit()
                 
@@ -882,6 +888,7 @@ def create_werbe_address(data, customer):
     city = get_werbe_value(data, 'Ort')
     vid = str(get_werbe_value(data, 'vid')).replace(".0", "")
     vid_firma = str(get_werbe_value(data, 'vid_firma')).replace(".0", "")
+    idschlichtungsbehoerde = get_werbe_value(data, 'idSchlichtungsbehoerde')
     
     postfach = str(get_werbe_value(data, 'postfach_v')).replace(".0", "")
     if postfach == '1' or postfach == '-1':
@@ -937,7 +944,8 @@ def create_werbe_address(data, customer):
             'city': city,
             'vid': vid,
             'vid_firma': vid_firma,
-            'country': 'Schweiz'
+            'country': 'Schweiz',
+            'idschlichtungsbehoerde': idschlichtungsbehoerde
         })
         new_address.insert()
         
@@ -968,7 +976,7 @@ def create_werbe_contact(data, customer, address):
     vid_firma = str(get_werbe_value(data, 'vid_firma')).replace(".0", "")
     idabo = str(get_werbe_value(data, 'idAbo'))
     idedoobox = str(get_werbe_value(data, 'idEdoobox'))
-    idschlichtungsbehoerde = str(get_werbe_value(data, 'idSchlichtungsbehoerde')).replace(".0", "")
+    idschlichtungsbehoerde = get_werbe_value(data, 'idSchlichtungsbehoerde')
     idfaktura = str(get_werbe_value(data, 'idFaktura'))
     salutation = str(get_werbe_value(data, 'Anrede'))
     
@@ -1074,7 +1082,7 @@ def import_schlichtungsbehoerden(site_name, file_name, limit=False):
     
     for index, row in df.iterrows():
         if count <= max_loop:
-            idschlichtungsbehoerde = str(get_werbe_value(row, 'id')).replace(".0", "")
+            idschlichtungsbehoerde = get_werbe_value(row, 'id')
             kontakt = frappe.db.sql("""SELECT `name` FROM `tabContact` WHERE `idschlichtungsbehoerde` = '{idschlichtungsbehoerde}'""".format(idschlichtungsbehoerde=idschlichtungsbehoerde), as_dict=True)
             if len(kontakt) > 0:
                 if len(kontakt) > 1:
@@ -1116,12 +1124,21 @@ def import_schlichtungsbehoerden(site_name, file_name, limit=False):
                             if str(get_werbe_value(row, 'Strasse')):
                                 address.strasse = str(get_werbe_value(row, 'Strasse'))
                                 address.address_line1 = str(get_werbe_value(row, 'Strasse'))
+                            else:
+                                address.strasse = 'KEINE STRASSE'
+                                address.address_line1 = 'KEINE STRASSE'
                             if str(get_werbe_value(row, 'Adresszusatz')):
                                 address.zusatz = str(get_werbe_value(row, 'Adresszusatz'))
                                 address.address_line2 = str(get_werbe_value(row, 'Adresszusatz'))
+                            else:
+                                address.zusatz = ''
+                                address.address_line2 = ''
                             if str(get_werbe_value(row, 'Postfach')):
                                 address.postfach = 1
                                 address.postfach_nummer = str(get_werbe_value(row, 'Postfach'))
+                            else:
+                                address.postfach = 0
+                                address.postfach_nummer = ''
                             address.plz = str(get_werbe_value(row, 'Ort')).split(" ")[0]
                             address.pincode = str(get_werbe_value(row, 'Ort')).split(" ")[0]
                             address.city = str(get_werbe_value(row, 'Ort')).replace(str(get_werbe_value(row, 'Ort')).split(" ")[0] + " ", "")
