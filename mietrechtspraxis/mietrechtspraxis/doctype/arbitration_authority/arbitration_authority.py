@@ -5,6 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from datetime import datetime
+from PyPDF2 import PdfFileWriter
+from frappe.utils.file_manager import save_file
 
 class ArbitrationAuthority(Document):
     pass
@@ -131,13 +134,12 @@ def get_sammel_pdf():
     return
 
 def _get_sammel_pdf():
-    from PyPDF2 import PdfFileWriter
     output = PdfFileWriter()
     schlichtungsbehoerden = frappe.db.sql("""SELECT `name` FROM `tabArbitration Authority`""", as_dict=True)
     for schlichtungsbehoerde in schlichtungsbehoerden:
         output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Datenüberprüfung', as_pdf = True, output = output, no_letterhead = 1)
         output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Fragebogen für Schlichtungsbehörden', as_pdf = True, output = output, no_letterhead = 1)
-    from frappe.utils.file_manager import save_file
+    
     now = datetime.now()
     ts = "{0:04d}-{1:02d}-{2:02d}".format(now.year, now.month, now.day)
     file_name = "{0}_{1}.pdf".format('SB_Sammel-PDF', ts)
