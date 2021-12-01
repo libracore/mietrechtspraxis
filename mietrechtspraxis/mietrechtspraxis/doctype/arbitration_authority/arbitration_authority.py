@@ -140,9 +140,11 @@ def _get_sammel_pdf():
         output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Datenüberprüfung', as_pdf = True, output = output, no_letterhead = 1)
         output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Fragebogen für Schlichtungsbehörden', as_pdf = True, output = output, no_letterhead = 1)
     
+    pdf = frappe.utils.pdf.get_file_data_from_writer(output)
+    
     now = datetime.now()
     ts = "{0:04d}-{1:02d}-{2:02d}".format(now.year, now.month, now.day)
     file_name = "{0}_{1}.pdf".format('SB_Sammel-PDF', ts)
-    save_file(file_name, output, '', '', is_private=1)
+    save_file(file_name, pdf, '', '', is_private=1)
     return
     
