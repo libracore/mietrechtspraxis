@@ -123,3 +123,24 @@ def raise_4xx(code, title, message):
     
 def raise_200(answer):
     return ['200 OK', answer]
+
+
+@frappe.whitelist()
+def get_sammel_pdf():
+    frappe.enqueue(method=_get_sammel_pdf, queue='long')
+    return
+
+def _get_sammel_pdf():
+    from PyPDF2 import PdfFileWriter
+    output = PdfFileWriter()
+    schlichtungsbehoerden = frappe.db.sql("""SELECT `name` FROM `tabArbitration Authority`""", as_dict=True)
+    for schlichtungsbehoerde in schlichtungsbehoerden:
+        output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Datenüberprüfung', as_pdf = True, output = output, no_letterhead = 1)
+        output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Fragebogen für Schlichtungsbehörden', as_pdf = True, output = output, no_letterhead = 1)
+    from frappe.utils.file_manager import save_file
+    now = datetime.now()
+    ts = "{0:04d}-{1:02d}-{2:02d}".format(now.year, now.month, now.day)
+    file_name = "{0}_{1}.pdf".format('SB_Sammel-PDF', ts)
+    save_file(file_name, output, '', '', is_private=1)
+    return
+    
