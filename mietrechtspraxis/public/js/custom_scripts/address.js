@@ -20,7 +20,11 @@ function copy_to_address_line1(frm) {
     if (!cur_frm.doc.postfach) {
         cur_frm.set_value("address_line1", cur_frm.doc.strasse);
     } else {
-        cur_frm.set_value("address_line1", 'Postfach');
+        if (cur_frm.doc.strasse) {
+		cur_frm.set_value("address_line1", cur_frm.doc.strasse);
+	} else {
+	    cur_frm.set_value("address_line1", 'Postfach');
+	}
     }
 }
 
