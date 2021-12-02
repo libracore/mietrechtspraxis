@@ -129,16 +129,16 @@ def raise_200(answer):
 
 
 @frappe.whitelist()
-def get_sammel_pdf():
-    frappe.enqueue(method=_get_sammel_pdf, queue='long')
+def get_sammel_pdf(no_letterhead=1):
+    frappe.enqueue(method=_get_sammel_pdf, queue='long', job_name='Schlichtungsbehörden Sammel-PDF', **{'no_letterhead': no_letterhead})
     return
 
-def _get_sammel_pdf():
+def _get_sammel_pdf(no_letterhead=1):
     output = PdfFileWriter()
     schlichtungsbehoerden = frappe.db.sql("""SELECT `name` FROM `tabArbitration Authority`""", as_dict=True)
     for schlichtungsbehoerde in schlichtungsbehoerden:
-        output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Datenüberprüfung', as_pdf = True, output = output, no_letterhead = 1)
-        output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Fragebogen für Schlichtungsbehörden', as_pdf = True, output = output, no_letterhead = 1)
+        output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Datenüberprüfung', as_pdf = True, output = output, no_letterhead = no_letterhead)
+        output = frappe.get_print("Arbitration Authority", schlichtungsbehoerde.name, 'Fragebogen für Schlichtungsbehörden', as_pdf = True, output = output, no_letterhead = no_letterhead)
     
     pdf = frappe.utils.pdf.get_file_data_from_writer(output)
     
