@@ -12,7 +12,7 @@ class CustomersSearchMask(Document):
     pass
 
 @frappe.whitelist()
-def create_customer(firstname, lastname, email, phone, mobile, address_line1, address_line2, plz, city, country, customer_type, customer_name, customer_addition, salutation):
+def create_customer(firstname, lastname, email, phone, mobile, address_line1, address_line2, plz, city, country, customer_type, customer_name, customer_addition, salutation, postfach, postfach_nummer):
     if customer_type == 'Individual':
         fullname = firstname if firstname != '!' else ''
         fullname += " " + lastname if lastname != '!' else ''
@@ -32,10 +32,12 @@ def create_customer(firstname, lastname, email, phone, mobile, address_line1, ad
     address = frappe.get_doc({
         "doctype": "Address",
         "address_type": "Billing",
-        "address_line1": address_line1,
+        "address_line1": address_line1 if address_line1 != '!' else 'Postfach',
         "address_line2": address_line2 if address_line2 != '!' else '',
-        "strasse": address_line1,
+        "strasse": address_line1 if address_line1 != '!' else 'Postfach',
         "zusatz": address_line2 if address_line2 != '!' else '',
+        "postfach": postfach,
+        "postfach_nummer": postfach_nummer if postfach_nummer != '!' else '',
         "city": city,
         "country": country if country != '!' else '',
         "pincode": plz,

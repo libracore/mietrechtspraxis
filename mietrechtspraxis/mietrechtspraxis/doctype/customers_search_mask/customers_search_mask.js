@@ -105,6 +105,14 @@ function create_new_customer(frm) {
     if (cur_frm.doc.salutation) {
         salutation = cur_frm.doc.salutation;
     }
+    var postfach = 0;
+    if (cur_frm.doc.postfach) {
+        postfach = 1
+    }
+    var postfach_nummer = '!';
+    if (cur_frm.doc.postfach_nummer) {
+        postfach_nummer = cur_frm.doc.postfach_nummer;
+    }
     
     var customer_type = 'Individual';
     var customer_name = '';
@@ -124,7 +132,7 @@ function create_new_customer(frm) {
     }
     
     // check mandatory
-    if ((firstname != '!' || lastname != '!') && (address_line1 != '!' && plz != '!' && city != '!' && customer_name != '!')) {
+    if ((firstname != '!' || lastname != '!') && ((address_line1 != '!' || postfach == 1) && plz != '!' && city != '!' && customer_name != '!')) {
         remove_mandatory(frm);
         frappe.call({
             "method": "mietrechtspraxis.mietrechtspraxis.doctype.customers_search_mask.customers_search_mask.create_customer",
@@ -142,7 +150,9 @@ function create_new_customer(frm) {
                 "customer_type": customer_type,
                 "customer_name": customer_name,
                 "customer_addition": company_addition,
-                "salutation": salutation
+                "salutation": salutation,
+                'postfach': postfach,
+                'postfach_nummer': postfach_nummer
             },
             "async": false,
             "callback": function(response) {
