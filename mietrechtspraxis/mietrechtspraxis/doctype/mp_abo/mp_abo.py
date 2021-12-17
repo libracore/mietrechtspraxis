@@ -18,7 +18,8 @@ class mpAbo(Document):
         # calc qty
         total_qty = self.magazines_qty_ir
         for recipient in self.recipient:
-            total_qty += recipient.magazines_qty_mr
+            if not recipient.remove_recipient:
+                total_qty += recipient.magazines_qty_mr
         self.magazines_qty_total = total_qty
         
         # check status
