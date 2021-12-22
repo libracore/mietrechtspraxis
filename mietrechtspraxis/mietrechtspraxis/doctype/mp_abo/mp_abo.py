@@ -17,9 +17,13 @@ class mpAbo(Document):
     def validate(self):
         # calc qty
         total_qty = self.magazines_qty_ir
+        total_invoice_qty = self.magazines_qty_ir
         for recipient in self.recipient:
             total_qty += recipient.magazines_qty_mr
+            if not recipient.remove_recipient:
+                total_invoice_qty += recipient.magazines_qty_mr
         self.magazines_qty_total = total_qty
+        self.qty_next_invoice = total_invoice_qty
         
         # check status
         if self.end_date:
@@ -126,7 +130,7 @@ def _create_invoice(abo):
         "items": [
             {
                 "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
-                "qty": abo.magazines_qty_total,
+                "qty": abo.qty_next_invoice,
                 "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'), abo.invoice_recipient)
             }
         ]
