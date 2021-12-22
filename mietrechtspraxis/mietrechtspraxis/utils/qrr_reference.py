@@ -8,10 +8,10 @@ import frappe
 @frappe.whitelist()
 def get_qrr_reference(sales_invoice=None, customer=None, reference_raw='00 00000 00000 00000 00000 0000'):
     if sales_invoice and customer:
-        reference_raw = '00 00000 ' + customer.replace("K-", "") + ' 00000 ' + sales_invoice.replace("MP-R-", "") + ' 0000'
+        reference_raw = '00 00000 ' + customer.replace("K-", "") + ' 00000 ' + sales_invoice.replace("MP-R-", "").split("-")[0] + ' 0000'
     else:
         if sales_invoice:
-            reference_raw = '00 00000 00000 00000 ' + sales_invoice.replace("MP-R-", "") + ' 0000'
+            reference_raw = '00 00000 00000 00000 ' + sales_invoice.replace("MP-R-", "").split("-")[0] + ' 0000'
         if customer:
             reference_raw = '00 00000 ' + customer.replace("K-", "") + ' 00000 00000 0000'
     

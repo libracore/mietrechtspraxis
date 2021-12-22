@@ -171,7 +171,7 @@ def create_invoice(abo, date):
             "items": [
                 {
                     "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
-                    "qty": abo.magazines_qty_total,
+                    "qty": abo.qty_next_invoice,
                     "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'), abo.invoice_recipient)
                 }
             ]
