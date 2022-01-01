@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.pdf import get_pdf, get_file_data_from_writer
 from frappe.utils.file_manager import save_file
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from PyPDF2 import PdfFileWriter
 import io
 
 def get_qrr_data(sinv):
