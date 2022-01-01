@@ -109,7 +109,7 @@ def get_qrr_data(sinv):
 
     # qrr dict
     qrr = {
-        'top_position': '565px',
+        'top_position': '192mm',
         'iban': 'CH68 3000 0002 8878 4152 8',
         'reference': sinv.esr_reference,
         'reference_type': 'QRR',
@@ -142,7 +142,8 @@ def create_qrr_watermark_pdf(sinv):
         "margin-left": "0mm",
         "margin-right": "0mm",
         "page-size": "A4",
-        'background': None
+        'background': None,
+        'disable-smart-shrinking': None
     }
     qrr_pdf = get_pdf(html, options=options)
     file_name = '{sinv}.pdf'.format(sinv=sinv)
