@@ -135,7 +135,7 @@ def get_qrr_data(sinv):
 
 def create_qrr_watermark_pdf(sinv):
     qrr = get_qrr_data(sinv)
-    html = frappe.render_template('templates/qrr_invoice/qrr_invoice.html', {'qrr': qrr})
+    html = frappe.render_template('templates/qrr_sinv/qrr_invoice.html', {'qrr': qrr})
     options = {
         "margin-top": "0mm",
         "margin-bottom": "0mm",
