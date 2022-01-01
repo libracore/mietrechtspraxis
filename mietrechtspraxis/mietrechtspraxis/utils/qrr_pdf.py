@@ -4,9 +4,10 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils.pdf import get_pdf
+from frappe.utils.pdf import get_pdf, get_file_data_from_writer
 from frappe.utils.file_manager import save_file
-from PyPDF2 import PdfFileWriter
+from PyPDF2 import PdfFileMerger, PdfFileReader
+import io
 
 def get_qrr_data(sinv):
     sinv = frappe.get_doc("Sales Invoice", sinv)
@@ -146,5 +147,19 @@ def create_qrr_watermark_pdf(sinv):
         'disable-smart-shrinking': None
     }
     qrr_pdf = get_pdf(html, options=options)
+    
+    output = PdfFileWriter()
+    sinv_print = frappe.get_print("Sales Invoice", sinv, 'Jahresrechnung inkl', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
+    
+    writer = PdfFileWriter()
+    page_count = sinv_print.getNumPages()
+    for page_number in range(page_count):
+        input_page = sinv_print.getPage(page_number)
+        if page_number == page_count:
+            input_page.mergePage(qrr_pdf.getPage(0))
+        writer.addPage(input_page)
+    
+    filedata = get_file_data_from_writer(writer)
+    
     file_name = '{sinv}.pdf'.format(sinv=sinv)
-    save_file(file_name, qrr_pdf, 'Sales Invoice', sinv, is_private=1)
+    save_file(file_name, filedata, 'Sales Invoice', sinv, is_private=1)
