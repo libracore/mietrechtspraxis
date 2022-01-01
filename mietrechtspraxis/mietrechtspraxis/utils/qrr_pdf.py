@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.pdf import get_pdf, get_file_data_from_writer
 from frappe.utils.file_manager import save_file
-from PyPDF2 import PdfFileWriter
+from PyPDF2 import PdfFileWriter, PdfFileReader
 import io
 
 def get_qrr_data(sinv):
@@ -149,14 +149,16 @@ def create_qrr_watermark_pdf(sinv):
     qrr_pdf = get_pdf(html, options=options)
     
     output = PdfFileWriter()
-    sinv_print = frappe.get_print("Sales Invoice", sinv, 'Jahresrechnung inkl', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
+    sinv_print = frappe.get_print("Sales Invoice", sinv, 'Standard', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
     
     writer = PdfFileWriter()
     page_count = sinv_print.getNumPages()
     for page_number in range(page_count):
         input_page = sinv_print.getPage(page_number)
-        if page_number == page_count:
-            input_page.mergePage(qrr_pdf.getPage(0))
+        print(page_number)
+        print(page_count)
+        if page_number == (page_count - 1):
+            input_page.mergePage(PdfFileReader(io.BytesIO(qrr_pdf)).getPage(0))
         writer.addPage(input_page)
     
     filedata = get_file_data_from_writer(writer)
