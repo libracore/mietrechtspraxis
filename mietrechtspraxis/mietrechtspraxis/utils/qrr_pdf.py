@@ -153,13 +153,18 @@ def create_qrr_watermark_pdf(sinv):
     
     writer = PdfFileWriter()
     page_count = sinv_print.getNumPages()
+    merged = False
     for page_number in range(page_count):
         input_page = sinv_print.getPage(page_number)
         print(page_number)
         print(page_count)
         if page_number == (page_count - 1):
-            input_page.mergePage(PdfFileReader(io.BytesIO(qrr_pdf)).getPage(0))
+            if input_page.mediaBox.getHeight < 544:
+                input_page.mergePage(PdfFileReader(io.BytesIO(qrr_pdf)).getPage(0))
+                merged = True
         writer.addPage(input_page)
+    if not merged:
+        writer.addPage(PdfFileReader(io.BytesIO(qrr_pdf)).getPage(0))
     
     filedata = get_file_data_from_writer(writer)
     
