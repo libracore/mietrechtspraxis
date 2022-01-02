@@ -149,19 +149,16 @@ def create_qrr_watermark_pdf(sinv):
     qrr_pdf = get_pdf(html, options=options)
     
     output = PdfFileWriter()
-    sinv_print = frappe.get_print("Sales Invoice", sinv, 'Standard', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
+    sinv_print = frappe.get_print("Sales Invoice", sinv, 'test margin', as_pdf = True, output = output, no_letterhead = 0, ignore_zugferd=True)
     
     writer = PdfFileWriter()
     page_count = sinv_print.getNumPages()
     merged = False
     for page_number in range(page_count):
         input_page = sinv_print.getPage(page_number)
-        print(page_number)
-        print(page_count)
         if page_number == (page_count - 1):
-            if input_page.mediaBox.getHeight < 544:
-                input_page.mergePage(PdfFileReader(io.BytesIO(qrr_pdf)).getPage(0))
-                merged = True
+            input_page.mergePage(PdfFileReader(io.BytesIO(qrr_pdf)).getPage(0))
+            merged = True
         writer.addPage(input_page)
     if not merged:
         writer.addPage(PdfFileReader(io.BytesIO(qrr_pdf)).getPage(0))
