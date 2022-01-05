@@ -14,11 +14,11 @@ import operator
 import re
 import six
 
-class CAMTConverter(Document):
+class CAMTImport(Document):
     pass
 
 @frappe.whitelist()
-def read_camt054(file_path):
+def read_camt054(file_path, account):
     # get uploaded camt file
     physical_path = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.local.site_path.replace("./", ""), file_path)
     with open(physical_path, 'r') as f:
@@ -34,7 +34,7 @@ def read_camt054(file_path):
         frappe.throw("Das CAMT File konnte nicht gelesen werden.")
         
     # transactions
-    new_payment_entries = read_camt_transactions(soup.find_all('ntry'), '1010 - Postcheckkonto - mp', False)
+    new_payment_entries = read_camt_transactions(soup.find_all('ntry'), account, False)
     message = _("Successfully imported {0} payments.".format(len(new_payment_entries)))
     frappe.msgprint(message)
     return { "records": str(new_payment_entries), "anz": len(new_payment_entries) }
@@ -292,7 +292,7 @@ def get_unassigned_payments():
 
 @frappe.whitelist()
 def generate_report(camt_record):
-    camt_record = frappe.get_doc("CAMT Converter", camt_record)
+    camt_record = frappe.get_doc("CAMT Import", camt_record)
     importet_pe_raw = camt_record.importet_payments.replace("'", '"')
     importet_pe = json.loads(importet_pe_raw)
     deleted_pes = []

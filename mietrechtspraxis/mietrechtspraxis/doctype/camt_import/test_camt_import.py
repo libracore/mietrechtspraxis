@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 # import frappe
 import unittest
 
-class TestCAMTConverter(unittest.TestCase):
+class TestCAMTImport(unittest.TestCase):
 	pass

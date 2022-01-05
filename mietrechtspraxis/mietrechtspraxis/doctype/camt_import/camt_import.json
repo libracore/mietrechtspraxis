@@ -12,21 +12,26 @@
   "submitt_payments",
   "close_camt_import",
   "generate_report",
+  "cb_1",
+  "company",
+  "account",
   "status",
-  "section_import",
+  "overview",
   "anz_importet_payments",
-  "importet_payments",
-  "section_match",
   "anz_matched_payments",
-  "matched_payments",
-  "section_submitted",
   "anz_submitted_payments",
-  "submitted_payments",
-  "section_unsubmitted",
   "anz_unsubmitted_payments",
+  "cb_2",
   "show_overpaid",
   "show_unassigned",
   "show_manual_match",
+  "section_import",
+  "importet_payments",
+  "section_match",
+  "matched_payments",
+  "section_submitted",
+  "submitted_payments",
+  "section_unsubmitted",
   "unsubmitted_payments"
  ],
  "fields": [
@@ -40,18 +45,19 @@
    "depends_on": "eval:doc.camt_file&&doc.status=='Open'",
    "fieldname": "import",
    "fieldtype": "Button",
-   "label": "Import Payments"
+   "label": "Importiere Zahlungen"
   },
   {
    "depends_on": "eval:doc.status=='Imported'",
    "fieldname": "match",
    "fieldtype": "Button",
-   "label": "Match Payments"
+   "label": "Matche Zahlungen"
   },
   {
    "fieldname": "status",
    "fieldtype": "Select",
    "hidden": 1,
+   "in_list_view": 1,
    "label": "Status",
    "options": "Open\nImported\nMatched\nPartially Processed\nClosed"
   },
@@ -65,7 +71,7 @@
   {
    "fieldname": "importet_payments",
    "fieldtype": "Code",
-   "label": "Importet Payments",
+   "label": "Importierte Zahlungen",
    "read_only": 1
   },
   {
@@ -73,12 +79,12 @@
    "depends_on": "eval:doc.matched_payments",
    "fieldname": "section_match",
    "fieldtype": "Section Break",
-   "label": "Match"
+   "label": "Zuweisungen"
   },
   {
    "fieldname": "matched_payments",
    "fieldtype": "Code",
-   "label": "Matched Payments",
+   "label": "Zugewiesene Zahlungen",
    "read_only": 1
   },
   {
@@ -86,12 +92,12 @@
    "depends_on": "eval:doc.submitted_payments",
    "fieldname": "section_submitted",
    "fieldtype": "Section Break",
-   "label": "Submitted"
+   "label": "Gebucht"
   },
   {
    "fieldname": "submitted_payments",
    "fieldtype": "Code",
-   "label": "Submitted Payments",
+   "label": "Gebuchte Zahlungen",
    "read_only": 1
   },
   {
@@ -99,61 +105,64 @@
    "depends_on": "eval:doc.unsubmitted_payments",
    "fieldname": "section_unsubmitted",
    "fieldtype": "Section Break",
-   "label": "Unsubmitted"
+   "label": "Ungebucht"
   },
   {
    "fieldname": "unsubmitted_payments",
    "fieldtype": "Code",
-   "label": "Unsubmitted Payments",
+   "label": "Ungebuchte Zahlungen",
    "read_only": 1
   },
   {
    "depends_on": "eval:doc.status=='Matched'",
    "fieldname": "submitt_payments",
    "fieldtype": "Button",
-   "label": "Submitt Payments"
+   "label": "Buche Zahlungen"
   },
   {
    "fieldname": "anz_importet_payments",
    "fieldtype": "Int",
-   "label": "QTY Importet Payments",
+   "label": "Importierte Zahlungen",
    "read_only": 1
   },
   {
    "fieldname": "anz_matched_payments",
    "fieldtype": "Int",
-   "label": "QTY Matched Payments",
+   "label": "Zugewiesene Zahlungen",
    "read_only": 1
   },
   {
    "fieldname": "anz_submitted_payments",
    "fieldtype": "Int",
-   "label": "QTY Submitted Payments",
+   "label": "Gebuchte Zahlungen",
    "read_only": 1
   },
   {
    "fieldname": "anz_unsubmitted_payments",
    "fieldtype": "Int",
-   "label": "QTY Unsubmitted Payments",
+   "label": "Ungebuchte Zahlungen",
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.unsubmitted_payments",
    "fieldname": "show_overpaid",
    "fieldtype": "Button",
-   "label": "Show Overpaid"
+   "label": "Zeige \u00dcberbezahlte"
   },
   {
+   "depends_on": "eval:doc.unsubmitted_payments",
    "fieldname": "show_unassigned",
    "fieldtype": "Button",
-   "label": "Show Unassigned"
+   "label": "Zeige unzugewiesene"
   },
   {
    "depends_on": "eval:doc.status=='Partially Processed'",
    "fieldname": "close_camt_import",
    "fieldtype": "Button",
-   "label": "Close CAMT Import"
+   "label": "Schliese CAMT Import"
   },
   {
+   "depends_on": "eval:doc.unsubmitted_payments",
    "fieldname": "show_manual_match",
    "fieldtype": "Button",
    "label": "\u00d6ffne manuelle Zuordnung"
@@ -162,13 +171,41 @@
    "depends_on": "eval:doc.status=='Closed'",
    "fieldname": "generate_report",
    "fieldtype": "Button",
-   "label": "Generate Report"
+   "label": "Generiere Bericht"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "depends_on": "eval:doc.company",
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.importet_payments",
+   "fieldname": "overview",
+   "fieldtype": "Section Break",
+   "label": "\u00dcbersicht"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-01-05 13:08:28.050713",
+ "modified": "2022-01-05 14:28:18.203572",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
- "name": "CAMT Converter",
+ "name": "CAMT Import",
  "owner": "Administrator",
  "permissions": [
   {
