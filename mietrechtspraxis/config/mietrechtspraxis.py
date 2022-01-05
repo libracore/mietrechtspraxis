@@ -42,6 +42,12 @@ def get_data():
                        "name": "RM Log",
                        "label": _("Massenlauf Logfile"),
                        "description": _("Massenlauf Logfile")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "CAMT Import",
+                       "label": _("CAMT Import"),
+                       "description": _("CAMT Import")
                    }
             ]
         },
