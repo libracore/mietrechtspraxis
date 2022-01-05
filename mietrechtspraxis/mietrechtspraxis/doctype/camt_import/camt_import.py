@@ -13,6 +13,7 @@ from datetime import datetime
 import operator
 import re
 import six
+from frappe.utils.background_jobs import enqueue
 
 class CAMTImport(Document):
     pass
@@ -241,7 +242,13 @@ def create_reference(payment_entry, sales_invoice):
     return
 
 @frappe.whitelist()
-def submit_all():
+def submit_all(camt_import):
+    args = {
+        'camt_import': camt_import
+    }
+    enqueue("mietrechtspraxis.mietrechtspraxis.doctype.camt_import.camt_import._submit_all", queue='long', job_name='Buche Zahlungen (CAMT Import)', timeout=5000, **args)
+
+def _submit_all(camt_import):
     # prepare array of (un-)submitted payments
     submitted_payments = []
     unsubmitted_payments = []
@@ -255,8 +262,23 @@ def submit_all():
             submitted_payments.append(payment_entry_record.name)
         else:
             unsubmitted_payments.append(payment_entry_record.name)
+    
     frappe.msgprint("{0} Zahlungen verbucht, {1} Zahlungen <b>nicht</b> verbucht".format(len(submitted_payments), len(unsubmitted_payments)))
-    return { 'anz_submitted': len(submitted_payments), 'submitted': str(submitted_payments), 'anz_unsubmitted': len(unsubmitted_payments), 'unsubmitted': str(unsubmitted_payments) }
+    
+    camt_import = frappe.get_doc("CAMT Import", camt_import)
+    if len(unsubmitted_payments) < 1:
+        camt_import.submitted_payments = str(submitted_payments)
+        camt_import.anz_submitted_payments = len(submitted_payments)
+        camt_import.status = 'Closed'
+    else:
+        camt_import.submitted_payments = str(submitted_payments)
+        camt_import.anz_submitted_payments = len(submitted_payments)
+        camt_import.unsubmitted_payments = str(unsubmitted_payments)
+        camt_import.anz_unsubmitted_payments = len(unsubmitted_payments)
+        camt_import.status = 'Partially Processed'
+    camt_import.save()
+    return True
+    #return { 'anz_submitted': len(submitted_payments), 'submitted': str(submitted_payments), 'anz_unsubmitted': len(unsubmitted_payments), 'unsubmitted': str(unsubmitted_payments) }
 
 @frappe.whitelist()
 def get_overpaid_payments():

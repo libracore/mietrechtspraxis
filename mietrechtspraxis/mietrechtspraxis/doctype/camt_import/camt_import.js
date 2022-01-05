@@ -77,26 +77,29 @@ frappe.ui.form.on('CAMT Import', {
     submitt_payments: function(frm) {
         frappe.call({
             method: 'mietrechtspraxis.mietrechtspraxis.doctype.camt_import.camt_import.submit_all',
-            args: {},
+            args: {
+                'camt_import': cur_frm.doc.name
+            },
             freeze: true,
             freeze_message: 'Buche Zahlungen...',
             callback: function(r) {
-                if (r.message) {
-                    var feedback = r.message;
-                    if (feedback.anz_unsubmitted < 1) {
-                        cur_frm.set_value("submitted_payments", feedback.submitted);
-                        cur_frm.set_value("anz_submitted_payments", feedback.anz_submitted);
-                        cur_frm.set_value("status", "Closed");
-                        cur_frm.save();
-                    } else {
-                        cur_frm.set_value("submitted_payments", feedback.submitted);
-                        cur_frm.set_value("anz_submitted_payments", feedback.anz_submitted);
-                        cur_frm.set_value("unsubmitted_payments", feedback.unsubmitted);
-                        cur_frm.set_value("anz_unsubmitted_payments", feedback.anz_unsubmitted);
-                        cur_frm.set_value("status", "Partially Processed");
-                        cur_frm.save();
-                    }
-                }
+                //~ if (r.message) {
+                    //~ var feedback = r.message;
+                    //~ if (feedback.anz_unsubmitted < 1) {
+                        //~ cur_frm.set_value("submitted_payments", feedback.submitted);
+                        //~ cur_frm.set_value("anz_submitted_payments", feedback.anz_submitted);
+                        //~ cur_frm.set_value("status", "Closed");
+                        //~ cur_frm.save();
+                    //~ } else {
+                        //~ cur_frm.set_value("submitted_payments", feedback.submitted);
+                        //~ cur_frm.set_value("anz_submitted_payments", feedback.anz_submitted);
+                        //~ cur_frm.set_value("unsubmitted_payments", feedback.unsubmitted);
+                        //~ cur_frm.set_value("anz_unsubmitted_payments", feedback.anz_unsubmitted);
+                        //~ cur_frm.set_value("status", "Partially Processed");
+                        //~ cur_frm.save();
+                    //~ }
+                //~ }
+                frappe.set_route("background_jobs");
             }
         });
     },
