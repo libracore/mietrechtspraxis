@@ -14,6 +14,7 @@ import operator
 import re
 import six
 from frappe.utils.background_jobs import enqueue
+from decimal import Decimal, ROUND_HALF_UP
 
 class CAMTImport(Document):
     pass
@@ -314,25 +315,68 @@ def get_unassigned_payments():
 
 @frappe.whitelist()
 def generate_report(camt_record):
+    data = 'Filename:\n'
     camt_record = frappe.get_doc("CAMT Import", camt_record)
-    importet_pe_raw = camt_record.importet_payments.replace("'", '"')
-    importet_pe = json.loads(importet_pe_raw)
-    deleted_pes = []
-    unsubmitted_pes = []
-    for pe in importet_pe:
-        if not frappe.db.exists('Payment Entry', pe):
-            deleted_pes.append(pe)
-        else:
-            pe = frappe.get_doc("Payment Entry", pe)
-            if pe.docstatus != 1:
-                unsubmitted_pes.append(pe.name)
-    if len(deleted_pes) > 0 or len(unsubmitted_pes) > 0:
-        feedback_message = 'Der Bericht konnte nicht erstellt werden.<br>'
-        if len(deleted_pes) > 0:
-            feedback_message += '{0} importierte Zahlungen wurden gelöscht:<br>{1}<br><br>'.format(len(deleted_pes), str(deleted_pes).replace("[", "").replace("'", "").replace("]", ""))
-        if len(unsubmitted_pes) > 0:
-            feedback_message += '{0} importierte Zahlungen wurden noch nicht verbucht:<br>{1}'.format(len(unsubmitted_pes), str(unsubmitted_pes).replace("[", "").replace("'", "").replace("]", ""))
-        return { 'status': 'nok', 'feedback_message': feedback_message }
-    else:
-        # create_report()
-        return { 'status': 'ok' }
+    data += str(camt_record.camt_file).split("/")[3] + "\n\n"
+    verbuchte_zahlungen = ''
+    anzahl_zahlungen = 0
+    totalbetrag = 0.00
+    einzahlungstaxen = 0.00
+    erp_next_zahlung = 0.00
+    konten = []
+    konten_betraege = {}
+    physical_path = "/home/frappe/frappe-bench/sites/{0}{1}".format(frappe.local.site_path.replace("./", ""), camt_record.camt_file)
+    with open(physical_path, 'r') as f:
+        content = f.read()
+        
+    soup = BeautifulSoup(content, 'lxml')
+    filedatum = soup.document.bktocstmrdbtcdtntfctn.grphdr.credttm.get_text().split("T")[0]
+    transaction_entries = soup.find_all('ntry')
+    for entry in transaction_entries:
+        entry_soup = BeautifulSoup(six.text_type(entry), 'lxml')
+        date = entry_soup.bookgdt.dt.get_text()
+        transactions = entry_soup.find_all('txdtls')
+        # fetch entry amount as fallback
+        entry_amount = float(entry_soup.amt.get_text())
+        verbuchte_zahlungen += 'Datum: ' + frappe.utils.get_datetime(date).strftime('%d.%m.%Y') + ", Betrag: " + "{:,.2f}".format(proper_round(entry_amount, Decimal('0.01'))).replace(",", "'") + "\n"
+        for transaction in transactions:
+            transaction_soup = BeautifulSoup(six.text_type(transaction), 'lxml')
+            unique_reference = transaction_soup.refs.acctsvcrref.get_text()
+            totalbetrag += float(transaction_soup.amt.get_text())
+            anzahl_zahlungen += 1
+            try:
+                einzahlungstaxen += float(transaction_soup.chrgs.ttlchrgsandtaxamt.get_text())
+            except:
+                einzahlungstaxen += 0.0
+            _pe = frappe.db.sql("""SELECT `name` FROM `tabPayment Entry` WHERE `reference_no` = '{unique_reference}'""".format(unique_reference=unique_reference), as_dict=True)
+            try:
+                pe = frappe.get_doc("Payment Entry", _pe[0].name)
+                erp_next_zahlung += float(pe.paid_amount)
+                for _sinv in pe.references:
+                    sinv = frappe.get_doc("Sales Invoice", _sinv.reference_name)
+                    for item in sinv.items:
+                        if item.income_account not in konten:
+                            konten.append(item.income_account)
+                            konten_betraege[item.income_account] = 0.00
+                        konten_betraege[item.income_account] += float(item.amount)
+            except:
+                pass
+    
+    str_konten_betraege = ''
+    for konto in konten:
+        str_konten_betraege += konto + ": "
+        str_konten_betraege += "{:,.2f}".format(proper_round(konten_betraege[konto], Decimal('0.01'))).replace(",", "'") + "\n"
+    
+    camt_record.zahlungsreport = data + \
+        "Filedatum: " + frappe.utils.get_datetime(filedatum).strftime('%d.%m.%Y') + "\n\n" + \
+        "Einzahlungstaxen: " + "{:,.2f}".format(proper_round(einzahlungstaxen, Decimal('0.01'))).replace(",", "'") + "\n\n" + \
+        "Anzahl Zahlungen: " + str(anzahl_zahlungen) + "\n\n" + \
+        "Totalbetrag: " + "{:,.2f}".format(proper_round(totalbetrag, Decimal('0.01'))).replace(",", "'") + "\n\n" + \
+        "Verbuchte Zahlungen gem. CAMT File:\n" + str(verbuchte_zahlungen) + "\n\n" + \
+        "In ERPNext verbuchte Zahlungen:\n" + "{:,.2f}".format(proper_round(erp_next_zahlung, Decimal('0.01'))).replace(",", "'") + "\n\n" + \
+        "In ERPNext verbuchte Beträge zu Konten:\n" + str(str_konten_betraege)
+    camt_record.save()
+    return
+    
+def proper_round(number, decimals):
+    return float(Decimal(number).quantize(decimals, ROUND_HALF_UP))
