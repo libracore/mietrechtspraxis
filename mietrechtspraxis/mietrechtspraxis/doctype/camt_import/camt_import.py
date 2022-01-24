@@ -359,6 +359,19 @@ def generate_report(camt_record):
                             konten.append(item.income_account)
                             konten_betraege[item.income_account] = 0.00
                         konten_betraege[item.income_account] += float(item.amount)
+                for zwischenkonto in pe.deductions:
+                    if zwischenkonto.account not in konten:
+                        konten.append(zwischenkonto.account)
+                        konten_betraege[zwischenkonto.account] = 0.00
+                    if float(zwischenkonto.amount) < 0:
+                        konten_betraege[zwischenkonto.account] += float(zwischenkonto.amount) * -1
+                    else:
+                        konten_betraege[zwischenkonto.account] += float(zwischenkonto.amount)
+                if float(pe.unallocated_amount) > 0:
+                    if pe.party not in konten:
+                        konten.append(pe.party)
+                        konten_betraege[pe.party] = 0.00
+                    konten_betraege[pe.party] += float(pe.unallocated_amount)
             except:
                 pass
     
