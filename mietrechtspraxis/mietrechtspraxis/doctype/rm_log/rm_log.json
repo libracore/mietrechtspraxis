@@ -20,7 +20,7 @@
  ],
  "fields": [
   {
-   "depends_on": "eval:doc.status=='PDF erstellt'&&(doc.typ=='Rechnungen (0 Ex.)'||doc.typ=='Rechnungen (1+ Ex.)')",
+   "depends_on": "eval:doc.status=='PDF erstellt'",
    "fieldname": "download_pdf",
    "fieldtype": "Button",
    "label": "Download PDF"
@@ -105,7 +105,7 @@
    "options": "RM Log Versandkarten"
   }
  ],
- "modified": "2021-11-15 21:23:21.670614",
+ "modified": "2022-03-15 11:10:24.164068",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "RM Log",
