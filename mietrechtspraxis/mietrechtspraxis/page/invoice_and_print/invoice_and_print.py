@@ -727,7 +727,7 @@ def _create_versandkarten(date):
                                 `tabmp Abo`.`recipient_address`
                             FROM `tabmp Abo`
                             WHERE
-                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}'))
+                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}'))
                             AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
                             AND `tabmp Abo`.`magazines_qty_ir` > 0
                             UNION
@@ -743,7 +743,7 @@ def _create_versandkarten(date):
                                 SELECT
                                     `name`
                                 FROM `tabmp Abo`
-                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}')
+                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}')
                             )
                             AND `tabmp Abo Recipient`.`magazines_qty_mr` > 0
                         ) AS `view`
@@ -791,7 +791,7 @@ def _create_versandkarten(date):
                                 `tabmp Abo`.`recipient_address`
                             FROM `tabmp Abo`
                             WHERE
-                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}'))
+                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}'))
                             AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
                             UNION
                             SELECT
@@ -806,7 +806,7 @@ def _create_versandkarten(date):
                                 SELECT
                                     `name`
                                 FROM `tabmp Abo`
-                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}')
+                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}')
                             )
                         ) AS `view`
                         ORDER BY `view`.`anz` ASC
