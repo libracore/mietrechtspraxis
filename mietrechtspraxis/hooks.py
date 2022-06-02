@@ -33,7 +33,9 @@ doctype_js = {
     "Address" : "public/js/custom_scripts/address.js",
     "Sales Invoice" : "public/js/custom_scripts/sales_invoice.js"
 }
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {
+    "Payment Reminder" : "/public/js/custom_scripts/mahnungen_list.js"
+}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
