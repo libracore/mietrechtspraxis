@@ -47,7 +47,6 @@ def _get_sb(**kwargs):
                                     SELECT
                                         `city`,
                                         `municipality`,
-                                        `district`,
                                         `canton`
                                     FROM `tabPincode`
                                     WHERE `pincode` = '{plz_city}'
@@ -59,7 +58,6 @@ def _get_sb(**kwargs):
                                         SELECT
                                             `city`,
                                             `municipality`,
-                                            `district`,
                                             `canton`
                                         FROM `tabPincode`
                                         WHERE `city` LIKE '%{plz_city}%'
@@ -72,7 +70,6 @@ def _get_sb(**kwargs):
             data['plz'] = city.plz
             data['ort'] = city.city
             data['gemeinde'] = city.municipality
-            data['bezirk'] = city.district
             data['kanton'] = city.canton
             data['allgemein'] = get_informations(city.canton)
             data['schlichtungsbehoerde'] = frappe.db.sql("""
