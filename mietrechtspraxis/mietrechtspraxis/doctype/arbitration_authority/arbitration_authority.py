@@ -47,7 +47,8 @@ def _get_sb(**kwargs):
                                     SELECT
                                         `city`,
                                         `municipality`,
-                                        `canton`
+                                        `canton`,
+                                        `pincode` AS `plz`
                                     FROM `tabPincode`
                                     WHERE `pincode` = '{plz_city}'
                                     ORDER BY `city` ASC
@@ -58,7 +59,8 @@ def _get_sb(**kwargs):
                                         SELECT
                                             `city`,
                                             `municipality`,
-                                            `canton`
+                                            `canton`,
+                                            `pincode` AS `plz`
                                         FROM `tabPincode`
                                         WHERE `city` LIKE '%{plz_city}%'
                                         ORDER BY `city` ASC
