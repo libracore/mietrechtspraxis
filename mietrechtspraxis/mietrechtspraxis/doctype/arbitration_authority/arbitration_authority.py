@@ -101,10 +101,14 @@ def _get_sb(**kwargs):
 def get_informations(kanton):
     search = frappe.db.sql("""
                             SELECT
-                                `informationen`,
+                                `mietgerichte`,
+                                `kosten`,
+                                `anfangsmietzins`,
+                                `anwalt_vertretung`,
+                                `bemerkungen`,
                                 `homepage`,
-                                `gesetzessammlung`,
-                                `formulare`
+                                `formulare`,
+                                `gesetzessammlung`
                             FROM `tabKantonsinformationen`
                             WHERE `kanton` = '{kanton}'
                             """.format(kanton=kanton), as_dict=True)
