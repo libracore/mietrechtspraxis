@@ -16,11 +16,12 @@
   "qty_multi",
   "sinvs",
   "begleitungen",
-  "versandkarten"
+  "versandkarten",
+  "mahnungen"
  ],
  "fields": [
   {
-   "depends_on": "eval:doc.status=='PDF erstellt'&&(doc.typ=='Rechnungen (0 Ex.)'||doc.typ=='Rechnungen (1+ Ex.)')",
+   "depends_on": "eval:doc.status=='PDF erstellt'",
    "fieldname": "download_pdf",
    "fieldtype": "Button",
    "label": "Download PDF"
@@ -70,12 +71,14 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.typ!='Mahnungen'",
    "fieldname": "qty_one",
    "fieldtype": "Int",
    "label": "1 Exemplar",
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.typ!='Mahnungen'",
    "fieldname": "qty_multi",
    "fieldtype": "Int",
    "label": "&gt;1 Exemplar",
@@ -86,7 +89,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Typ",
-   "options": "Rechnungen (0 Ex.)\nRechnungen (1+ Ex.)\nBegleitschreiben: K\u00fcndigungen Ausland\nBegleitschreiben: K\u00fcndigungen Inland\nBegleitschreiben: Gratis Abos Ausland\nBegleitschreiben: Gratis Abos Inland\nBegleitschreiben: Jahres-Abo Empf\u00e4nger Ausland\nBegleitschreiben: Jahres-Abo Empf\u00e4nger Inland\nVersandkarten",
+   "options": "Rechnungen (0 Ex.)\nRechnungen (1+ Ex.)\nBegleitschreiben: K\u00fcndigungen Ausland\nBegleitschreiben: K\u00fcndigungen Inland\nBegleitschreiben: Gratis Abos Ausland\nBegleitschreiben: Gratis Abos Inland\nBegleitschreiben: Jahres-Abo Empf\u00e4nger Ausland\nBegleitschreiben: Jahres-Abo Empf\u00e4nger Inland\nVersandkarten\nMahnungen",
    "read_only": 1
   },
   {
@@ -103,9 +106,15 @@
    "fieldtype": "Table",
    "label": "\u00dcbersicht",
    "options": "RM Log Versandkarten"
+  },
+  {
+   "fieldname": "mahnungen",
+   "fieldtype": "Table",
+   "label": "\u00dcbersicht",
+   "options": "RM Log Mahnungen"
   }
  ],
- "modified": "2021-11-15 21:23:21.670614",
+ "modified": "2022-06-02 09:53:41.778938",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "RM Log",

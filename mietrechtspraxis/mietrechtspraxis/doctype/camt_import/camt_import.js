@@ -161,16 +161,7 @@ frappe.ui.form.on('CAMT Import', {
             freeze: true,
             freeze_message: 'Analysiere Daten und erstelle Bericht...',
             callback: function(r) {
-                if (r.message) {
-                    var feedback = r.message;
-                    if (feedback.status == 'ok') {
-                        frappe.msgprint("Bericht erstellt");
-                    } else {
-                        frappe.msgprint(feedback.feedback_message);
-                    }
-                } else {
-                    frappe.msgprint("Etwas ist schief gelaufen...");
-                }
+                cur_frm.reload_doc();
             }
         });
     }

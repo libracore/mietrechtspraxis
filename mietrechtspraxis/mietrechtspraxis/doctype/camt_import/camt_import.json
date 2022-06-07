@@ -25,6 +25,8 @@
   "show_overpaid",
   "show_unassigned",
   "show_manual_match",
+  "section_zahlungsreport",
+  "zahlungsreport",
   "section_import",
   "importet_payments",
   "section_match",
@@ -200,9 +202,20 @@
   {
    "fieldname": "cb_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.status=='Closed'",
+   "fieldname": "section_zahlungsreport",
+   "fieldtype": "Section Break",
+   "label": "Zahlungsreport"
+  },
+  {
+   "fieldname": "zahlungsreport",
+   "fieldtype": "Code",
+   "read_only": 1
   }
  ],
- "modified": "2022-01-05 14:28:18.203572",
+ "modified": "2022-01-13 21:59:58.222767",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "CAMT Import",

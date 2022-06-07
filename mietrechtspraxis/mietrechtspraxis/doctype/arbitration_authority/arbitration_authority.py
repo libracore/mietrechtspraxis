@@ -47,8 +47,8 @@ def _get_sb(**kwargs):
                                     SELECT
                                         `city`,
                                         `municipality`,
-                                        `district`,
-                                        `canton`
+                                        `canton`,
+                                        `pincode` AS `plz`
                                     FROM `tabPincode`
                                     WHERE `pincode` = '{plz_city}'
                                     ORDER BY `city` ASC
@@ -59,8 +59,8 @@ def _get_sb(**kwargs):
                                         SELECT
                                             `city`,
                                             `municipality`,
-                                            `district`,
-                                            `canton`
+                                            `canton`,
+                                            `pincode` AS `plz`
                                         FROM `tabPincode`
                                         WHERE `city` LIKE '%{plz_city}%'
                                         ORDER BY `city` ASC
@@ -72,13 +72,12 @@ def _get_sb(**kwargs):
             data['plz'] = city.plz
             data['ort'] = city.city
             data['gemeinde'] = city.municipality
-            data['bezirk'] = city.district
             data['kanton'] = city.canton
             data['allgemein'] = get_informations(city.canton)
             data['schlichtungsbehoerde'] = frappe.db.sql("""
                                                                 SELECT
                                                                     `schlichtungsbehoerde`.`titel` AS `Titel`,
-                                                                    `schlichtungsbehoerde`.`telefon` AS `Telefon`,
+                                                                    `contact`.`phone` AS `Telefon`,
                                                                     `schlichtungsbehoerde`.`kuendigungstermine` AS `Kündigungstermine`,
                                                                     `schlichtungsbehoerde`.`pauschalen` AS `Pauschalen`,
                                                                     `schlichtungsbehoerde`.`rechtsberatung` AS `Rechtsberatung`,
@@ -86,6 +85,7 @@ def _get_sb(**kwargs):
                                                                     `schlichtungsbehoerde`.`homepage` AS `Homepage`
                                                                 FROM `tabArbitration Authority` AS `schlichtungsbehoerde`
                                                                 LEFT JOIN `tabMunicipality Table` AS `geminendentbl` ON `schlichtungsbehoerde`.`name`=`geminendentbl`.`parent`
+                                                                LEFT JOIN `tabContact` AS `contact` ON `schlichtungsbehoerde`.`kontakt`=`contact`.`name`
                                                                 WHERE `geminendentbl`.`municipality` = '{municipality}'
                                                                 """.format(municipality=city.municipality), as_dict=True)
             answer.append(data)
@@ -102,10 +102,14 @@ def _get_sb(**kwargs):
 def get_informations(kanton):
     search = frappe.db.sql("""
                             SELECT
-                                `informationen`,
+                                `mietgerichte`,
+                                `kosten`,
+                                `anfangsmietzins`,
+                                `anwalt_vertretung`,
+                                `bemerkungen`,
                                 `homepage`,
-                                `gesetzessammlung`,
-                                `formulare`
+                                `formulare`,
+                                `gesetzessammlung`
                             FROM `tabKantonsinformationen`
                             WHERE `kanton` = '{kanton}'
                             """.format(kanton=kanton), as_dict=True)

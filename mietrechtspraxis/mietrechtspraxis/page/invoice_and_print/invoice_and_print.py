@@ -694,6 +694,7 @@ def _create_versandkarten(date):
     data = []
     qty_one = 0
     qty_multi = 0
+    save_counter = 1
     
     rm_log = frappe.get_doc({
         "doctype": "RM Log",
@@ -726,7 +727,7 @@ def _create_versandkarten(date):
                                 `tabmp Abo`.`recipient_address`
                             FROM `tabmp Abo`
                             WHERE
-                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}'))
+                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}'))
                             AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
                             AND `tabmp Abo`.`magazines_qty_ir` > 0
                             UNION
@@ -742,7 +743,7 @@ def _create_versandkarten(date):
                                 SELECT
                                     `name`
                                 FROM `tabmp Abo`
-                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}')
+                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}')
                             )
                             AND `tabmp Abo Recipient`.`magazines_qty_mr` > 0
                         ) AS `view`
@@ -758,14 +759,21 @@ def _create_versandkarten(date):
             versand_row.anz = empfaenger.anz
             versand_row.recipient_contact = empfaenger.recipient_contact
             versand_row.recipient_address = empfaenger.recipient_address
-            rm_log.save(ignore_permissions=True)
-            frappe.db.commit()
+            if save_counter == 250:
+                rm_log.save(ignore_permissions=True)
+                frappe.db.commit()
+                save_counter = 1
+            else:
+                save_counter += 1
             if empfaenger.anz > 1:
                 qty_multi += 1
             else:
                 qty_one += 1
         except:
             frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
+    
+    rm_log.save(ignore_permissions=True)
+    frappe.db.commit()
     
     inland_empfaenger = frappe.db.sql("""
                         SELECT
@@ -783,7 +791,7 @@ def _create_versandkarten(date):
                                 `tabmp Abo`.`recipient_address`
                             FROM `tabmp Abo`
                             WHERE
-                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}'))
+                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}'))
                             AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
                             UNION
                             SELECT
@@ -798,7 +806,7 @@ def _create_versandkarten(date):
                                 SELECT
                                     `name`
                                 FROM `tabmp Abo`
-                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` <= '{date}')
+                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}')
                             )
                         ) AS `view`
                         ORDER BY `view`.`anz` ASC
@@ -813,8 +821,12 @@ def _create_versandkarten(date):
             versand_row.anz = empfaenger.anz
             versand_row.recipient_contact = empfaenger.recipient_contact
             versand_row.recipient_address = empfaenger.recipient_address
-            rm_log.save(ignore_permissions=True)
-            frappe.db.commit()
+            if save_counter == 250:
+                rm_log.save(ignore_permissions=True)
+                frappe.db.commit()
+                save_counter = 1
+            else:
+                save_counter += 1
             if empfaenger.anz > 1:
                 qty_multi += 1
             else:
@@ -822,6 +834,8 @@ def _create_versandkarten(date):
         except:
             frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
     
+    rm_log.save(ignore_permissions=True)
+    frappe.db.commit()
     
         
     try:
