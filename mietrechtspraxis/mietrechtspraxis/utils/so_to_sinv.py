@@ -11,18 +11,21 @@ from frappe.utils.background_jobs import enqueue
 from frappe.utils.data import now
 
 @frappe.whitelist()
-def create_invoices(tag):
+def create_invoices(tag, posting_date):
     sales_orders = frappe.db.sql("""SELECT
                                         `name`
                                     FROM `tabSales Order`
                                     WHERE `docstatus` = 1
                                     AND `_user_tags` LIKE '%{tag}%'
-                                    AND `per_billed` < 1""".format(tag=tag), as_dict=True)
+                                    AND `per_billed` < 1
+                                    ORDER BY `total_qty` DESC""".format(tag=tag), as_dict=True)
     if len(sales_orders) > 0:
         sinvs = []
         return_value = ''
         for so in sales_orders:
             sinv = frappe.get_doc(make_sales_invoice(so.name, target_doc=None, ignore_permissions=False))
+            sinv.set_posting_time = 1
+            sinv.posting_date = posting_date
             sinv.insert()
             sinv.esr_reference = get_qrr_reference(sales_invoice=sinv.name, customer=sinv.customer)
             sinv.submit()
