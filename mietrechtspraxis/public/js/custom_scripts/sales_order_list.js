@@ -80,13 +80,14 @@ frappe.listview_settings['Sales Order'] = {
     }
 };
 
-function create_invoice(tag) {
+function create_invoice(tag, posting_date) {
     console.log(tag);
     frappe.dom.freeze('Bitte warten, erstelle Rechnungen...');
     frappe.call({
         'method': "mietrechtspraxis.mietrechtspraxis.utils.so_to_sinv.create_invoices",
         'args': {
-            'tag': tag
+            'tag': tag,
+            'posting_date': posting_date
         },
         'callback': function(r) {
             var jobname = r.message;
@@ -127,10 +128,11 @@ function get_tags(){
         callback: function(r) {
             var tags = r.message.join("\n");
             frappe.prompt([
-                {'fieldname': 'tag', 'fieldtype': 'Select', 'label': 'Tag', 'reqd': 1, 'options': tags}  
+                {'fieldname': 'tag', 'fieldtype': 'Select', 'label': 'Tag', 'reqd': 1, 'options': tags},
+                {'fieldname': 'posting_date', 'fieldtype': 'Date', 'label': 'Buchungsdatum der Rechnung', 'reqd': 1, 'default': frappe.datetime.get_today()}
             ],
             function(values){
-                create_invoice(values.tag);
+                create_invoice(values.tag, values.posting_date);
             },
             'Auswahl Aufträge',
             'Rechnungen erstellen'
