@@ -1224,3 +1224,15 @@ def customer_fullname_to_contact():
     print("Fehlgeschlagen:")
     print(errors)
     return
+
+def add_abo_tags():
+    abos = frappe.db.sql("""SELECT `name` FROM `tabmp Abo` WHERE `status` = 'Active'""", as_dict=True)
+    total = len(abos)
+    loop = 1
+    for abo in abos:
+        print("{0} of {1}".format(loop, total))
+        a = frappe.get_doc("mp Abo", abo.name)
+        add_tag('Abo-Inhaber', 'Contact', a.recipient_contact)
+        for k in a.recipient:
+            add_tag('Abo-Empfänger', 'Contact', k.recipient_contact)
+        loop += 1
