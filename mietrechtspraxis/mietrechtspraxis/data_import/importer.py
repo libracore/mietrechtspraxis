@@ -1201,3 +1201,26 @@ def import_schlichtungsbehoerden(site_name, file_name, limit=False):
             count += 1
         else:
             break
+
+def customer_fullname_to_contact():
+    contacts = frappe.db.sql("""SELECT
+                                    `parent`,
+                                    `link_name`
+                                FROM `tabDynamic Link`
+                                WHERE `parenttype` = 'Contact'
+                                AND `link_doctype` = 'Customer'""", as_dict=True)
+    total = len(contacts)
+    loop = 1
+    errors = ''
+    for contact in contacts:
+        try:
+            customer_fullname = frappe.get_doc("Customer", contact.link_name).customer_name
+            update = frappe.db.sql("""UPDATE `tabContact` SET `customer_fullname` = '{customer_fullname}' WHERE `name` = '{parent}'""".format(customer_fullname=customer_fullname, parent=contact.parent), as_list=True)
+            print("{0} of {1}".format(loop, total))
+            loop += 1
+        except Exception as err:
+            errors += '{0}, '.format(contact.parent)
+    
+    print("Fehlgeschlagen:")
+    print(errors)
+    return
