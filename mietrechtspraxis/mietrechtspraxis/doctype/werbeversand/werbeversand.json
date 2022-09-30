@@ -1,0 +1,81 @@
+{
+ "autoname": "format:Werbeversand-{#####}",
+ "creation": "2022-09-27 16:17:41.582232",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "amended_from",
+  "section_selektion",
+  "mh_tags",
+  "cb_1",
+  "no_tags"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Neu\nIn Arbeit\nAbgeschlossen\nFehlgeschlagen",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Werbeversand",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_selektion",
+   "fieldtype": "Section Break",
+   "label": "Selektionskriterien"
+  },
+  {
+   "description": "Jeden Tag auf einer Zeile auff\u00fchren",
+   "fieldname": "mh_tags",
+   "fieldtype": "Code",
+   "label": "Folgende Tags <b>m\u00fcssen</b> vorhanden sein"
+  },
+  {
+   "description": "Jeden Tag auf einer Zeile auff\u00fchren",
+   "fieldname": "no_tags",
+   "fieldtype": "Code",
+   "label": "Folgende Tags d\u00fcrfen <b>nicht</b> vorhanden sein"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-09-30 10:58:03.497795",
+ "modified_by": "Administrator",
+ "module": "mietrechtspraxis",
+ "name": "Werbeversand",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
