@@ -1365,3 +1365,19 @@ def create_edubox_kontakt(kunde, adresse, row):
     new_contact.insert()
     
     return
+
+def edubox_update():
+    customers = frappe.db.sql("""SELECT `name` FROM `tabCustomer` WHERE `import_quelle` = 'edoobox_20220929.csv'""", as_dict=True)
+    for customer in customers:
+        cus = frappe.get_doc("Customer", customer.name)
+        if cus.customer_type == 'Individual':
+            contact = frappe.db.sql("""SELECT `parent` FROM `tabDynamic Link` WHERE `link_doctype` = 'Customer' AND `link_name` = '{0}' AND `parenttype` = 'Contact'""".format(cus.name), as_dict=True)
+            c = frappe.get_doc("Contact", contact[0].parent)
+            cus.customer_name = (" ").join((c.first_name, c.last_name))
+            cus.save()
+            add_tag('Kurs', 'Contact', c.name)
+        else:
+            contacts = frappe.db.sql("""SELECT `parent` FROM `tabDynamic Link` WHERE `link_doctype` = 'Customer' AND `link_name` = '{0}' AND `parenttype` = 'Contact'""".format(cus.name), as_dict=True)
+            for contact in contacts:
+                c = frappe.get_doc("Contact", contact.parent)
+                add_tag('Kurs', 'Contact', c.name)
