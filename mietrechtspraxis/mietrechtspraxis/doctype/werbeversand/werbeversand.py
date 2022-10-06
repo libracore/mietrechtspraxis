@@ -32,10 +32,10 @@ def get_create_csv(werbeversand):
             first = True
             for mh_tag in werbeversand_doc.mh_tags.split("\n"):
                 if first:
-                    filters += """WHERE (`_user_tags` LIKE '%{0}%'""".format(mh_tag)
+                    filters += """WHERE (`_user_tags` LIKE '{0}'""".format(mh_tag)
                     first = False
                 else:
-                    filters += """ AND `_user_tags` LIKE '%{0}%'""".format(mh_tag)
+                    filters += """ AND `_user_tags` LIKE '{0}'""".format(mh_tag)
             filters += ')'
         
         if werbeversand_doc.no_tags:
@@ -43,13 +43,13 @@ def get_create_csv(werbeversand):
             for no_tag in werbeversand_doc.no_tags.split("\n"):
                 if first:
                     if not werbeversand_doc.mh_tags:
-                        filters += """WHERE (`_user_tags` NOT LIKE '%{0}%'""".format(no_tag)
+                        filters += """WHERE (`_user_tags` NOT LIKE '{0}'""".format(no_tag)
                         first = False
                     else:
-                        filters += """ AND (`_user_tags` NOT LIKE '%{0}%'""".format(no_tag)
+                        filters += """ AND (`_user_tags` NOT LIKE '{0}'""".format(no_tag)
                         first = False
                 else:
-                    filters += """ AND `_user_tags` NOT LIKE '%{0}%'""".format(no_tag)
+                    filters += """ AND `_user_tags` NOT LIKE '{0}'""".format(no_tag)
             filters += ')'
                 
         
