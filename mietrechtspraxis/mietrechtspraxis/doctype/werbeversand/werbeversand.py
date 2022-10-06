@@ -95,7 +95,10 @@ def get_csv_header():
         'zusatz',
         'plz',
         'ort',
-        'land'
+        'land',
+        'customer_id',
+        'contact_id',
+        'address_id'
     ]
     data.append(header)
     return data
@@ -152,6 +155,15 @@ def get_csv_data(csv_data, contact):
         data.append('{ort}'.format(ort=address.city or ''))
         data.append('{land}'.format(land=address.country or ''))
     
+    if not customer:
+        data.append('---')
+    else:
+        data.append('https://mp.libracore.ch/Form/Customer/{0}'.format(customer.name))
+    data.append('https://mp.libracore.ch/Form/Contact/{0}'.format(contact.name))
+    if not address:
+        data.append('---')
+    else:
+        data.append('https://mp.libracore.ch/Form/Address/{0}'.format(address.name))
     # concat data and return
     csv_data.append(data)
     return csv_data
