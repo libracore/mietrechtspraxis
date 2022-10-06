@@ -116,5 +116,17 @@ def get_data():
                        "description": _("API Einstellungen")
                    }
             ]
+        },
+        {
+            "label": _("Versand"),
+            "icon": "fa fa-money",
+            "items": [
+                   {
+                       "type": "doctype",
+                       "name": "Werbeversand",
+                       "label": _("Werbeversand"),
+                       "description": _("Werbeversand")
+                   }
+            ]
         }
 ]

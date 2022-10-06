@@ -32,10 +32,10 @@ def get_create_csv(werbeversand):
             first = True
             for mh_tag in werbeversand_doc.mh_tags.split("\n"):
                 if first:
-                    filters += """WHERE (`_user_tags` LIKE '{0}'""".format(mh_tag)
+                    filters += """WHERE (`_user_tags` LIKE '%{0}%'""".format(mh_tag)
                     first = False
                 else:
-                    filters += """ AND `_user_tags` LIKE '{0}'""".format(mh_tag)
+                    filters += """ AND `_user_tags` LIKE '%{0}%'""".format(mh_tag)
             filters += ')'
         
         if werbeversand_doc.no_tags:
@@ -43,16 +43,16 @@ def get_create_csv(werbeversand):
             for no_tag in werbeversand_doc.no_tags.split("\n"):
                 if first:
                     if not werbeversand_doc.mh_tags:
-                        filters += """WHERE (`_user_tags` NOT LIKE '{0}'""".format(no_tag)
+                        filters += """WHERE (`_user_tags` NOT LIKE '%{0}%'""".format(no_tag)
                         first = False
                     else:
-                        filters += """ AND (`_user_tags` NOT LIKE '{0}'""".format(no_tag)
+                        filters += """ AND (`_user_tags` NOT LIKE '%{0}%'""".format(no_tag)
                         first = False
                 else:
-                    filters += """ AND `_user_tags` NOT LIKE '{0}'""".format(no_tag)
+                    filters += """ AND `_user_tags` NOT LIKE '%{0}%'""".format(no_tag)
             filters += ')'
                 
-        
+        frappe.throw("""SELECT `name` FROM `tabContact` {filters}""".format(filters=filters))
         contacts = frappe.db.sql("""SELECT `name` FROM `tabContact` {filters}""".format(filters=filters), as_dict=True)
         
         for contact in contacts:
@@ -158,12 +158,12 @@ def get_csv_data(csv_data, contact):
     if not customer:
         data.append('---')
     else:
-        data.append('https://mp.libracore.ch/Form/Customer/{0}'.format(customer.name))
-    data.append('https://mp.libracore.ch/Form/Contact/{0}'.format(contact.name))
+        data.append('{0}'.format(customer.name))
+    data.append('{0}'.format(contact.name))
     if not address:
         data.append('---')
     else:
-        data.append('https://mp.libracore.ch/Form/Address/{0}'.format(address.name))
+        data.append('{0}'.format(address.name))
     # concat data and return
     csv_data.append(data)
     return csv_data
