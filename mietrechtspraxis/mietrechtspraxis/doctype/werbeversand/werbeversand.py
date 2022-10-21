@@ -52,7 +52,6 @@ def get_create_csv(werbeversand):
                     filters += """ AND `_user_tags` NOT LIKE '%{0}%'""".format(no_tag)
             filters += ')'
                 
-        frappe.throw("""SELECT `name` FROM `tabContact` {filters}""".format(filters=filters))
         contacts = frappe.db.sql("""SELECT `name` FROM `tabContact` {filters}""".format(filters=filters), as_dict=True)
         
         for contact in contacts:
