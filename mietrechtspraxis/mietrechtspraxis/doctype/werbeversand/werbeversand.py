@@ -52,7 +52,6 @@ def get_create_csv(werbeversand):
                     filters += """ AND `_user_tags` NOT LIKE '%{0}%'""".format(no_tag)
             filters += ')'
                 
-        
         contacts = frappe.db.sql("""SELECT `name` FROM `tabContact` {filters}""".format(filters=filters), as_dict=True)
         
         for contact in contacts:
@@ -95,7 +94,10 @@ def get_csv_header():
         'zusatz',
         'plz',
         'ort',
-        'land'
+        'land',
+        'customer_id',
+        'contact_id',
+        'address_id'
     ]
     data.append(header)
     return data
@@ -118,7 +120,13 @@ def get_csv_data(csv_data, contact):
         data.append('---')
         data.append('---')
     else:
-        data.append('{customer_fullname}'.format(customer_fullname=customer.customer_name or ''))
+        if customer.customer_type == 'Company':
+            if customer.customer_name != contact.first_name:
+                data.append('{customer_fullname}'.format(customer_fullname=customer.customer_name or ''))
+            else:
+                data.append('')
+        else:
+            data.append('')
         data.append('{customer_addition}'.format(customer_addition=customer.customer_addition or ''))
         data.append('{customer_type}'.format(customer_type=customer.customer_type or ''))
         data.append('{customer_group}'.format(customer_group=customer.customer_group or ''))
@@ -152,6 +160,15 @@ def get_csv_data(csv_data, contact):
         data.append('{ort}'.format(ort=address.city or ''))
         data.append('{land}'.format(land=address.country or ''))
     
+    if not customer:
+        data.append('---')
+    else:
+        data.append('{0}'.format(customer.name))
+    data.append('{0}'.format(contact.name))
+    if not address:
+        data.append('---')
+    else:
+        data.append('{0}'.format(address.name))
     # concat data and return
     csv_data.append(data)
     return csv_data

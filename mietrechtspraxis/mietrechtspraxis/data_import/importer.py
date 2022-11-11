@@ -14,8 +14,8 @@ from frappe.desk.tags import add_tag
 
 # Header mapping (ERPNext <> MVD)
 hm = {
-    'first_name': 'vorname', # contact
-    'last_name': 'nachname', # contact
+    'first_name': 'first_name', # contact
+    'last_name': 'last_name', # contact
     'salutation': 'anrede_string', # contact
     'email_id': 'e_mail', # contact
     'is_primary_phone': 'tel_p', # contact
@@ -47,7 +47,16 @@ hm = {
     'backup_mail': 'email',
     'zeitung_anzahl_adresse': 'zeitung_anzahl_adresse',
     'leistung_id': 'leistung_id',
-    'datum_kuend_per': 'datum_kuend_per'
+    'datum_kuend_per': 'datum_kuend_per',
+    'id': 'id',
+    'gender': 'gender',
+    'street': 'street',
+    'postcode': 'postcode',
+    'location': 'location',
+    'phone_number': 'phone_number',
+    'email': 'email',
+    'company': 'company',
+    'data_1': 'data_1'
 }
     
 
@@ -1236,3 +1245,139 @@ def add_abo_tags():
         for k in a.recipient:
             add_tag('Abo-Empfänger', 'Contact', k.recipient_contact)
         loop += 1
+
+# ----------------------------------------------
+# Import EduBox Daten
+# ----------------------------------------------
+def import_edubox_daten(site_name, file_name):
+    # display all coloumns for error handling
+    pd.set_option('display.max_rows', None, 'display.max_columns', None)
+    
+    # read csv
+    df = pd.read_csv('/home/frappe/frappe-bench/sites/{site_name}/private/files/{file_name}'.format(site_name=site_name, file_name=file_name))
+    
+    # loop through rows
+    count = 1
+    index = df.index
+    max_loop = len(index)
+    
+    vorgaenger_name = ''
+    vorgaenger_kunde = ''
+    
+    for index, row in df.iterrows():
+        try:
+            if str(get_werbe_value(row, 'company')) and str(get_werbe_value(row, 'company')) == vorgaenger_name:
+                address = create_edubox_address(vorgaenger_kunde, row)
+                create_edubox_kontakt(vorgaenger_kunde, address, row)
+            else:
+                vorgaenger_name = str(get_werbe_value(row, 'company'))
+                vorgaenger_kunde = create_edubox_kunde(row)
+                address = create_edubox_address(vorgaenger_kunde, row)
+                create_edubox_kontakt(vorgaenger_kunde, address, row)
+            print("{0} of {1}".format(count, max_loop))
+            count += 1
+        except Exception as err:
+            frappe.log_error('{0}\n\n{1}'.format(str(err), row), "Import EduBox Daten")
+
+def create_edubox_kunde(row):
+    if not str(get_werbe_value(row, 'company')):
+        customer_type = 'Individual'
+        customer_name = str(get_werbe_value(row, 'first_name')) + str(get_werbe_value(row, 'last_name'))
+        customer_addition = ''
+    else:
+        customer_type = 'Company'
+        customer_name = str(get_werbe_value(row, 'company'))
+        customer_addition = str(get_werbe_value(row, 'data_1'))
+    import_quelle = "edoobox_20220929.csv"
+    
+    new_customer = frappe.get_doc({
+        'doctype': 'Customer',
+        'customer_name': customer_name,
+        'customer_addition': customer_addition,
+        'customer_type': customer_type,
+        'import_quelle': import_quelle
+    })
+    new_customer.insert()
+    
+    return new_customer.name
+
+def create_edubox_address(kunde, row):
+    strasse= address_line1 = str(get_werbe_value(row, 'street'))
+    address_line2 = ''
+    zusatz = ''
+    plz = str(int(get_werbe_value(row, 'postcode')))
+    city = str(get_werbe_value(row, 'location'))
+    country = 'Schweiz'
+    
+    new_address = frappe.get_doc({
+        'doctype': 'Address',
+        'address_title': kunde,
+        'address_line1': address_line1,
+        'address_line2': address_line2,
+        'zusatz': zusatz,
+        'strasse': strasse,
+        'pincode': plz,
+        'plz': plz,
+        'city': city,
+        'country': country,
+        'links': [{
+            'link_doctype': 'Customer',
+            'link_name': kunde
+        }]
+    })
+    new_address.insert()
+    
+    return new_address.name
+
+def create_edubox_kontakt(kunde, adresse, row):
+    first_name = str(get_werbe_value(row, 'first_name'))
+    last_name = str(get_werbe_value(row, 'last_name'))
+    salutation = str(get_werbe_value(row, 'gender'))
+    if str(get_werbe_value(row, 'email')):
+        email_ids = [{
+            'email_id': str(get_werbe_value(row, 'email')),
+            'is_primary': 1
+        }]
+    else:
+        email_ids = []
+    if str(get_werbe_value(row, 'phone_number')):
+        phone_nos = [{
+            'phone': str(get_werbe_value(row, 'phone_number')),
+            'is_primary_phone': 1
+        }]
+    else:
+        phone_nos = []
+    
+    new_contact = frappe.get_doc({
+        'doctype': 'Contact',
+        'first_name': first_name,
+        'last_name': last_name,
+        'salutation': salutation,
+        'address': adresse,
+        'email_ids': email_ids,
+        'phone_nos': phone_nos,
+        'links': [{
+            'link_doctype': 'Customer',
+            'link_name': kunde
+        }],
+        'idedoobox': str(get_werbe_value(row, 'id'))
+    })
+    new_contact.insert()
+    
+    return
+
+def edubox_update():
+    customers = frappe.db.sql("""SELECT `name` FROM `tabCustomer` WHERE `import_quelle` = 'edoobox_20220929.csv'""", as_dict=True)
+    for customer in customers:
+        cus = frappe.get_doc("Customer", customer.name)
+        if cus.customer_type == 'Individual':
+            contact = frappe.db.sql("""SELECT `parent` FROM `tabDynamic Link` WHERE `link_doctype` = 'Customer' AND `link_name` = '{0}' AND `parenttype` = 'Contact'""".format(cus.name), as_dict=True)
+            c = frappe.get_doc("Contact", contact[0].parent)
+            cus.customer_name = (" ").join((c.first_name, c.last_name))
+            cus.save()
+            add_tag('Kurs', 'Contact', c.name)
+        else:
+            contacts = frappe.db.sql("""SELECT `parent` FROM `tabDynamic Link` WHERE `link_doctype` = 'Customer' AND `link_name` = '{0}' AND `parenttype` = 'Contact'""".format(cus.name), as_dict=True)
+            for contact in contacts:
+                c = frappe.get_doc("Contact", contact.parent)
+                add_tag('Kurs', 'Contact', c.name)

@@ -86,19 +86,86 @@ def set_inactive_status():
         # set status
         abo = frappe.get_doc("mp Abo", _abo.name)
         abo.status = "Inactive"
+        
+        disabled_customer = False
+        if abo.invoice_recipient:
+            customer = frappe.get_doc("Customer", abo.invoice_recipient)
+            if customer.disabled:
+                disabled_customer = True
+                customer.disabled = 0
+                customer.save()
+                
+        disabled_address = False
+        if abo.recipient_address:
+            address = frappe.get_doc("Address", abo.recipient_address)
+            if address.disabled:
+                disabled_address = True
+                address.disabled = 0
+                address.save()
+        
         abo.save()
+        
+        if disabled_address:
+            address.disabled = 1
+            address.save()
+        
         # reset mp user login
         if abo.recipient_contact:
             contact = frappe.get_doc("Contact", abo.recipient_contact)
+            
+            disabled_address = False
+            if contact.address:
+                address = frappe.get_doc("Address", contact.address)
+                if address.disabled:
+                    disabled_address = True
+                    address.disabled = 0
+                    address.save()
+            
             contact.mp_username = ''
             contact.mp_password = ''
             contact.save()
+            
+            if disabled_address:
+                address.disabled = 1
+                address.save()
+        
+        if disabled_customer:
+            customer.disabled = 1
+            customer.save()
+        
         for recipient in abo.recipient:
             if recipient.recipient_contact:
+                disabled_customer = False
+                if recipient.magazines_recipient:
+                    customer = frappe.get_doc("Customer", recipient.magazines_recipient)
+                    
+                    if customer.disabled:
+                        disabled_customer = True
+                        customer.disabled = 0
+                        customer.save()
+                
                 contact = frappe.get_doc("Contact", recipient.recipient_contact)
+                
+                disabled_address = False
+                if contact.address:
+                    address = frappe.get_doc("Address", contact.address)
+                    if address.disabled:
+                        disabled_address = True
+                        address.disabled = 0
+                        address.save()
+                
                 contact.mp_username = ''
                 contact.mp_password = ''
+                
                 contact.save()
+                
+                if disabled_address:
+                    address.disabled = 1
+                    address.save()
+                
+                if disabled_customer:
+                    customer.disabled = 1
+                    customer.save()
 
 def remove_recipient():
     frappe.db.sql("""SET SQL_SAFE_UPDATES = 0""", as_list=True)
