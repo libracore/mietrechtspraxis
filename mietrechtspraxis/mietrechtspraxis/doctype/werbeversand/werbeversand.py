@@ -120,7 +120,13 @@ def get_csv_data(csv_data, contact):
         data.append('---')
         data.append('---')
     else:
-        data.append('{customer_fullname}'.format(customer_fullname=customer.customer_name or ''))
+        if customer.customer_type == 'Company':
+            if customer.customer_name != contact.first_name:
+                data.append('{customer_fullname}'.format(customer_fullname=customer.customer_name or ''))
+            else:
+                data.append('')
+        else:
+            data.append('')
         data.append('{customer_addition}'.format(customer_addition=customer.customer_addition or ''))
         data.append('{customer_type}'.format(customer_type=customer.customer_type or ''))
         data.append('{customer_group}'.format(customer_group=customer.customer_group or ''))
