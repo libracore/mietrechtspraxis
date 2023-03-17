@@ -37,6 +37,11 @@ frappe.invoice_and_print = {
                 $("#date_label").hide();
                 $("#date").hide();
             }
+            if (selected_type != 'versandkarten') {
+                $("#versandkartentext").hide();
+            } else {
+                $("#versandkartentext").show();
+            }
         });
     },
     get_show_data: function() {
@@ -150,6 +155,7 @@ frappe.invoice_and_print = {
     },
     create_versandkarten: function() {
         var date = $("#date").val();
+        var txt = $("#versandkartentext_text").val();
         if (date) {
             frappe.confirm(
                 'Wollen Sie die Versandkarten erstellen? Der berücksichtigte Stichtag ist ' + frappe.datetime.obj_to_user(date),
@@ -160,7 +166,8 @@ frappe.invoice_and_print = {
                     frappe.call({
                         "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_versandkarten",
                         "args": {
-                            "date": date
+                            "date": date,
+                            "txt": txt
                         }
                     });
                 },

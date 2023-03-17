@@ -16,6 +16,7 @@
   "qty_multi",
   "sinvs",
   "begleitungen",
+  "versandkartentext",
   "versandkarten",
   "mahnungen"
  ],
@@ -112,9 +113,15 @@
    "fieldtype": "Table",
    "label": "\u00dcbersicht",
    "options": "RM Log Mahnungen"
+  },
+  {
+   "depends_on": "eval:doc.typ=='Versandkarten'",
+   "fieldname": "versandkartentext",
+   "fieldtype": "Code",
+   "label": "Versandkarten Text"
   }
  ],
- "modified": "2022-06-14 09:50:51.766922",
+ "modified": "2023-03-17 14:41:09.477895",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "RM Log",
