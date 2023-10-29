@@ -684,13 +684,14 @@ def create_begleitschreiben_jahres_abo():
     frappe.db.commit()
 
 @frappe.whitelist()
-def create_versandkarten(date):
+def create_versandkarten(date, txt):
     args = {
-        'date': date
+        'date': date,
+        'txt': txt
     }
     enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_versandkarten", queue='long', job_name='Generierung Sammel-PDF (Versandkarten)', timeout=5000, **args)
 
-def _create_versandkarten(date):
+def _create_versandkarten(date, txt):
     data = []
     qty_one = 0
     qty_multi = 0
@@ -700,7 +701,8 @@ def _create_versandkarten(date):
         "doctype": "RM Log",
         'start': now(),
         'status': 'Job gestartet',
-        'typ': 'Versandkarten'
+        'typ': 'Versandkarten',
+        'versandkartentext': txt
     })
     rm_log.insert()
     frappe.db.commit()
