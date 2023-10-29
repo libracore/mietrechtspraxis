@@ -74,20 +74,42 @@ def _get_sb(**kwargs):
             data['gemeinde'] = city.municipality
             data['kanton'] = city.canton
             data['allgemein'] = get_informations(city.canton)
-            data['schlichtungsbehoerde'] = frappe.db.sql("""
+            schlichtungsbehoerden = frappe.db.sql("""
                                                                 SELECT
                                                                     `schlichtungsbehoerde`.`titel` AS `Titel`,
+                                                                    `schlichtungsbehoerde`.`name` AS `schlichtungsbehoerde_id`,
                                                                     `contact`.`phone` AS `Telefon`,
+                                                                    `contact`.`email_id` AS `email`,
                                                                     `schlichtungsbehoerde`.`kuendigungstermine` AS `Kündigungstermine`,
                                                                     `schlichtungsbehoerde`.`pauschalen` AS `Pauschalen`,
                                                                     `schlichtungsbehoerde`.`rechtsberatung` AS `Rechtsberatung`,
                                                                     `schlichtungsbehoerde`.`elektronische_eingaben` AS `elektronische Eingaben`,
-                                                                    `schlichtungsbehoerde`.`homepage` AS `Homepage`
+                                                                    `schlichtungsbehoerde`.`homepage` AS `Homepage`,
+                                                                    `schlichtungsbehoerde`.`sb_sitz` AS `Sitz`,
+                                                                    `address`.`plz` AS `plz`,
+                                                                    `address`.`city` AS `ort`,
+                                                                    `address`.`strasse` AS `strasse`,
+                                                                    `address`.`zusatz` AS `adressen_zusatz`,
+                                                                    NULL AS `zustaendig_fuer_gemeinden`
                                                                 FROM `tabArbitration Authority` AS `schlichtungsbehoerde`
                                                                 LEFT JOIN `tabMunicipality Table` AS `geminendentbl` ON `schlichtungsbehoerde`.`name`=`geminendentbl`.`parent`
                                                                 LEFT JOIN `tabContact` AS `contact` ON `schlichtungsbehoerde`.`kontakt`=`contact`.`name`
+                                                                LEFT JOIN `tabAddress` AS `address` ON `schlichtungsbehoerde`.`adresse`=`address`.`name`
                                                                 WHERE `geminendentbl`.`municipality` = '{municipality}'
                                                                 """.format(municipality=city.municipality), as_dict=True)
+            
+            
+            for schlichtungsbehoerde in schlichtungsbehoerden:
+                zustaendig_fuer_gemeinden = frappe.db.sql("""
+                                                            SELECT
+                                                                group_concat(`municipality` ORDER BY `municipality` ASC) `geminendentbl`
+                                                            FROM `tabMunicipality Table` AS `geminendentbl`
+                                                            WHERE `parent` = '{schlichtungsbehoerde_id}'
+                                                            """.format(schlichtungsbehoerde_id=schlichtungsbehoerde.schlichtungsbehoerde_id), as_dict=True)
+                if len(zustaendig_fuer_gemeinden) > 0:
+                    schlichtungsbehoerde.zustaendig_fuer_gemeinden = zustaendig_fuer_gemeinden[0].geminendentbl
+            
+            data['schlichtungsbehoerde'] = schlichtungsbehoerden
             answer.append(data)
             
         if len(answer) > 0:
