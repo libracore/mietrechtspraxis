@@ -24,15 +24,16 @@ def deactivate_abo_user():
         frappe.clear_cache()
         return True
     
-    default_role = frappe.db.get_single_value('mp Abo Settings', 'rolle_abo_inhaber') or 'undefined'
-    active_abo_users = frappe.db.sql("""
-        SELECT `parent` AS `user` FROM `tabHas Role`
-        WHERE `role` = '{default_role}'
-    """.format(default_role=default_role), as_dict=True)
+    default_role = frappe.db.get_single_value('mp Abo Settings', 'rolle_abo_inhaber') or False
+    if default_role:
+        active_abo_users = frappe.db.sql("""
+            SELECT `parent` AS `user` FROM `tabHas Role`
+            WHERE `role` = '{default_role}'
+        """.format(default_role=default_role), as_dict=True)
 
-    for active_abo_user in active_abo_users:
-        if not has_valid_abo(active_abo_user.user):
-            if not has_valid_bestellung(active_abo_user.user):
-                deactivate_abo_user(default_role, active_abo_user.user)
+        for active_abo_user in active_abo_users:
+            if not has_valid_abo(active_abo_user.user):
+                if not has_valid_bestellung(active_abo_user.user):
+                    deactivate_abo_user(default_role, active_abo_user.user)
     
     return

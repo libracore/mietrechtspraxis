@@ -119,7 +119,8 @@ doctype_list_js = {
 scheduler_events = {
     "daily": [
         "mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.set_inactive_status",
-        "mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.remove_recipient"
+        "mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.remove_recipient",
+        "mietrechtspraxis.mietrechtspraxis.utils.daily_jobs.deactivate_abo_user"
     ]
 }
 
