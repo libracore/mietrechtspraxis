@@ -14,8 +14,28 @@ def deactivate_abo_user():
             return False
     
     def has_valid_bestellung(username):
-        # welche bestellung?!
-        return False
+        probe_abo_day_diff = frappe.db.get_single_value('mp Abo Settings', 'login_ablauf_probe_abo') or 3
+        probe_abo = frappe.db.get_single_value('mp Abo Settings', 'probe_abo') or 'PERI-ABO-MP'
+        qty_valid_probe_bestellung = frappe.db.sql("""
+            SELECT COUNT(`name`) AS `qty` FROM `tab`
+            WHERE DATEDIFF(NOW(), `creation`) <= {probe_abo_day_diff}
+            AND `email` = '{username}'
+            AND `data` LIKE '%{probe_abo}%'
+        """.format(probe_abo_day_diff=probe_abo_day_diff, username=username, probe_abo=probe_abo), as_dict=True)[0].qty
+
+        reg_abo = frappe.db.get_single_value('mp Abo Settings', 'jahres_abo') or 'PERI-ABO-MP'
+        reg_abo_day_diff = frappe.db.get_single_value('mp Abo Settings', 'login_ablauf_reg_abo') or 10
+        qty_valid_reg_bestellung = frappe.db.sql("""
+            SELECT COUNT(`name`) AS `qty` FROM `tab`
+            WHERE DATEDIFF(NOW(), `creation`) <= {reg_abo_day_diff}
+            AND `email` = '{username}'
+            AND `data` LIKE '%{reg_abo}%'
+        """.format(reg_abo_day_diff=reg_abo_day_diff, username=username, reg_abo=reg_abo), as_dict=True)[0].qty
+
+        if (qty_valid_probe_bestellung + qty_valid_reg_bestellung) > 0:
+            return True
+        else:
+            return False
     
     def deactivate_abo_user(default_role, username):
         frappe.db.sql("""
