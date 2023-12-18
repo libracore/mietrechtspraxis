@@ -17,7 +17,7 @@ def deactivate_abo_user():
         probe_abo_day_diff = frappe.db.get_single_value('mp Abo Settings', 'login_ablauf_probe_abo') or 3
         probe_abo = frappe.db.get_single_value('mp Abo Settings', 'probe_abo') or 'PERI-ABO-MP'
         qty_valid_probe_bestellung = frappe.db.sql("""
-            SELECT COUNT(`name`) AS `qty` FROM `tab`
+            SELECT COUNT(`name`) AS `qty` FROM `tabAntwort auf das Formular`
             WHERE DATEDIFF(NOW(), `creation`) <= {probe_abo_day_diff}
             AND `email` = '{username}'
             AND `data` LIKE '%{probe_abo}%'
@@ -26,7 +26,7 @@ def deactivate_abo_user():
         reg_abo = frappe.db.get_single_value('mp Abo Settings', 'jahres_abo') or 'PERI-ABO-MP'
         reg_abo_day_diff = frappe.db.get_single_value('mp Abo Settings', 'login_ablauf_reg_abo') or 10
         qty_valid_reg_bestellung = frappe.db.sql("""
-            SELECT COUNT(`name`) AS `qty` FROM `tab`
+            SELECT COUNT(`name`) AS `qty` FROM `tabAntwort auf das Formular`
             WHERE DATEDIFF(NOW(), `creation`) <= {reg_abo_day_diff}
             AND `email` = '{username}'
             AND `data` LIKE '%{reg_abo}%'
