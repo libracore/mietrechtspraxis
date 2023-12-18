@@ -8,6 +8,16 @@
   "jahres_abo",
   "gratis_abo",
   "probe_abo",
+  "section_ablaufdatum",
+  "heading_1",
+  "login_ablauf_probe_abo",
+  "heading_3",
+  "login_ablauf",
+  "cb_1",
+  "heading_2",
+  "login_ablauf_reg_abo",
+  "heading_4",
+  "rolle_abo_inhaber",
   "section_druckformat",
   "druckformat"
  ],
@@ -56,10 +66,64 @@
    "fieldtype": "Data",
    "label": "Druckformat",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_ablaufdatum",
+   "fieldtype": "Section Break",
+   "label": "Ablauf Daten"
+  },
+  {
+   "fieldname": "heading_1",
+   "fieldtype": "Heading",
+   "label": "Probe-Abo"
+  },
+  {
+   "fieldname": "login_ablauf_probe_abo",
+   "fieldtype": "Int",
+   "label": "Login-Ablauf in Tagen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "heading_2",
+   "fieldtype": "Heading",
+   "label": "Regul\u00e4res Abo"
+  },
+  {
+   "fieldname": "login_ablauf_reg_abo",
+   "fieldtype": "Int",
+   "label": "Login-Ablauf in Tagen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "heading_3",
+   "fieldtype": "Heading",
+   "label": "Deaktivierung User ohne Abo"
+  },
+  {
+   "fieldname": "login_ablauf",
+   "fieldtype": "Int",
+   "label": "Login-Ablauf in Tagen",
+   "reqd": 1
+  },
+  {
+   "fieldname": "heading_4",
+   "fieldtype": "Heading",
+   "label": "Rolle Abo-Inhaber"
+  },
+  {
+   "fieldname": "rolle_abo_inhaber",
+   "fieldtype": "Link",
+   "label": "Rolle",
+   "options": "Role",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2021-10-30 17:17:06.435582",
+ "modified": "2023-12-18 10:41:41.050545",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo Settings",
