@@ -1,6 +1,8 @@
 ## mietrechtspraxis
 
 ### Version Log
+#### 1.11.0
+Patch zur autom. Umstellung der MwSt relevanten Datensätze und -verknüpfungen
 #### 1.10.0
 Anp. Druckformat Fragebogen für Schlichtungsbehörden
 #### 1.9.0
