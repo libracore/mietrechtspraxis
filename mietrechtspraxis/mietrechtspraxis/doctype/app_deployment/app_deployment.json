@@ -4,7 +4,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "mietrechtspraxis"
+  "mietrechtspraxis",
+  "mietrecht_ch"
  ],
  "fields": [
   {
@@ -12,10 +13,16 @@
    "fieldname": "mietrechtspraxis",
    "fieldtype": "Button",
    "label": "Mietrechtspraxis Deployment"
+  },
+  {
+   "description": "Dieser Button deployd die aktuellste Version der mietrecht.ch-App",
+   "fieldname": "mietrecht_ch",
+   "fieldtype": "Button",
+   "label": "Mietrech.ch Deployment"
   }
  ],
  "issingle": 1,
- "modified": "2024-01-23 15:37:28.667557",
+ "modified": "2024-01-23 15:45:10.773492",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "App Deployment",

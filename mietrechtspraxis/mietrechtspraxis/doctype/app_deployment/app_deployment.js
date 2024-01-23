@@ -9,5 +9,13 @@ frappe.ui.form.on('App Deployment', {
         }).then((r) => {
             frappe.msgprint(r.message);
         });
+    },
+    mietrecht_ch: function(frm) {
+        cur_frm.call({
+            method: "deploy_app",
+            args: {app: 'mietrecht_ch'}
+        }).then((r) => {
+            frappe.msgprint(r.message);
+        });
     }
 });
