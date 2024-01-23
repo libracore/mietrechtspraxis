@@ -9,7 +9,7 @@
  ],
  "fields": [
   {
-   "description": "Dieser Button deployd die aktuellste Version der mietrechtspraxis-App",
+   "description": "Dieser Button deployd die aktuellste Version der mietrechtspraxis-App X",
    "fieldname": "mietrechtspraxis",
    "fieldtype": "Button",
    "label": "Mietrechtspraxis Deployment"
@@ -22,7 +22,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2024-01-23 15:45:10.773492",
+ "modified": "2024-01-23 15:46:10.773492",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "App Deployment",
