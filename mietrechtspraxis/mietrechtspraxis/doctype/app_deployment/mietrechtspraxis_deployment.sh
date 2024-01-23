@@ -1,4 +1,4 @@
 cd /home/frappe/frappe-bench/apps/mietrechtspraxis/
 git pull
 cd /home/frappe/frappe-bench/
-bench migrate && bench restart
+bench --site mp-test.libracore.ch migrate && bench restart
