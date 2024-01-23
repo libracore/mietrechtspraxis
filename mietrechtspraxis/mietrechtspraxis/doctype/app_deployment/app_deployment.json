@@ -10,7 +10,8 @@
   {
    "fieldname": "mietrechtspraxis",
    "fieldtype": "Button",
-   "label": "Mietrechtspraxis Deployment"
+   "label": "Mietrechtspraxis Deployment",
+   "description": "Dieser Button deployd die aktuellste Version der mietrechtspraxis-App"
   }
  ],
  "issingle": 1,
