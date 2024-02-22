@@ -1,6 +1,8 @@
 ## mietrechtspraxis
 
 ### Version Log
+#### 1.12.0
+validate_mp_web_user
 #### 1.11.0
 Patch zur autom. Umstellung der MwSt relevanten Datensätze und -verknüpfungen
 #### 1.10.0
