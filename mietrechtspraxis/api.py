@@ -60,16 +60,16 @@ def mp_shop(**kwargs):
                                 ORDER BY `price_list_rate` DESC
                             """.format(item_code=item.item_code), as_dict=True)
         
+        return_rate = 0
         if len(rate) > 1:
-            rate = rate[0].rate
+            return_rate = rate[0].rate
             frappe.log_error("Mehere Preise für {item_code} gefunden!".format(item_code=item.item_code), "MP Shop API")
         if len(rate) < 1:
-            rate = 0
             frappe.log_error("Kein Preis für {item_code} gefunden!".format(item_code=item.item_code), "MP Shop API")
         else:
-            rate = rate[0].rate
+            return_rate = rate[0].rate
         
-        item.rate = rate
+        item.rate = return_rate
         return item
     
     data = []
