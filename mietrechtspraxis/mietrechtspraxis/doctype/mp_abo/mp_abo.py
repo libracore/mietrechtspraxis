@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.data import today, getdate
 from mietrechtspraxis.mietrechtspraxis.utils.qrr_reference import get_qrr_reference
+from frappe.utils import cint
 
 class mpAbo(Document):
     def onload(self):
@@ -41,7 +42,11 @@ class mpAbo(Document):
         if self.type == 'Probe-Abo':
             if len(self.recipient) >= 1:
                 frappe.throw("Ein Probe-Abo kann nicht mehrere Empfänger haben.")
-    pass
+    
+    def on_update(self):
+        # check valid_mp_web_user_abo
+        valid_mp_web_user_abo(abo=self)
+
 
 @frappe.whitelist()
 def get_address_html(customer, contact, address):
@@ -264,3 +269,87 @@ def create_random_pw():
         random.choice(spchars),
         get_covoco_block()])
     return password
+
+def valid_mp_web_user_abo(abo=None, user=None):
+    if not abo and not user:
+        return
+    
+    if abo:
+        user = get_user_from_contact(abo.recipient_contact)
+        if user:
+            contacts = get_contacts_from_user(user)
+            check_mp_web_user_based_on_contacts(contacts)
+
+        for recipient_contact in abo.recipient:
+            user = get_user_from_contact(recipient_contact.recipient_contact)
+            if user:
+                contacts = get_contacts_from_user(user)
+                check_mp_web_user_based_on_contacts(contacts)
+        return
+    
+    if user:
+        contacts = get_contacts_from_user(user)
+        check_mp_web_user_based_on_contacts(contacts)
+        return
+
+
+def check_mp_web_user_based_on_contacts(contacts):
+    has_activ_abo = False
+    for contact in contacts:
+        c = frappe.get_doc("Contact", contact[0])
+        if c.mp_web_user:
+            user = frappe.get_doc("User", c.mp_web_user)
+            activ_abos = frappe.db.sql("""
+                                        SELECT COUNT(`name`) AS `qty`
+                                        FROM `tabmp Abo`
+                                        WHERE `status` != 'Inactive'
+                                        AND `magazines_qty_ir` != 0
+                                        AND `recipient_contact` = '{0}'
+                                        """.format(contact[0]), as_dict=True)
+            frappe.log_error("{0}".format(activ_abos), "activ_abos")
+            if activ_abos[0].qty > 0:
+                has_activ_abo = True
+            
+            activ_recipient = frappe.db.sql("""
+                                            SELECT COUNT(`mar`.`name`) AS `qty`
+                                            FROM `tabmp Abo Recipient` AS `mar`
+                                            LEFT JOIN `tabmp Abo` AS `ma` ON `mar`.`parent` = `ma`.`name`
+                                            WHERE `ma`.`status` != 'Inactive'
+                                            AND `mar`.`recipient_contact` = '{0}'
+                                            """.format(contact[0]), as_dict=True)
+            frappe.log_error("{0}".format(activ_recipient), "activ_recipient")
+            if activ_recipient[0].qty > 0:
+                has_activ_abo = True
+    if has_activ_abo:
+        if cint(user.enabled) != 1:
+            enable_disable_user(user, 1)
+    else:
+        if cint(user.enabled) == 1:
+            enable_disable_user(user, 0)
+        
+    return
+
+def get_contacts_from_user(user):
+    if not user:
+        return []
+    
+    contacts = frappe.db.sql("""
+                             SELECT `name`
+                             FROM `tabContact`
+                             WHERE `mp_web_user` = '{0}'
+                             """.format(user), as_list=True)
+    return contacts
+
+def get_user_from_contact(contact):
+    c = frappe.get_doc("Contact", contact)
+    if c.mp_web_user:
+        return c.mp_web_user
+    else:
+        return False
+
+def enable_disable_user(user, status):
+    user.enabled = status
+    user.save(ignore_permissions=True)
+    return
+
+
