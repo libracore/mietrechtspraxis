@@ -1,0 +1,94 @@
+<div class="row">
+    <div class="col-3"></div>
+    <div class="col-6">
+        <div class="page-card">
+            <div class='page-card-head'>
+                <span class='indicator blue password-box'>E-Mail Erstregistration</span>
+            </div>
+            <form id="set-email">
+                <div class="form-group">
+                    <input id="regist_hash" type="text"
+                        class="form-control" placeholder="Registrations Hash-Code">
+                </div>
+                <div class="form-group">
+                    <input id="e_mail" type="text"
+                        class="form-control" placeholder="E-Mail Adresse">
+                </div>
+                <button type="submit" id="set_email_adress"
+                    class="btn btn-primary">E-Mail bestätigen</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-3"></div>
+</div>
+
+
+
+<script>
+    frappe.ready(function() {
+        if(frappe.utils.get_url_arg("hash")) {
+            $("#regist_hash").val(frappe.utils.get_url_arg("hash"));
+        }
+    
+        $("#set-email").on("submit", function() {
+            return false;
+        });
+    
+        $("#set_email_adress").click(function() {
+            var args = {
+                key: $("#regist_hash").val() || frappe.utils.get_url_arg("hash") || "",
+                e_mail: $("#e_mail").val()
+            }
+    
+            if(!args.e_mail || !args.key) {
+                if(!args.e_mail && !args.key) {
+                    $('.page-card-head .indicator')
+                        .removeClass().addClass('indicator red')
+                        .html("E-Mail & Hash-Code fehlen");
+                } else if(!args.e_mail) {
+                    $('.page-card-head .indicator')
+                        .removeClass().addClass('indicator red')
+                        .html("E-Mail fehlt");
+                } else if(!args.key) {
+                    $('.page-card-head .indicator')
+                        .removeClass().addClass('indicator red')
+                        .html("Hash-Code fehlt");
+                }
+                
+                return;
+            }
+
+            $('.page-card-head .indicator')
+                .removeClass().addClass('indicator orange')
+                .html("Ihre Daten werden geprüft");
+
+            frappe.call({
+                type: "POST",
+                method: "mietrechtspraxis.api.check_hash_and_create_user",
+                btn: $("#set_email_adress"),
+                args: args,
+                statusCode: {
+                    401: function() {
+                        $('.page-card-head .indicator').removeClass().addClass('indicator red')
+                            .text("Ungültige Daten");
+                        setTimeout(function() {
+                            $('.page-card-head .indicator')
+                                .removeClass().addClass('indicator blue')
+                                .html("E-Mail Erstregistration");
+                        }, 2000);
+                    },
+                    200: function(r) {
+                        $("regist_hash").val("");
+                        $("e_mail").val("");
+                        $('.page-card-head .indicator')
+                            .removeClass().addClass('indicator green')
+                            .html("Ihr Benutzer wurde erstellt");
+                    }
+                }
+            });
+
+            return false;
+        });
+    });
+    
+</script>

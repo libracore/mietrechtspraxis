@@ -9,6 +9,9 @@ from frappe import _
 import requests
 from mietrechtspraxis.mietrechtspraxis.doctype.mietrechtspraxis_api.mietrechtspraxis_api import _request
 from mietrechtspraxis.mietrechtspraxis.doctype.arbitration_authority.arbitration_authority import _get_sb
+from datetime import datetime
+from frappe.config import get_modules_from_all_apps
+from frappe.exceptions import DoesNotExistError
 
 @frappe.whitelist(allow_guest=True)
 def request(**kwargs):
@@ -17,6 +20,7 @@ def request(**kwargs):
 @frappe.whitelist(allow_guest=True)
 def get_sb(**kwargs):
     return _get_sb(**kwargs)
+
 @frappe.whitelist(allow_guest=True)
 def mp_shop(**kwargs):
     def get_mp_shop_item_groups():
@@ -85,3 +89,49 @@ def mp_shop(**kwargs):
         })
     
     return data
+
+@frappe.whitelist(allow_guest=True)
+def check_hash_and_create_user(**kwargs):
+    if not kwargs['hash'] and not kwargs['e_mail']:
+        raise frappe.AuthenticationError
+    if kwargs['hash'] == '' or kwargs['e_mail'] == '':
+        raise frappe.AuthenticationError
+    
+    contacts = frappe.db.sql("""
+                                SELECT `name`
+                                FROM `tabContact`
+                                WHERE `erstregistrations_hash` = '{0}'
+                            """.format(kwargs['hash']), as_dict=True)
+    
+    if len(contacts) != 1:
+        raise frappe.AuthenticationError
+    else:
+        contact = frappe.get_doc("Contact", contacts[0].name)
+        if contact.mp_web_user:
+            raise frappe.AuthenticationError
+        from mietrecht_ch.mietrecht_ch.doctype.antwort_auf_das_formular.api import __add_role_mp__, __create_base_user__, clean_response
+        MP_ABO_ROLE = "mp_web_user_abo"
+        try:
+            user = frappe.get_doc('User', kwargs['e_mail'])
+            __add_role_mp__(user)
+            contact.mp_web_user = user.name
+            contact.save(ignore_permissions=True)
+        except DoesNotExistError:
+            request_data = {
+                'email': kwargs['e_mail'],
+                'billing_address': {
+                    'first_name': contact.first_name,
+                    'last_name': contact.last_name
+                }
+            }
+            user = __create_base_user__(request_data)
+            __add_role_mp__(user)
+            contact.mp_web_user = user.name
+            contact.save(ignore_permissions=True)
+        except:
+            clean_response()
+            raise frappe.AuthenticationError
+        finally:
+            clean_response()
+            contact.mp_web_user = user.name
+            contact.save(ignore_permissions=True)
