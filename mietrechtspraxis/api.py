@@ -114,8 +114,11 @@ def check_hash_and_create_user(**kwargs):
         try:
             user = frappe.get_doc('User', kwargs['e_mail'])
             __add_role_mp__(user)
-            contact.mp_web_user = user.name
-            contact.save(ignore_permissions=True)
+            # contact.mp_web_user = user.name
+            # row = contact.append('email_ids', {})
+            # row.email_id = kwargs['e_mail']
+            # row.is_primary = 1
+            # contact.save(ignore_permissions=True)
         except DoesNotExistError:
             request_data = {
                 'email': kwargs['e_mail'],
@@ -126,12 +129,19 @@ def check_hash_and_create_user(**kwargs):
             }
             user = __create_base_user__(request_data)
             __add_role_mp__(user)
-            contact.mp_web_user = user.name
-            contact.save(ignore_permissions=True)
+            # contact.mp_web_user = user.name
+            # row = contact.append('email_ids', {})
+            # row.email_id = kwargs['e_mail']
+            # row.is_primary = 1
+            # contact.save(ignore_permissions=True)
         except:
             clean_response()
             raise frappe.AuthenticationError
         finally:
-            clean_response()
             contact.mp_web_user = user.name
+            row = contact.append('email_ids', {})
+            row.email_id = kwargs['e_mail']
+            row.is_primary = 1
             contact.save(ignore_permissions=True)
+            frappe.clear_messages()
+            clean_response()
