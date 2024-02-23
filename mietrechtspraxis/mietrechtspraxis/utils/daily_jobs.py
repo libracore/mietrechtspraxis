@@ -11,7 +11,12 @@ def validate_mp_web_user():
                                                SELECT `email`
                                                FROM `tabAntwort auf das Formular`
                                                WHERE
-                                               `creation` < DATE_SUB(CURDATE(), INTERVAL 14 DAY);
+                                               `login_expiration_date` < CURDATE()
+                                               AND (
+                                                    `conversion_date` IS NULL
+                                                    OR
+                                                    `conversion_date` = ''
+                                               )
                                                """, as_dict=True)
     for antwort_auf_das_formular in antworten_auf_das_formular:
         valid_mp_web_user_abo(antwort_auf_das_formular.email)
