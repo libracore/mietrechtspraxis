@@ -40,3 +40,11 @@
 .nav-link.btn-login-area {
     visibility: hidden;
 }
+
+.logo {
+    color: #fff;
+}
+
+.logo:hover {
+    color: #0D622A;
+}
