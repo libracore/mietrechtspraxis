@@ -1,11 +1,17 @@
 .btn-primary {
-    background-color: #0D622A;
-    border-color: #0D622A;
+    background-color: #0D622A !important;
+    border-color: #0D622A !important;
+    margin-top: 40px;
+}
+
+.btn-primary:active {
+    background-color: #0D622A !important;
+    border-color: #0D622A !important;
 }
 
 .btn-primary:hover {
-    background-color: #7FCF0A;
-    border-color: #7FCF0A;
+    background-color: #7FCF0A !important;
+    border-color: #7FCF0A !important;
 }
 
 .navbar.navbar-light.bg-white.navbar-expand-lg.sticky-top.shadow-sm {
@@ -47,4 +53,8 @@
 
 .logo:hover {
     color: #0D622A;
+}
+
+.page-card .page-card-head {
+    margin-bottom: 10px !important;
 }
