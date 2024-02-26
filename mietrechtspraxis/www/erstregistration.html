@@ -8,7 +8,7 @@
             <form id="set-email">
                 <div class="form-group">
                     <input id="regist_hash" type="text"
-                        class="form-control" placeholder="Registrations Hash-Code">
+                        class="form-control" placeholder="Registrations-Code">
                 </div>
                 <div class="form-group">
                     <input id="e_mail" type="text"
@@ -44,15 +44,15 @@
                 if(!args.e_mail && !args.hash) {
                     $('.page-card-head .indicator')
                         .removeClass().addClass('indicator red')
-                        .html("E-Mail & Hash-Code fehlen");
+                        .html("E-Mail & Registrations-Code fehlen");
                 } else if(!args.e_mail) {
                     $('.page-card-head .indicator')
                         .removeClass().addClass('indicator red')
                         .html("E-Mail fehlt");
-                } else if(!args.hash) {
+                } else if(!args.hash||args.hash == '') {
                     $('.page-card-head .indicator')
                         .removeClass().addClass('indicator red')
-                        .html("Hash-Code fehlt");
+                        .html("Registrations-Code fehlt");
                 }
                 
                 return;
@@ -89,6 +89,7 @@
                                 .html("E-Mail Erstregistration");
                             $("regist_hash").val("");
                             $("e_mail").val("");
+                            window.location.replace("https://www.mietrecht.ch");
                         }, 2000);
                     }
                 }
