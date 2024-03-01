@@ -61,6 +61,16 @@ def mp_shop(**kwargs):
                                 FROM `tabItem Price`
                                 WHERE `item_code` = '{item_code}'
                                 AND `selling` = 1
+                                AND (
+                                    `valid_from` IS NULL
+                                    OR
+                                    `valid_from` <= CURDATE()
+                                )
+                                AND (
+                                    `valid_upto` IS NULL
+                                    OR
+                                    `valid_upto` >= CURDATE()
+                                )
                                 ORDER BY `price_list_rate` DESC
                             """.format(item_code=item.item_code), as_dict=True)
         
@@ -114,11 +124,6 @@ def check_hash_and_create_user(**kwargs):
         try:
             user = frappe.get_doc('User', kwargs['e_mail'])
             __add_role_mp__(user)
-            # contact.mp_web_user = user.name
-            # row = contact.append('email_ids', {})
-            # row.email_id = kwargs['e_mail']
-            # row.is_primary = 1
-            # contact.save(ignore_permissions=True)
         except DoesNotExistError:
             request_data = {
                 'email': kwargs['e_mail'],
@@ -129,11 +134,6 @@ def check_hash_and_create_user(**kwargs):
             }
             user = __create_base_user__(request_data)
             __add_role_mp__(user)
-            # contact.mp_web_user = user.name
-            # row = contact.append('email_ids', {})
-            # row.email_id = kwargs['e_mail']
-            # row.is_primary = 1
-            # contact.save(ignore_permissions=True)
         except:
             clean_response()
             raise frappe.AuthenticationError
