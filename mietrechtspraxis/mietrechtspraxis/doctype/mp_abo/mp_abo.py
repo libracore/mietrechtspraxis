@@ -228,7 +228,7 @@ def get_price(item_code, customer):
     if prices:
         return prices[0].rate
     else:
-        return 98
+        return None
 
 @frappe.whitelist()
 def create_batch_pdf(abo):

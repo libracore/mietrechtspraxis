@@ -15,15 +15,16 @@ frappe.ui.form.on('mp Abo', {
             go_to_customers_search_mask(frm);
         });
         if (!frm.doc.__islocal) {
-           if (!cur_frm.doc.user_login_createt) {
-               frm.add_custom_button(__("User Login"), function() {
-                    if (!cur_frm.is_dirty()) {
-                        create_user_login(frm);
-                    } else {
-                        frappe.msgprint("Bitte speichern Sie den Datensatz zuerst.");
-                    }
-                }, __("Create"));
-            }
+            // obsolet aufgrund neuem User Login
+            // if (!cur_frm.doc.user_login_createt) {
+            //    frm.add_custom_button(__("User Login"), function() {
+            //         if (!cur_frm.is_dirty()) {
+            //             create_user_login(frm);
+            //         } else {
+            //             frappe.msgprint("Bitte speichern Sie den Datensatz zuerst.");
+            //         }
+            //     }, __("Create"));
+            // }
             if (cur_frm.doc.type == 'Jahres-Abo') {
                 if (!exist_initial_sinv(frm)) {
                     frm.add_custom_button(__("Initial Rechnung"), function() {
