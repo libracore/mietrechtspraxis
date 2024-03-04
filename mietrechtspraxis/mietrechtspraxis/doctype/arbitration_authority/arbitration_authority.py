@@ -17,21 +17,8 @@ def _get_sb(**kwargs):
     '''
     call on [IP]/api/method/mietrechtspraxis.api.get_sb
     Mandatory Parameter:
-        - token
         - plz
     '''
-    
-    # check that token is present
-    try:
-        token = kwargs['token']
-    except:
-        # 400 Bad Request (Missing Token)
-        return raise_4xx(400, 'Bad Request', 'Token Required')
-        
-    # check that token is correct
-    if not token == frappe.db.get_single_value('mietrechtspraxis API', 'token'):
-        # 401 Unauthorized (Invalid Token)
-        return raise_4xx(401, 'Unauthorized', 'Invalid Token')
     
     # check that plz_city is present
     try:
