@@ -17,8 +17,8 @@ class mpAbo(Document):
         
     def validate(self):
         # calc qty
-        total_qty = self.magazines_qty_ir
-        total_invoice_qty = self.magazines_qty_ir
+        total_qty = 0
+        total_invoice_qty = 0
         for recipient in self.recipient:
             total_qty += recipient.magazines_qty_mr
             if not recipient.remove_recipient:
@@ -38,14 +38,26 @@ class mpAbo(Document):
         # set customer link for dashboard
         self.customer = self.invoice_recipient
         
-        # check optional receipients
+        # check receipients
         if self.type == 'Probe-Abo':
-            if len(self.recipient) >= 1:
+            if len(self.recipient) > 1:
                 frappe.throw("Ein Probe-Abo kann nicht mehrere Empfänger haben.")
+        if self.status != "Inactive":
+            if len(self.recipient) < 1:
+                frappe.throw("Ein Abo muss mind. ein Empfänger haben.")
     
     def on_update(self):
         # check valid_mp_web_user_abo
         valid_mp_web_user_abo(abo=self)
+    
+    def fetch_inhaber(self):
+        row = self.append('recipient', {})
+        row.abo_type = 'Jahres-Abo'
+        row.magazines_qty_mr = 1
+        row.magazines_recipient = self.invoice_recipient
+        row.recipient_contact = self.recipient_contact
+        row.recipient_address = self.recipient_address
+        self.save()
 
 
 @frappe.whitelist()
