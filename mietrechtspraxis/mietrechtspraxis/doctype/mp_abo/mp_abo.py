@@ -19,12 +19,16 @@ class mpAbo(Document):
         # calc qty
         total_qty = 0
         total_invoice_qty = 0
+        total_digital = 0
         for recipient in self.recipient:
             total_qty += recipient.magazines_qty_mr
+            if recipient.digital:
+                total_digital += 1
             if not recipient.remove_recipient:
                 total_invoice_qty += recipient.magazines_qty_mr
         self.magazines_qty_total = total_qty
         self.qty_next_invoice = total_invoice_qty
+        self.digital_qty = total_digital
         
         # check status
         if self.end_date:
@@ -202,6 +206,18 @@ def create_invoice(abo):
         
 def _create_invoice(abo):
     abo = frappe.get_doc("mp Abo", abo)
+    items = []
+    for recipient in abo.recipient:
+        abo_type = recipient.abo_type.lower().replace("-", "_") if cint(recipient.digital) == 0 else "{0}_digital".format(recipient.abo_type.lower().replace("-", "_"))
+        item_code = frappe.db.get_single_value('mp Abo Settings', abo_type)
+        qty = recipient.magazines_qty_mr
+        if cint(recipient.digital) == 1:
+            qty += 1
+        items.append({
+            "item_code": item_code,
+            "qty": qty,
+            "rate": get_price(item_code, abo.invoice_recipient)
+        })
     
     new_sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
@@ -211,13 +227,7 @@ def _create_invoice(abo):
         "customer": abo.invoice_recipient,
         "customer_address": abo.recipient_address,
         "contact_person": abo.recipient_contact,
-        "items": [
-            {
-                "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
-                "qty": abo.qty_next_invoice,
-                "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'), abo.invoice_recipient)
-            }
-        ]
+        "items": items
     })
     new_sinv.insert()
     new_sinv.esr_reference = get_qrr_reference(sales_invoice=new_sinv.name, customer=abo.invoice_recipient)

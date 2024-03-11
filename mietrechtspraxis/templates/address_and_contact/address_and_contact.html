@@ -19,7 +19,7 @@
 {% endif %}
 {% if customer_type == 'Company' %}
 <div class="address-box">
-    <p>{{ customer_name }}<br>{{ customer_addition }}</p>
+    <p>{{ customer_name }}{% if customer_addition %}<br>{{ customer_addition }}{% endif %}</p>
     <p>
         {% if first_name != customer_name %}
             {{ salutation }} {{ first_name }} {{ last_name }}<br>
