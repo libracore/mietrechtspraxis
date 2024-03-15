@@ -60,28 +60,59 @@ frappe.invoice_and_print = {
     },
     show_data: function(sel_type, data) {
         $("#chart_area").empty();
-        $('<div id="chart"></div>').appendTo($("#chart_area"));
+        $('<div id="abo_uebersicht_chart"></div>').appendTo($("#chart_area"));
+        $('<div id="empfaenger_chart"></div>').appendTo($("#chart_area"));
         frappe.invoice_and_print.show_donut_all(data);
         
     },
     show_donut_all: function(_data) {
-        const data = {
-            labels: ["Alle Abos", "Jahres Abos", "Gekündete Jahres Abos", "Aktive Probe Abos", "Gratis Abos"],
+        var abo_uebersicht = _data.abo_uebersicht;
+        const abo_uebersicht_data = {
+            labels: ["Unbefristet", "Gekündet"],
             datasets: [
                 {
-                    name: "Anzahl Abos", type: "bar",
-                    values: [_data.anz_abos, _data.anz_jahres_abos, _data.anz_jahres_abos_gekuendet, _data.anz_aktive_probe_abos, _data.anz_gratis_abos]
+                    name: "Anzahl Abos", chartType: "bar",
+                    values: [abo_uebersicht.anz_abos_ungekuended, abo_uebersicht.anz_abos_gekuendet]
+                },
+                {
+                    name: "Abos Total", chartType: "line",
+                    values: [abo_uebersicht.anz_abos_total, abo_uebersicht.anz_abos_total]
                 }
             ]
         }
 
-        const chart = new frappe.Chart("#chart", {  // or a DOM element,
-                                                    // new Chart() in case of ES6 module with above usage
+        const abo_uebersicht_chart = new frappe.Chart("#abo_uebersicht_chart", {
             title: __("Abo Übersicht"),
-            data: data,
-            type: 'bar', // or 'axis-mixed', 'line', 'scatter', 'pie', 'percentage', 'donut'
+            data: abo_uebersicht_data,
+            type: 'axis-mixed', // or 'bar', 'line', 'scatter', 'pie', 'percentage', 'donut'
             height: 250,
             colors: ['#7cd6fd', '#743ee2', '#ffa3ef']
+        })
+
+        var empfaenger = _data.empfaenger;
+        const empfaenger_data = {
+            labels: ["Jahres Abo", "Probe Abo", "Gratis Abo"],
+            datasets: [
+                {
+                    name: "Physikalisch", chartType: "bar",
+                    values: [empfaenger.empfaenger_physikalisch_jahr, empfaenger.empfaenger_physikalisch_probe, empfaenger.empfaenger_physikalisch_gratis]
+                },
+                {
+                    name: "Digital", chartType: "bar",
+                    values: [empfaenger.empfaenger_digital_jahr, empfaenger.empfaenger_digital_probe, empfaenger.empfaenger_digital_gratis]
+                }
+            ]
+        }
+
+        const empfaenger_chart = new frappe.Chart("#empfaenger_chart", {
+            title: __("Empfänger Übersicht"),
+            data: empfaenger_data,
+            type: 'bar', // or 'axis-mixed', 'line', 'scatter', 'pie', 'percentage', 'donut'
+            height: 250,
+            colors: ['#7cd6fd', '#743ee2', '#ffa3ef'],
+            barOptions: {
+              stacked: true
+            }
         })
     },
     create_data: function() {
@@ -164,7 +195,7 @@ frappe.invoice_and_print = {
                     $("#invoice_area").empty();
                     $("<center><div>Der Background-Job wurde gestartet. Sie können dessen Status <a href='/desk#background_jobs'>hier</a> einsehen.<br>Bitte warten Sie oder starten Sie einen Folge-Auftrag.</div></center>").appendTo($("#invoice_area"));
                     frappe.call({
-                        "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.create_versandkarten",
+                        "method": "mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.start_get_versandkarten_empfaenger",
                         "args": {
                             "date": date,
                             "txt": txt

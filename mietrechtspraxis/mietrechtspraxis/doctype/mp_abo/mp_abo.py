@@ -374,4 +374,57 @@ def enable_disable_user(user, status):
     user.save(ignore_permissions=True)
     return
 
+# Diese Funktion wird anstelle eines Patches dafür verwendet, die bestehenden Abos in die neue Struktur zu migrieren.
+# Execute with bench --site [site_name] execute mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.migrate_old_abos
+def migrate_old_abos():
+    # Abos bei denen Inhaber = Empfänger
+    abos = frappe.db.sql("""
+                            SELECT `name`
+                            FROM `tabmp Abo`
+                            WHERE `status` != "Inactive"
+                             AND `magazines_qty_ir` > 0
+                        """, as_dict=True)
+    total = len(abos)
+    loop = 1
+    for abo in abos:
+        print("Round 1: {0} von {1}".format(loop, total))
+        a = frappe.get_doc("mp Abo", abo.name)
+        found_inhaber = False
+        for recipient in a.recipient:
+            recipient.abo_type = a.type
+            if recipient.magazines_recipient == a.invoice_recipient:
+                if recipient.recipient_contact == a.recipient_contact:
+                    if recipient.recipient_address == a.recipient_address:
+                        found_inhaber = True
+        if not found_inhaber:
+            row = a.append('recipient', {})
+            row.abo_type = a.type
+            row.magazines_qty_mr = a.magazines_qty_ir
+            row.magazines_recipient = a.invoice_recipient
+            row.recipient_contact = a.recipient_contact
+            row.recipient_address = a.recipient_address
+        a.save()
+        loop += 1
+    
+    # Abos bei denen Inhaber != Empfänger
+    abos = frappe.db.sql("""
+                            SELECT `name`
+                            FROM `tabmp Abo`
+                            WHERE `status` != "Inactive"
+                            AND (
+                                `magazines_qty_ir` < 1
+                                OR
+                                `magazines_qty_ir` IS NULL
+                            )
+                        """, as_dict=True)
+    total = len(abos)
+    loop = 1
+    for abo in abos:
+        print("Round 2: {0} von {1}".format(loop, total))
+        a = frappe.get_doc("mp Abo", abo.name)
+        for recipient in a.recipient:
+            recipient.abo_type = a.type
+        a.save()
+        loop += 1
+    print("Done")
 

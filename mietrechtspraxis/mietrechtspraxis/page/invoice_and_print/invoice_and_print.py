@@ -14,18 +14,72 @@ from mietrechtspraxis.mietrechtspraxis.utils.qrr_reference import get_qrr_refere
 
 @frappe.whitelist()
 def get_show_data(sel_type):
-    anz_abos = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo` WHERE `status` = 'Active' OR `status` = 'Actively terminated'""", as_dict=True)[0].qty
-    anz_jahres_abos = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Jahres-Abo' AND `status` = 'Active'""", as_dict=True)[0].qty
-    anz_jahres_abos_gekuendet = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Jahres-Abo' AND `status` = 'Actively terminated'""", as_dict=True)[0].qty
-    anz_aktive_probe_abos = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Probe-Abo' AND `end_date` >= '{today}'""".format(today=today()), as_dict=True)[0].qty
-    anz_gratis_abos = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo` WHERE `type` = 'Gratis-Abo' AND `status` = 'Active'""", as_dict=True)[0].qty
+    anz_abos_total = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo` WHERE `status` != 'Inactive'""", as_dict=True)[0].qty
+    anz_abos_gekuendet = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo` WHERE `status` = 'Actively terminated'""", as_dict=True)[0].qty
+    anz_abos_ungekuended = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo` WHERE `status` NOT IN ('Inactive', 'Actively terminated')""", as_dict=True)[0].qty
+
+    empfaenger_physikalisch_jahr = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo Recipient` WHERE `abo_type` = 'Jahres-Abo'
+                                                    AND `parent` IN (
+                                                        SELECT `name`
+                                                        FROM `tabmp Abo`
+                                                        WHERE `status` != 'Inactive'
+                                                    )
+                                                    AND IFNULL(`magazines_qty_mr`, 0) > 0 """, as_dict=True)[0].qty
     
+    empfaenger_digital_jahr = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo Recipient` WHERE `abo_type` = 'Jahres-Abo'
+                                                    AND `parent` IN (
+                                                        SELECT `name`
+                                                        FROM `tabmp Abo`
+                                                        WHERE `status` != 'Inactive'
+                                                    )
+                                                    AND `digital` = 1""", as_dict=True)[0].qty
+    
+    empfaenger_physikalisch_probe = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo Recipient` WHERE `abo_type` = 'Probe-Abo'
+                                                    AND `parent` IN (
+                                                        SELECT `name`
+                                                        FROM `tabmp Abo`
+                                                        WHERE `status` != 'Inactive'
+                                                    )
+                                                    AND IFNULL(`magazines_qty_mr`, 0) > 0 """, as_dict=True)[0].qty
+    
+    empfaenger_digital_probe = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo Recipient` WHERE `abo_type` = 'Probe-Abo'
+                                                    AND `parent` IN (
+                                                        SELECT `name`
+                                                        FROM `tabmp Abo`
+                                                        WHERE `status` != 'Inactive'
+                                                    )
+                                                    AND `digital` = 1""", as_dict=True)[0].qty
+    
+    empfaenger_physikalisch_gratis = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo Recipient` WHERE `abo_type` = 'Gratis-Abo'
+                                                    AND `parent` IN (
+                                                        SELECT `name`
+                                                        FROM `tabmp Abo`
+                                                        WHERE `status` != 'Inactive'
+                                                    )
+                                                    AND IFNULL(`magazines_qty_mr`, 0) > 0 """, as_dict=True)[0].qty
+    
+    empfaenger_digital_gratis = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo Recipient` WHERE `abo_type` = 'Gratis-Abo'
+                                                    AND `parent` IN (
+                                                        SELECT `name`
+                                                        FROM `tabmp Abo`
+                                                        WHERE `status` != 'Inactive'
+                                                    )
+                                                    AND `digital` = 1""", as_dict=True)[0].qty
+
     return {
-        'anz_abos': anz_abos,
-        'anz_jahres_abos': anz_jahres_abos,
-        'anz_jahres_abos_gekuendet': anz_jahres_abos_gekuendet,
-        'anz_aktive_probe_abos': anz_aktive_probe_abos,
-        'anz_gratis_abos': anz_gratis_abos
+        'abo_uebersicht': {
+            'anz_abos_total': anz_abos_total,
+            'anz_abos_ungekuended': anz_abos_ungekuended,
+            'anz_abos_gekuendet': anz_abos_gekuendet
+        },
+        'empfaenger': {
+            'empfaenger_physikalisch_jahr': empfaenger_physikalisch_jahr,
+            'empfaenger_digital_jahr': empfaenger_digital_jahr,
+            'empfaenger_physikalisch_probe': empfaenger_physikalisch_probe,
+            'empfaenger_digital_probe': empfaenger_digital_probe,
+            'empfaenger_physikalisch_gratis': empfaenger_physikalisch_gratis,
+            'empfaenger_digital_gratis': empfaenger_digital_gratis
+        }
     }
 
 @frappe.whitelist()
@@ -684,14 +738,87 @@ def create_begleitschreiben_jahres_abo():
     frappe.db.commit()
 
 @frappe.whitelist()
-def create_versandkarten(date, txt):
+def start_get_versandkarten_empfaenger(date, txt):
     args = {
         'date': date,
         'txt': txt
     }
-    enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_versandkarten", queue='long', job_name='Generierung Sammel-PDF (Versandkarten)', timeout=5000, **args)
+    enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.get_versandkarten_empfaenger", queue='long', job_name='Generierung Sammel-PDF (Versandkarten)', timeout=5000, **args)
 
-def _create_versandkarten(date, txt):
+def get_versandkarten_empfaenger(date, txt):
+    abo_query = """
+        SELECT `name`
+        FROM `tabmp Abo`
+        WHERE (
+            `status` = 'Active'
+            OR (
+                `status` = 'Actively terminated'
+                AND `end_date` > '{0}'
+            )
+        )
+    """.format(date)
+
+    inland_query = """
+        SELECT `name`
+        FROM `tabAddress`
+        WHERE `country` = 'Schweiz'
+    """
+
+    ausland_query = """
+        SELECT `name`
+        FROM `tabAddress`
+        WHERE `country` != 'Schweiz'
+    """
+
+    empfaenger_ausland = frappe.db.sql("""
+                                SELECT
+                                    `magazines_recipient` AS `customer`,
+                                    `recipient_contact` AS `contact`,
+                                    `recipient_address` AS `address`,
+                                    `magazines_qty_mr` AS `qty`,
+                                    `parent` AS `abo`
+                                FROM `tabmp Abo Recipient`
+                                WHERE `parent` IN (
+                                    {abo_query}
+                                )
+                                AND `recipient_address` IN (
+                                    {ausland_query}
+                                )
+                                AND `magazines_qty_mr` > 0
+                                AND (
+                                    `remove_recipient` > '{date}'
+                                    OR
+                                    `remove_recipient` IS NULL
+                                )
+                                ORDER BY `magazines_qty_mr` DESC
+                               """.format(abo_query=abo_query, ausland_query=ausland_query, date=date), as_dict=True)
+
+    empfaenger_inland = frappe.db.sql("""
+                                SELECT
+                                    `magazines_recipient` AS `customer`,
+                                    `recipient_contact` AS `contact`,
+                                    `recipient_address` AS `address`,
+                                    `magazines_qty_mr` AS `qty`,
+                                    `parent` AS `abo`
+                                FROM `tabmp Abo Recipient`
+                                WHERE `parent` IN (
+                                    {abo_query}
+                                )
+                                AND `recipient_address` IN (
+                                    {inland_query}
+                                )
+                                AND `magazines_qty_mr` > 0
+                                AND (
+                                    `remove_recipient` > '{date}'
+                                    OR
+                                    `remove_recipient` IS NULL
+                                )
+                                ORDER BY `magazines_qty_mr` DESC
+                               """.format(abo_query=abo_query, inland_query=inland_query, date=date), as_dict=True)
+    
+    frappe.log_error("{0}".format(empfaenger_ausland), 'empfaenger_ausland')
+    frappe.log_error("{0}".format(empfaenger_inland), 'empfaenger_inland')
+
     data = []
     qty_one = 0
     qty_multi = 0
@@ -712,134 +839,58 @@ def _create_versandkarten(date, txt):
     dest=str(physical_path)
     
     output = PdfFileWriter()
-    
-    ausland_empfaenger = frappe.db.sql("""
-                        SELECT
-                            `view`.`recipient`,
-                            `view`.`abo`,
-                            `view`.`anz`,
-                            `view`.`recipient_contact`,
-                            `view`.`recipient_address`
-                        FROM (
-                            SELECT
-                                `tabmp Abo`.`invoice_recipient` AS `recipient`,
-                                `tabmp Abo`.`name` AS `abo`,
-                                `tabmp Abo`.`magazines_qty_ir` AS `anz`,
-                                `tabmp Abo`.`recipient_contact`,
-                                `tabmp Abo`.`recipient_address`
-                            FROM `tabmp Abo`
-                            WHERE
-                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}'))
-                            AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
-                            AND `tabmp Abo`.`magazines_qty_ir` > 0
-                            UNION
-                            SELECT
-                                `tabmp Abo Recipient`.`magazines_recipient` AS `recipient`,
-                                `tabmp Abo Recipient`.`parent` AS `abo`,
-                                `tabmp Abo Recipient`.`magazines_qty_mr` AS `anz`,
-                                `tabmp Abo Recipient`.`recipient_contact`,
-                                `tabmp Abo Recipient`.`recipient_address`
-                            FROM `tabmp Abo Recipient`
-                            WHERE `tabmp Abo Recipient`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')
-                            AND `tabmp Abo Recipient`.`parent` IN (
-                                SELECT
-                                    `name`
-                                FROM `tabmp Abo`
-                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}')
-                            )
-                            AND `tabmp Abo Recipient`.`magazines_qty_mr` > 0
-                        ) AS `view`
-                        ORDER BY `view`.`anz` ASC
-                    """.format(date=date), as_dict=True)
-    for empfaenger in ausland_empfaenger:
+
+    for empfaenger in empfaenger_ausland:
         # create rm_log:
         try:
-            customer = frappe.get_doc("Customer", empfaenger.recipient)
+            customer = frappe.get_doc("Customer", empfaenger.customer)
             versand_row = rm_log.append('versandkarten', {})
             versand_row.recipient_name = customer.customer_name
             versand_row.abo = empfaenger.abo
-            versand_row.anz = empfaenger.anz
-            versand_row.recipient_contact = empfaenger.recipient_contact
-            versand_row.recipient_address = empfaenger.recipient_address
-            if save_counter == 250:
+            versand_row.anz = empfaenger.qty
+            versand_row.recipient_contact = empfaenger.contact
+            versand_row.recipient_address = empfaenger.address
+            if save_counter == 50:
                 rm_log.save(ignore_permissions=True)
                 frappe.db.commit()
+                break
                 save_counter = 1
             else:
                 save_counter += 1
-            if empfaenger.anz > 1:
+            if empfaenger.qty > 1:
                 qty_multi += 1
             else:
                 qty_one += 1
         except:
-            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
+            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=empfaenger.abo))
     
-    rm_log.save(ignore_permissions=True)
-    frappe.db.commit()
-    
-    inland_empfaenger = frappe.db.sql("""
-                        SELECT
-                            `view`.`recipient`,
-                            `view`.`abo`,
-                            `view`.`anz`,
-                            `view`.`recipient_contact`,
-                            `view`.`recipient_address`
-                        FROM (
-                            SELECT
-                                `tabmp Abo`.`invoice_recipient` AS `recipient`,
-                                `tabmp Abo`.`name` AS `abo`,
-                                `tabmp Abo`.`magazines_qty_ir` AS `anz`,
-                                `tabmp Abo`.`recipient_contact`,
-                                `tabmp Abo`.`recipient_address`
-                            FROM `tabmp Abo`
-                            WHERE
-                            (`tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}'))
-                            AND `tabmp Abo`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
-                            UNION
-                            SELECT
-                                `tabmp Abo Recipient`.`magazines_recipient` AS `recipient`,
-                                `tabmp Abo Recipient`.`parent` AS `abo`,
-                                `tabmp Abo Recipient`.`magazines_qty_mr` AS `anz`,
-                                `tabmp Abo Recipient`.`recipient_contact`,
-                                `tabmp Abo Recipient`.`recipient_address`
-                            FROM `tabmp Abo Recipient`
-                            WHERE `tabmp Abo Recipient`.`recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')
-                            AND `tabmp Abo Recipient`.`parent` IN (
-                                SELECT
-                                    `name`
-                                FROM `tabmp Abo`
-                                WHERE `tabmp Abo`.`status` = 'Active' OR (`tabmp Abo`.`status` = 'Actively terminated' AND `tabmp Abo`.`end_date` >= '{date}')
-                            )
-                        ) AS `view`
-                        ORDER BY `view`.`anz` ASC
-                    """.format(date=date), as_dict=True)
-    for empfaenger in inland_empfaenger:
+    for empfaenger in empfaenger_inland:
         # create rm_log:
         try:
-            customer = frappe.get_doc("Customer", empfaenger.recipient)
+            customer = frappe.get_doc("Customer", empfaenger.customer)
             versand_row = rm_log.append('versandkarten', {})
             versand_row.recipient_name = customer.customer_name
             versand_row.abo = empfaenger.abo
-            versand_row.anz = empfaenger.anz
-            versand_row.recipient_contact = empfaenger.recipient_contact
-            versand_row.recipient_address = empfaenger.recipient_address
-            if save_counter == 250:
+            versand_row.anz = empfaenger.qty
+            versand_row.recipient_contact = empfaenger.contact
+            versand_row.recipient_address = empfaenger.address
+            if save_counter == 50:
                 rm_log.save(ignore_permissions=True)
                 frappe.db.commit()
+                break
                 save_counter = 1
             else:
                 save_counter += 1
-            if empfaenger.anz > 1:
+            if empfaenger.qty > 1:
                 qty_multi += 1
             else:
                 qty_one += 1
         except:
-            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=ausland_abo.name))
+            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=empfaenger.abo))
     
     rm_log.save(ignore_permissions=True)
     frappe.db.commit()
     
-        
     try:
         output = frappe.get_print("RM Log", rm_log.name, 'RM Log Versandkarten', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
     except:
