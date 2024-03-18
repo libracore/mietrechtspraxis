@@ -756,14 +756,15 @@ def create_begleitschreiben_jahres_abo():
     frappe.db.commit()
 
 @frappe.whitelist()
-def start_get_versandkarten_empfaenger(date, txt):
+def start_get_versandkarten_empfaenger(date, txt, printformat=None):
     args = {
         'date': date,
-        'txt': txt
+        'txt': txt,
+        'printformat': printformat
     }
     enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print.get_versandkarten_empfaenger", queue='long', job_name='Generierung Sammel-PDF (Versandkarten)', timeout=5000, **args)
 
-def get_versandkarten_empfaenger(date, txt):
+def get_versandkarten_empfaenger(date, txt, printformat=None):
     abo_query = """
         SELECT `name`
         FROM `tabmp Abo`
@@ -833,11 +834,7 @@ def get_versandkarten_empfaenger(date, txt):
                                 )
                                 ORDER BY `magazines_qty_mr` DESC
                                """.format(abo_query=abo_query, inland_query=inland_query, date=date), as_dict=True)
-    
-    frappe.log_error("{0}".format(empfaenger_ausland), 'empfaenger_ausland')
-    frappe.log_error("{0}".format(empfaenger_inland), 'empfaenger_inland')
 
-    data = []
     qty_one = 0
     qty_multi = 0
     save_counter = 1
@@ -908,7 +905,11 @@ def get_versandkarten_empfaenger(date, txt):
     frappe.db.commit()
     
     try:
-        output = frappe.get_print("RM Log", rm_log.name, 'RM Log Versandkarten', as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
+        if printformat:
+            durckformat = printformat
+        else:
+            durckformat = 'RM Log Versandkarten'
+        output = frappe.get_print("RM Log", rm_log.name, durckformat, as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
     except:
         frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=rm_log.name))
     
