@@ -13,6 +13,9 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
+website_route_rules = [
+    {"from_route": "/login#forgot", "to_route": "/pwd-reset"}
+]
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/mietrechtspraxis/css/mietrechtspraxis.css"
@@ -21,7 +24,7 @@ app_include_js = [
 ]
 
 # include js, css files in header of web template
-# web_include_css = "/assets/mietrechtspraxis/css/mietrechtspraxis.css"
+web_include_css = "/assets/mietrechtspraxis/css/mietrechtspraxis.css"
 # web_include_js = "/assets/mietrechtspraxis/js/mietrechtspraxis.js"
 
 # include js in page

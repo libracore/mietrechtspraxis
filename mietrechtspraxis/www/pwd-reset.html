@@ -1,0 +1,32 @@
+{% extends "templates/web.html" %}
+
+{% block style %}
+<style>
+    {% include "templates/includes/login/login.css" %}
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div style='min-height: 360px'>
+    <section class='for-forgot'>
+        <div class="login-content page-card" style="margin-top: 20px;">
+        <form class="form-signin form-forgot hide" role="form">
+            <div class="page-card-head">
+                <span class="indicator blue" data-text="{{ _('Forgot Password') }}"></span></div>
+            <input type="email" id="forgot_email"
+                class="form-control" placeholder="{{ _('Email Address') }}" required autofocus>
+            <button class="btn btn-sm btn-primary btn-block btn-forgot" type="submit">{{ _("Reset Password") }}</button>
+        </form>
+        </div>
+        <div class='form-footer'>
+            <a href="#login">{{ _("Back to Login") }}</a>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block script %}
+    <script>{% include "templates/pwd_reset/pwd_reset.js" %}</script>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

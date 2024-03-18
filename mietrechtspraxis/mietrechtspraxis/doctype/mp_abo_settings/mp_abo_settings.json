@@ -6,8 +6,14 @@
  "field_order": [
   "section_abo_type_item",
   "jahres_abo",
+  "jahres_legi_abo",
   "gratis_abo",
   "probe_abo",
+  "cb_2",
+  "jahres_abo_digital",
+  "jahres_legi_abo_digital",
+  "gratis_abo_digital",
+  "probe_abo_digital",
   "section_ablaufdatum",
   "heading_1",
   "login_ablauf_probe_abo",
@@ -28,7 +34,7 @@
    "label": "Abo Type &lt;&gt; Item"
   },
   {
-   "description": "Corresponding Item for Type Jahres-Abo",
+   "description": "Artikel f\u00fcr Abo-Typ Jahres-Abo",
    "fieldname": "jahres_abo",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -37,7 +43,7 @@
    "reqd": 1
   },
   {
-   "description": "Corresponding Item for Type Gratis-Abo",
+   "description": "Artikel f\u00fcr Abo-Typ Gratis-Abo",
    "fieldname": "gratis_abo",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -46,7 +52,7 @@
    "reqd": 1
   },
   {
-   "description": "Corresponding Item for Type Probe-Abo",
+   "description": "Artikel f\u00fcr Abo-Typ Probe-Abo",
    "fieldname": "probe_abo",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -120,10 +126,52 @@
    "label": "Rolle",
    "options": "Role",
    "reqd": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Artikel f\u00fcr Abo-Typ Jahres-Abo Digital",
+   "fieldname": "jahres_abo_digital",
+   "fieldtype": "Link",
+   "label": "Jahres-Abo Digital",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "description": "Artikel f\u00fcr Abo-Typ Gratis-Abo Digital",
+   "fieldname": "gratis_abo_digital",
+   "fieldtype": "Link",
+   "label": "Gratis-Abo Digital",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "description": "Artikel f\u00fcr Abo-Typ Probe-Abo Digital",
+   "fieldname": "probe_abo_digital",
+   "fieldtype": "Link",
+   "label": "Probe-Abo Digital",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jahres_legi_abo",
+   "fieldtype": "Link",
+   "label": "Jahres-Legi-Abo",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jahres_legi_abo_digital",
+   "fieldtype": "Link",
+   "label": "Jahres-Legi-Abo Digital",
+   "options": "Item",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2023-12-18 10:41:41.050545",
+ "modified": "2024-03-18 13:39:23.835914",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo Settings",

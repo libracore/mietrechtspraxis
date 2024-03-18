@@ -9,6 +9,7 @@
   "type",
   "status",
   "magazines_qty_total",
+  "digital_qty",
   "qty_next_invoice",
   "user_login_createt",
   "cb_1",
@@ -23,10 +24,10 @@
   "recipient_address",
   "cb_2",
   "magazines_qty_ir",
-  "abo_user",
   "invoice_recipient_address_html",
   "section_recipient",
   "recipient",
+  "fetch_inhaber",
   "section_begleitschreiben",
   "begleittext",
   "section_import_referenzen",
@@ -34,11 +35,10 @@
  ],
  "fields": [
   {
-   "description": "(IR)",
    "fieldname": "invoice_recipient",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Invoice Recipient",
+   "label": "Kunde",
    "options": "Customer",
    "reqd": 1
   },
@@ -46,9 +46,8 @@
    "default": "1",
    "fieldname": "magazines_qty_ir",
    "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Magazines Quantity (IR)",
-   "reqd": 1
+   "hidden": 1,
+   "label": "Magazines Quantity (IR)"
   },
   {
    "default": "Today",
@@ -66,10 +65,9 @@
   {
    "fieldname": "type",
    "fieldtype": "Select",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Type",
-   "options": "Jahres-Abo\nGratis-Abo\nProbe-Abo",
-   "reqd": 1
+   "options": "Jahres-Abo\nGratis-Abo\nProbe-Abo"
   },
   {
    "fieldname": "status",
@@ -81,7 +79,7 @@
   {
    "fieldname": "recipient",
    "fieldtype": "Table",
-   "label": "Recipient",
+   "label": "Empf\u00e4nger",
    "options": "mp Abo Recipient"
   },
   {
@@ -90,11 +88,10 @@
    "label": "General"
   },
   {
-   "default": "1",
-   "description": "(Total QTY IR + MR)",
+   "default": "0",
    "fieldname": "magazines_qty_total",
    "fieldtype": "Int",
-   "label": "Magazines Quantity (Total)",
+   "label": "Anzahl Gedruckt",
    "read_only": 1
   },
   {
@@ -104,7 +101,7 @@
   {
    "fieldname": "section_owner",
    "fieldtype": "Section Break",
-   "label": "Owner"
+   "label": "Inhaber / Rechnungsempf\u00e4nger"
   },
   {
    "fieldname": "cb_2",
@@ -113,13 +110,13 @@
   {
    "fieldname": "section_recipient",
    "fieldtype": "Section Break",
-   "label": "Recipient"
+   "label": "Abo Empf\u00e4nger"
   },
   {
    "depends_on": "eval:doc.invoice_recipient",
    "fieldname": "recipient_contact",
    "fieldtype": "Link",
-   "label": "Recipient Contact",
+   "label": "Kontakt",
    "options": "Contact",
    "reqd": 1
   },
@@ -129,7 +126,7 @@
    "fetch_if_empty": 1,
    "fieldname": "recipient_address",
    "fieldtype": "Link",
-   "label": "Recipient Address",
+   "label": "Adresse",
    "options": "Address",
    "reqd": 1
   },
@@ -154,7 +151,7 @@
    "fetch_from": "invoice_recipient.customer_name",
    "fieldname": "recipient_name",
    "fieldtype": "Data",
-   "label": "Recipient Name",
+   "label": "Kundennamen",
    "read_only": 1
   },
   {
@@ -190,18 +187,24 @@
    "default": "0",
    "fieldname": "qty_next_invoice",
    "fieldtype": "Int",
-   "label": "Anzahlt in n\u00e4chster Jahresrechnung",
+   "hidden": 1,
+   "label": "Anzahl in n\u00e4chster Jahresrechnung",
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.magazines_qty_ir != 0",
-   "fieldname": "abo_user",
-   "fieldtype": "Link",
-   "label": "Abo User",
-   "options": "User"
+   "fieldname": "fetch_inhaber",
+   "fieldtype": "Button",
+   "label": "Fetch Inhaber"
+  },
+  {
+   "default": "0",
+   "fieldname": "digital_qty",
+   "fieldtype": "Int",
+   "label": "Anzahl Digital",
+   "read_only": 1
   }
  ],
- "modified": "2023-12-18 10:07:44.822527",
+ "modified": "2024-03-18 13:50:11.808971",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo",

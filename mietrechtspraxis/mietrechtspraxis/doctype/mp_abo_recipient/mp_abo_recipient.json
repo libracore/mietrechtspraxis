@@ -4,10 +4,12 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "abo_type",
+  "digital",
+  "magazines_qty_mr",
   "magazines_recipient",
   "recipient_contact",
   "recipient_address",
-  "magazines_qty_mr",
   "remove_recipient"
  ],
  "fields": [
@@ -56,10 +58,25 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Empf\u00e4nger entfernen per"
+  },
+  {
+   "fieldname": "abo_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Typ",
+   "options": "Jahres-Abo\nJahres-Legi-Abo\nGratis-Abo\nProbe-Abo",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "digital",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Digital"
   }
  ],
  "istable": 1,
- "modified": "2021-11-03 10:35:54.821920",
+ "modified": "2024-03-18 13:36:54.982484",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo Recipient",

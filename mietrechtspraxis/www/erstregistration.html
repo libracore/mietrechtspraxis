@@ -1,0 +1,102 @@
+<div class="row">
+    <div class="col-sm-3 hidden-xs"></div>
+    <div class="col-xs-12 col-sm-6">
+        <div class="page-card">
+            <div class='page-card-head'>
+                <span class='indicator blue password-box mp'>E-Mail Erstregistration</span>
+            </div>
+            <form id="set-email">
+                <div class="form-group">
+                    <input id="regist_hash" type="text"
+                        class="form-control" placeholder="Registrations-Code">
+                </div>
+                <div class="form-group">
+                    <input id="e_mail" type="text"
+                        class="form-control" placeholder="E-Mail Adresse">
+                </div>
+                <button type="submit" id="set_email_adress"
+                    class="btn btn-primary btn-block">E-Mail bestätigen</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-3 hidden-xs"></div>
+</div>
+
+
+
+<script>
+    frappe.ready(function() {
+        if(frappe.utils.get_url_arg("hash")) {
+            $("#regist_hash").val(frappe.utils.get_url_arg("hash"));
+        }
+    
+        $("#set-email").on("submit", function() {
+            return false;
+        });
+    
+        $("#set_email_adress").click(function() {
+            var args = {
+                hash: $("#regist_hash").val() || frappe.utils.get_url_arg("hash") || "",
+                e_mail: $("#e_mail").val()
+            }
+    
+            if(!args.e_mail || !args.hash) {
+                if(!args.e_mail && !args.hash) {
+                    $('.page-card-head .indicator')
+                        .removeClass().addClass('indicator red')
+                        .html("E-Mail & Registrations-Code fehlen");
+                } else if(!args.e_mail) {
+                    $('.page-card-head .indicator')
+                        .removeClass().addClass('indicator red')
+                        .html("E-Mail fehlt");
+                } else if(!args.hash||args.hash == '') {
+                    $('.page-card-head .indicator')
+                        .removeClass().addClass('indicator red')
+                        .html("Registrations-Code fehlt");
+                }
+                
+                return;
+            }
+
+            $('.page-card-head .indicator')
+                .removeClass().addClass('indicator orange')
+                .html("Ihre Daten werden geprüft");
+
+            frappe.call({
+                type: "POST",
+                method: "mietrechtspraxis.api.check_hash_and_create_user",
+                btn: $("#set_email_adress"),
+                args: args,
+                statusCode: {
+                    401: function() {
+                        $('.page-card-head .indicator').removeClass().addClass('indicator red')
+                            .text("Ungültige Daten");
+                        setTimeout(function() {
+                            $('.page-card-head .indicator')
+                                .removeClass().addClass('indicator blue')
+                                .html("E-Mail Erstregistration");
+                            $("regist_hash").val("");
+                            $("e_mail").val("");
+                        }, 2000);
+                    },
+                    200: function(r) {
+                        $('.page-card-head .indicator')
+                            .removeClass().addClass('indicator green')
+                            .html("Ihr Benutzer wurde erstellt");
+                        setTimeout(function() {
+                            $('.page-card-head .indicator')
+                                .removeClass().addClass('indicator blue')
+                                .html("E-Mail Erstregistration");
+                            $("regist_hash").val("");
+                            $("e_mail").val("");
+                            window.location.replace("https://www.mietrecht.ch");
+                        }, 2000);
+                    }
+                }
+            });
+
+            return false;
+        });
+    });
+    
+</script>

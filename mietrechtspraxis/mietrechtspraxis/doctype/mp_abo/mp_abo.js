@@ -15,15 +15,6 @@ frappe.ui.form.on('mp Abo', {
             go_to_customers_search_mask(frm);
         });
         if (!frm.doc.__islocal) {
-           if (!cur_frm.doc.user_login_createt) {
-               frm.add_custom_button(__("User Login"), function() {
-                    if (!cur_frm.is_dirty()) {
-                        create_user_login(frm);
-                    } else {
-                        frappe.msgprint("Bitte speichern Sie den Datensatz zuerst.");
-                    }
-                }, __("Create"));
-            }
             if (cur_frm.doc.type == 'Jahres-Abo') {
                 if (!exist_initial_sinv(frm)) {
                     frm.add_custom_button(__("Initial Rechnung"), function() {
@@ -106,6 +97,16 @@ frappe.ui.form.on('mp Abo', {
     recipient_address: function(frm) {
         // set address html
         fetch_address(frm);
+    },
+    fetch_inhaber: function(frm) {
+        frappe.call({
+            method: 'fetch_inhaber',
+            doc: frm.doc,
+            callback: function(response) {
+               frappe.show_alert( __("Done!") );
+               cur_frm.reload_doc();
+            }
+        });
     }
 });
 
@@ -113,19 +114,19 @@ function go_to_customers_search_mask(frm) {
     frappe.set_route("Form", "Customers Search Mask");
 }
 
-function create_user_login(frm) {
-    frappe.call({
-        "method": "mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.create_user_login",
-        "args": {
-            "abo": cur_frm.doc.name
-        },
-        "async": false,
-        "callback": function(response) {
-            cur_frm.reload_doc();
-            frappe.msgprint("Das/Die User Logins(s) wurde(n) erstellt.");
-        }
-    });
-}
+// function create_user_login(frm) {
+//     frappe.call({
+//         "method": "mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.create_user_login",
+//         "args": {
+//             "abo": cur_frm.doc.name
+//         },
+//         "async": false,
+//         "callback": function(response) {
+//             cur_frm.reload_doc();
+//             frappe.msgprint("Das/Die User Logins(s) wurde(n) erstellt.");
+//         }
+//     });
+// }
 
 function create_sales_invoice(frm) {
     frappe.call({

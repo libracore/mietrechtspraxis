@@ -17,14 +17,14 @@ class mpAbo(Document):
         
     def validate(self):
         # calc qty
-        total_qty = self.magazines_qty_ir
-        total_invoice_qty = self.magazines_qty_ir
+        total_qty = 0
+        total_digital = 0
         for recipient in self.recipient:
             total_qty += recipient.magazines_qty_mr
-            if not recipient.remove_recipient:
-                total_invoice_qty += recipient.magazines_qty_mr
+            if recipient.digital:
+                total_digital += 1
         self.magazines_qty_total = total_qty
-        self.qty_next_invoice = total_invoice_qty
+        self.digital_qty = total_digital
         
         # check status
         if self.end_date:
@@ -38,14 +38,23 @@ class mpAbo(Document):
         # set customer link for dashboard
         self.customer = self.invoice_recipient
         
-        # check optional receipients
-        if self.type == 'Probe-Abo':
-            if len(self.recipient) >= 1:
-                frappe.throw("Ein Probe-Abo kann nicht mehrere Empfänger haben.")
+        # check receipients
+        if self.status != "Inactive":
+            if len(self.recipient) < 1:
+                frappe.throw("Ein Abo muss mind. ein Empfänger haben.")
     
     def on_update(self):
         # check valid_mp_web_user_abo
         valid_mp_web_user_abo(abo=self)
+    
+    def fetch_inhaber(self):
+        row = self.append('recipient', {})
+        row.abo_type = 'Jahres-Abo'
+        row.magazines_qty_mr = 1
+        row.magazines_recipient = self.invoice_recipient
+        row.recipient_contact = self.recipient_contact
+        row.recipient_address = self.recipient_address
+        self.save()
 
 
 @frappe.whitelist()
@@ -190,6 +199,18 @@ def create_invoice(abo):
         
 def _create_invoice(abo):
     abo = frappe.get_doc("mp Abo", abo)
+    items = []
+    for recipient in abo.recipient:
+        abo_type = recipient.abo_type.lower().replace("-", "_") if cint(recipient.digital) == 0 else "{0}_digital".format(recipient.abo_type.lower().replace("-", "_"))
+        item_code = frappe.db.get_single_value('mp Abo Settings', abo_type)
+        qty = recipient.magazines_qty_mr
+        if cint(recipient.digital) == 1:
+            qty += 1
+        items.append({
+            "item_code": item_code,
+            "qty": qty,
+            "rate": get_price(item_code, abo.invoice_recipient)
+        })
     
     new_sinv = frappe.get_doc({
         "doctype": "Sales Invoice",
@@ -199,13 +220,7 @@ def _create_invoice(abo):
         "customer": abo.invoice_recipient,
         "customer_address": abo.recipient_address,
         "contact_person": abo.recipient_contact,
-        "items": [
-            {
-                "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
-                "qty": abo.qty_next_invoice,
-                "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'), abo.invoice_recipient)
-            }
-        ]
+        "items": items
     })
     new_sinv.insert()
     new_sinv.esr_reference = get_qrr_reference(sales_invoice=new_sinv.name, customer=abo.invoice_recipient)
@@ -228,7 +243,7 @@ def get_price(item_code, customer):
     if prices:
         return prices[0].rate
     else:
-        return 98
+        return None
 
 @frappe.whitelist()
 def create_batch_pdf(abo):
@@ -352,4 +367,60 @@ def enable_disable_user(user, status):
     user.save(ignore_permissions=True)
     return
 
+# Diese Funktion wird anstelle eines Patches dafür verwendet, die bestehenden Abos in die neue Struktur zu migrieren.
+# Execute with bench --site [site_name] execute mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo.migrate_old_abos
+def migrate_old_abos():
+    # Abos bei denen Inhaber = Empfänger
+    abos = frappe.db.sql("""
+                            SELECT `name`
+                            FROM `tabmp Abo`
+                            WHERE `status` != "Inactive"
+                            AND `magazines_qty_ir` > 0
+                        """, as_dict=True)
+    total = len(abos)
+    loop = 1
+    for abo in abos:
+        print("Round 1: {0} von {1}".format(loop, total))
+        a = frappe.get_doc("mp Abo", abo.name)
+        found_inhaber = False
+        for recipient in a.recipient:
+            recipient.abo_type = a.type
+            recipient.digital = 1
+            if recipient.magazines_recipient == a.invoice_recipient:
+                if recipient.recipient_contact == a.recipient_contact:
+                    if recipient.recipient_address == a.recipient_address:
+                        found_inhaber = True
+        if not found_inhaber:
+            row = a.append('recipient', {})
+            row.abo_type = a.type
+            row.digital = 1
+            row.magazines_qty_mr = a.magazines_qty_ir
+            row.magazines_recipient = a.invoice_recipient
+            row.recipient_contact = a.recipient_contact
+            row.recipient_address = a.recipient_address
+        a.save()
+        loop += 1
+    
+    # Abos bei denen Inhaber != Empfänger
+    abos = frappe.db.sql("""
+                            SELECT `name`
+                            FROM `tabmp Abo`
+                            WHERE `status` != "Inactive"
+                            AND (
+                                `magazines_qty_ir` < 1
+                                OR
+                                `magazines_qty_ir` IS NULL
+                            )
+                        """, as_dict=True)
+    total = len(abos)
+    loop = 1
+    for abo in abos:
+        print("Round 2: {0} von {1}".format(loop, total))
+        a = frappe.get_doc("mp Abo", abo.name)
+        for recipient in a.recipient:
+            recipient.abo_type = a.type
+            recipient.digital = 1
+        a.save()
+        loop += 1
+    print("Done")
 
