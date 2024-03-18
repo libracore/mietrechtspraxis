@@ -868,10 +868,9 @@ def get_versandkarten_empfaenger(date, txt):
             versand_row.anz = empfaenger.qty
             versand_row.recipient_contact = empfaenger.contact
             versand_row.recipient_address = empfaenger.address
-            if save_counter == 50:
+            if save_counter == 250:
                 rm_log.save(ignore_permissions=True)
                 frappe.db.commit()
-                break
                 save_counter = 1
             else:
                 save_counter += 1
@@ -892,10 +891,9 @@ def get_versandkarten_empfaenger(date, txt):
             versand_row.anz = empfaenger.qty
             versand_row.recipient_contact = empfaenger.contact
             versand_row.recipient_address = empfaenger.address
-            if save_counter == 50:
+            if save_counter == 250:
                 rm_log.save(ignore_permissions=True)
                 frappe.db.commit()
-                break
                 save_counter = 1
             else:
                 save_counter += 1
