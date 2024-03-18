@@ -838,72 +838,97 @@ def get_versandkarten_empfaenger(date, txt, printformat=None):
     qty_one = 0
     qty_multi = 0
     save_counter = 1
+    batch_counter = 1
+
+    rm_log = create_rm_log_batch('Versandkarten', txt)
+
+    for empfaenger in empfaenger_ausland:
+        # create ggf. new rm_log:
+        if batch_counter > 500:
+            save_and_print_rm_log(rm_log, qty_one, qty_multi, printformat)
+            rm_log = create_rm_log_batch('Versandkarten', txt)
+            qty_one = 0
+            qty_multi = 0
+            save_counter = 1
+            batch_counter = 1
+        try:
+            customer = frappe.get_doc("Customer", empfaenger.customer)
+            versand_row = rm_log.append('versandkarten', {})
+            versand_row.recipient_name = customer.customer_name
+            versand_row.abo = empfaenger.abo
+            versand_row.anz = empfaenger.qty
+            versand_row.recipient_contact = empfaenger.contact
+            versand_row.recipient_address = empfaenger.address
+            if save_counter == 250:
+                rm_log.save(ignore_permissions=True)
+                frappe.db.commit()
+                save_counter = 1
+            else:
+                save_counter += 1
+            if empfaenger.qty > 1:
+                qty_multi += 1
+            else:
+                qty_one += 1
+            batch_counter += 1
+        except:
+            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=empfaenger.abo))
     
+    for empfaenger in empfaenger_inland:
+        # create ggf. new rm_log:
+        if batch_counter > 500:
+            save_and_print_rm_log(rm_log, qty_one, qty_multi, printformat)
+            rm_log = create_rm_log_batch('Versandkarten', txt)
+            qty_one = 0
+            qty_multi = 0
+            save_counter = 1
+            batch_counter = 1
+        try:
+            customer = frappe.get_doc("Customer", empfaenger.customer)
+            versand_row = rm_log.append('versandkarten', {})
+            versand_row.recipient_name = customer.customer_name
+            versand_row.abo = empfaenger.abo
+            versand_row.anz = empfaenger.qty
+            versand_row.recipient_contact = empfaenger.contact
+            versand_row.recipient_address = empfaenger.address
+            if save_counter == 250:
+                rm_log.save(ignore_permissions=True)
+                frappe.db.commit()
+                save_counter = 1
+            else:
+                save_counter += 1
+            if empfaenger.qty > 1:
+                qty_multi += 1
+            else:
+                qty_one += 1
+            batch_counter += 1
+        except:
+            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=empfaenger.abo))
+    
+    if batch_counter > 1:
+        save_and_print_rm_log(rm_log, qty_one, qty_multi, printformat)
+
+def create_rm_log_batch(typ, txt):
     rm_log = frappe.get_doc({
         "doctype": "RM Log",
         'start': now(),
         'status': 'Job gestartet',
-        'typ': 'Versandkarten',
+        'typ': typ,
         'versandkartentext': txt
     })
     rm_log.insert()
     frappe.db.commit()
-    
+    return rm_log
+
+def save_and_print_rm_log(rm_log, qty_one, qty_multi, printformat=None):
+    rm_log.save(ignore_permissions=True)
+    frappe.db.commit()
+
     bind_source = "/assets/mietrechtspraxis/sinvs_for_print/{date}.pdf".format(date=rm_log.name)
     physical_path = "/home/frappe/frappe-bench/sites" + bind_source
     dest=str(physical_path)
     
     output = PdfFileWriter()
 
-    for empfaenger in empfaenger_ausland:
-        # create rm_log:
-        try:
-            customer = frappe.get_doc("Customer", empfaenger.customer)
-            versand_row = rm_log.append('versandkarten', {})
-            versand_row.recipient_name = customer.customer_name
-            versand_row.abo = empfaenger.abo
-            versand_row.anz = empfaenger.qty
-            versand_row.recipient_contact = empfaenger.contact
-            versand_row.recipient_address = empfaenger.address
-            if save_counter == 250:
-                rm_log.save(ignore_permissions=True)
-                frappe.db.commit()
-                save_counter = 1
-            else:
-                save_counter += 1
-            if empfaenger.qty > 1:
-                qty_multi += 1
-            else:
-                qty_one += 1
-        except:
-            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=empfaenger.abo))
-    
-    for empfaenger in empfaenger_inland:
-        # create rm_log:
-        try:
-            customer = frappe.get_doc("Customer", empfaenger.customer)
-            versand_row = rm_log.append('versandkarten', {})
-            versand_row.recipient_name = customer.customer_name
-            versand_row.abo = empfaenger.abo
-            versand_row.anz = empfaenger.qty
-            versand_row.recipient_contact = empfaenger.contact
-            versand_row.recipient_address = empfaenger.address
-            if save_counter == 250:
-                rm_log.save(ignore_permissions=True)
-                frappe.db.commit()
-                save_counter = 1
-            else:
-                save_counter += 1
-            if empfaenger.qty > 1:
-                qty_multi += 1
-            else:
-                qty_one += 1
-        except:
-            frappe.log_error(frappe.get_traceback(), 'create rm_log failed: {ref_dok}'.format(ref_dok=empfaenger.abo))
-    
-    rm_log.save(ignore_permissions=True)
-    frappe.db.commit()
-    
     try:
         if printformat:
             durckformat = printformat
@@ -912,8 +937,6 @@ def get_versandkarten_empfaenger(date, txt, printformat=None):
         output = frappe.get_print("RM Log", rm_log.name, durckformat, as_pdf = True, output = output, no_letterhead = 1, ignore_zugferd=True)
     except:
         frappe.log_error(frappe.get_traceback(), 'print_pdf failed: {ref_dok}'.format(ref_dok=rm_log.name))
-    
-    
     
     try:
         if isinstance(dest, str): # when dest is a file path
