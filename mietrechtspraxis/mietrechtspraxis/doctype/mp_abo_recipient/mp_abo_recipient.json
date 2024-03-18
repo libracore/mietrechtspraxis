@@ -64,7 +64,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Typ",
-   "options": "Jahres-Abo\nGratis-Abo\nProbe-Abo",
+   "options": "Jahres-Abo\nJahres-Legi-Abo\nGratis-Abo\nProbe-Abo",
    "reqd": 1
   },
   {
@@ -76,7 +76,7 @@
   }
  ],
  "istable": 1,
- "modified": "2024-03-11 11:52:14.491721",
+ "modified": "2024-03-18 13:36:54.982484",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo Recipient",

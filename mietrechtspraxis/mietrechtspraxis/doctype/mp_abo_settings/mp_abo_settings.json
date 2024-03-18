@@ -6,10 +6,12 @@
  "field_order": [
   "section_abo_type_item",
   "jahres_abo",
+  "jahres_legi_abo",
   "gratis_abo",
   "probe_abo",
   "cb_2",
   "jahres_abo_digital",
+  "jahres_legi_abo_digital",
   "gratis_abo_digital",
   "probe_abo_digital",
   "section_ablaufdatum",
@@ -152,10 +154,24 @@
    "label": "Probe-Abo Digital",
    "options": "Item",
    "reqd": 1
+  },
+  {
+   "fieldname": "jahres_legi_abo",
+   "fieldtype": "Link",
+   "label": "Jahres-Legi-Abo",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "jahres_legi_abo_digital",
+   "fieldtype": "Link",
+   "label": "Jahres-Legi-Abo Digital",
+   "options": "Item",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2024-03-11 10:44:50.796545",
+ "modified": "2024-03-18 13:39:23.835914",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo Settings",

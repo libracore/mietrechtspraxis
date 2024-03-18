@@ -91,15 +91,15 @@ frappe.invoice_and_print = {
 
         var empfaenger = _data.empfaenger;
         const empfaenger_data = {
-            labels: ["Jahres Abo", "Probe Abo", "Gratis Abo"],
+            labels: ["Jahres Abo", "Jahres Legi Abo", "Probe Abo", "Gratis Abo"],
             datasets: [
                 {
                     name: "Physikalisch", chartType: "bar",
-                    values: [empfaenger.empfaenger_physikalisch_jahr, empfaenger.empfaenger_physikalisch_probe, empfaenger.empfaenger_physikalisch_gratis]
+                    values: [empfaenger.empfaenger_physikalisch_jahr, empfaenger.empfaenger_physikalisch_jahr_legi, empfaenger.empfaenger_physikalisch_probe, empfaenger.empfaenger_physikalisch_gratis]
                 },
                 {
                     name: "Digital", chartType: "bar",
-                    values: [empfaenger.empfaenger_digital_jahr, empfaenger.empfaenger_digital_probe, empfaenger.empfaenger_digital_gratis]
+                    values: [empfaenger.empfaenger_digital_jahr, empfaenger.empfaenger_digital_jahr_legi, empfaenger.empfaenger_digital_probe, empfaenger.empfaenger_digital_gratis]
                 }
             ]
         }

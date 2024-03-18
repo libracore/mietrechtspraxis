@@ -18,16 +18,12 @@ class mpAbo(Document):
     def validate(self):
         # calc qty
         total_qty = 0
-        total_invoice_qty = 0
         total_digital = 0
         for recipient in self.recipient:
             total_qty += recipient.magazines_qty_mr
             if recipient.digital:
                 total_digital += 1
-            if not recipient.remove_recipient:
-                total_invoice_qty += recipient.magazines_qty_mr
         self.magazines_qty_total = total_qty
-        self.qty_next_invoice = total_invoice_qty
         self.digital_qty = total_digital
         
         # check status
@@ -43,9 +39,6 @@ class mpAbo(Document):
         self.customer = self.invoice_recipient
         
         # check receipients
-        if self.type == 'Probe-Abo':
-            if len(self.recipient) > 1:
-                frappe.throw("Ein Probe-Abo kann nicht mehrere Empfänger haben.")
         if self.status != "Inactive":
             if len(self.recipient) < 1:
                 frappe.throw("Ein Abo muss mind. ein Empfänger haben.")
@@ -382,7 +375,7 @@ def migrate_old_abos():
                             SELECT `name`
                             FROM `tabmp Abo`
                             WHERE `status` != "Inactive"
-                             AND `magazines_qty_ir` > 0
+                            AND `magazines_qty_ir` > 0
                         """, as_dict=True)
     total = len(abos)
     loop = 1
@@ -392,6 +385,7 @@ def migrate_old_abos():
         found_inhaber = False
         for recipient in a.recipient:
             recipient.abo_type = a.type
+            recipient.digital = 1
             if recipient.magazines_recipient == a.invoice_recipient:
                 if recipient.recipient_contact == a.recipient_contact:
                     if recipient.recipient_address == a.recipient_address:
@@ -399,6 +393,7 @@ def migrate_old_abos():
         if not found_inhaber:
             row = a.append('recipient', {})
             row.abo_type = a.type
+            row.digital = 1
             row.magazines_qty_mr = a.magazines_qty_ir
             row.magazines_recipient = a.invoice_recipient
             row.recipient_contact = a.recipient_contact
@@ -424,6 +419,7 @@ def migrate_old_abos():
         a = frappe.get_doc("mp Abo", abo.name)
         for recipient in a.recipient:
             recipient.abo_type = a.type
+            recipient.digital = 1
         a.save()
         loop += 1
     print("Done")

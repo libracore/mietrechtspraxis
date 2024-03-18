@@ -34,6 +34,22 @@ def get_show_data(sel_type):
                                                     )
                                                     AND `digital` = 1""", as_dict=True)[0].qty
     
+    empfaenger_physikalisch_jahr_legi = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo Recipient` WHERE `abo_type` = 'Jahres-Legi-Abo'
+                                                    AND `parent` IN (
+                                                        SELECT `name`
+                                                        FROM `tabmp Abo`
+                                                        WHERE `status` != 'Inactive'
+                                                    )
+                                                    AND IFNULL(`magazines_qty_mr`, 0) > 0 """, as_dict=True)[0].qty
+    
+    empfaenger_digital_jahr_legi = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo Recipient` WHERE `abo_type` = 'Jahres-Legi-Abo'
+                                                    AND `parent` IN (
+                                                        SELECT `name`
+                                                        FROM `tabmp Abo`
+                                                        WHERE `status` != 'Inactive'
+                                                    )
+                                                    AND `digital` = 1""", as_dict=True)[0].qty
+    
     empfaenger_physikalisch_probe = frappe.db.sql("""SELECT COUNT(`name`) AS `qty` FROM `tabmp Abo Recipient` WHERE `abo_type` = 'Probe-Abo'
                                                     AND `parent` IN (
                                                         SELECT `name`
@@ -75,6 +91,8 @@ def get_show_data(sel_type):
         'empfaenger': {
             'empfaenger_physikalisch_jahr': empfaenger_physikalisch_jahr,
             'empfaenger_digital_jahr': empfaenger_digital_jahr,
+            'empfaenger_physikalisch_jahr_legi': empfaenger_physikalisch_jahr_legi,
+            'empfaenger_digital_jahr_legi': empfaenger_digital_jahr_legi,
             'empfaenger_physikalisch_probe': empfaenger_physikalisch_probe,
             'empfaenger_digital_probe': empfaenger_digital_probe,
             'empfaenger_physikalisch_gratis': empfaenger_physikalisch_gratis,
