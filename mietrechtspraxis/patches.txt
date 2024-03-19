@@ -1,2 +1,3 @@
 mietrechtspraxis.patches.v1_11_0.change_mwst_accounts
 mietrechtspraxis.patches.erstregistration.set_initial_hash
+mietrechtspraxis.patches.initiale_user_anlage.anlage
