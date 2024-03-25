@@ -42,6 +42,11 @@ class mpAbo(Document):
         if self.status != "Inactive":
             if len(self.recipient) < 1:
                 frappe.throw("Ein Abo muss mind. ein Empfänger haben.")
+        
+        #check for not allowed combination
+        for recipient in self.recipient:
+            if recipient.abo_type == 'Probe-Abo' and cint(recipient.digital) == 1:
+                frappe.throw("Ungültige Kombination (Probe-Abo & Digital)")
     
     def on_update(self):
         # check valid_mp_web_user_abo
@@ -314,25 +319,15 @@ def check_mp_web_user_based_on_contacts(contacts):
         c = frappe.get_doc("Contact", contact[0])
         if c.mp_web_user:
             user = frappe.get_doc("User", c.mp_web_user)
-            activ_abos = frappe.db.sql("""
-                                        SELECT COUNT(`name`) AS `qty`
-                                        FROM `tabmp Abo`
-                                        WHERE `status` != 'Inactive'
-                                        AND `magazines_qty_ir` != 0
-                                        AND `recipient_contact` = '{0}'
-                                        """.format(contact[0]), as_dict=True)
-            frappe.log_error("{0}".format(activ_abos), "activ_abos")
-            if activ_abos[0].qty > 0:
-                has_activ_abo = True
-            
             activ_recipient = frappe.db.sql("""
                                             SELECT COUNT(`mar`.`name`) AS `qty`
                                             FROM `tabmp Abo Recipient` AS `mar`
                                             LEFT JOIN `tabmp Abo` AS `ma` ON `mar`.`parent` = `ma`.`name`
                                             WHERE `ma`.`status` != 'Inactive'
                                             AND `mar`.`recipient_contact` = '{0}'
+                                            AND `mar`.`digital` = 1
                                             """.format(contact[0]), as_dict=True)
-            frappe.log_error("{0}".format(activ_recipient), "activ_recipient")
+            
             if activ_recipient[0].qty > 0:
                 has_activ_abo = True
     if has_activ_abo:
