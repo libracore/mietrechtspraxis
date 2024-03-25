@@ -19,4 +19,4 @@ def validate_mp_web_user():
                                                )
                                                """, as_dict=True)
     for antwort_auf_das_formular in antworten_auf_das_formular:
-        valid_mp_web_user_abo(antwort_auf_das_formular.email)
+        valid_mp_web_user_abo(user=antwort_auf_das_formular.email)
