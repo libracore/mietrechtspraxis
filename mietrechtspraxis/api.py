@@ -174,7 +174,7 @@ def reset_password(user):
 
     link = get_url(url)
     
-    send_login_mail(user, _("Password Reset"), "pwd_reset_mail", {"link": link}, now=True)
+    send_login_mail(user, "Passwort zurücksetzen", "pwd_reset_mail", {"link": link}, now=True)
 
     return link
 
@@ -190,7 +190,8 @@ def send_login_mail(username, subject, template, add_args, now=None):
     
 
     args = {
-        'first_name': user.first_name or user.last_name or "user",
+        'first_name': user.first_name or user.last_name or "",
+        'last_name': user.last_name or "",
         'user': user.name,
         'title': subject,
         'login_url': get_url(),

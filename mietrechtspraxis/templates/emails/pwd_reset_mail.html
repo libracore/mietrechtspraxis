@@ -1,7 +1,17 @@
-<p>{{_("Dear")}} {{ first_name }}{% if last_name %} {{ last_name}}{% endif %},</p>
-<p>{{_("Please click on the following link to set your new password")}}:</p>
-<p><a class="btn" style="background-color: #0D622A !important; border-color: #0D622A !important; color: white !important;" href="{{ link }}">{{_("Reset your password")}}</a></p>
 <p>
-	{{_("Thank you")}},<br>
-	{{ user_fullname }}
+    Guten Tag {{ first_name }}{% if last_name %} {{ last_name}}{% endif %}
+</p>
+<p>
+    Wir haben eine Anfrage zum Zurücksetzen Ihres Passworts erhalten.<br><br>
+    Wenn Sie die Anfrage gesendet haben, bestätigen Sie dies bitte hier:
+</p>
+<p><a class="btn" style="background-color: #0D622A !important; border-color: #0D622A !important; color: white !important;" href="{{ link }}">Neues Passwort wählen</a></p>
+<p>
+    Wenn Sie die Anfrage nicht abgeschickt haben, können Sie diese E-Mail ignorieren; Ihr Passwort bleibt unverändert.<br><br>
+    Bei Fragen stehen wir Ihnen gerne zur Verfügung. Sie können uns unter mietrecht@mietrecht.ch erreichen.<br><br>
+    Der Button funktioniert nicht? Kopieren Sie die folgende URL und fügen Sie sie in Ihren Browser ein:<br>
+    {{ link }}
+</p>
+<p>
+    www.mietrecht.ch – mietrechtspraxis | mp
 </p>
