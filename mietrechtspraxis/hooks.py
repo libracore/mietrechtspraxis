@@ -29,6 +29,8 @@ web_include_css = "/assets/mietrechtspraxis/css/mietrechtspraxis.css"
 
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
+welcome_email_subject = "www.mietrecht.ch – mietrechtspraxis | mp"
+welcome_email_template = "welcome_mail"
 
 # include js in doctype views
 doctype_js = {
