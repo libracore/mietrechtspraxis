@@ -46,7 +46,9 @@ class mpAbo(Document):
         #check for not allowed combination
         for recipient in self.recipient:
             if recipient.abo_type == 'Probe-Abo' and cint(recipient.digital) == 1:
-                frappe.throw("Ungültige Kombination (Probe-Abo & Digital)")
+                frappe.throw("Zeile {0}: Ungültige Kombination (Probe-Abo & Digital)".format(recipient.idx))
+            if recipient.magazines_qty_mr < 1 and cint(recipient.digital) == 0:
+                frappe.throw("Zeile {0}: Ungültige Kombination (Anz. Magazine 0 & Nicht Digital)".format(recipient.idx))
     
     def on_update(self):
         # check valid_mp_web_user_abo
@@ -210,7 +212,8 @@ def _create_invoice(abo):
         item_code = frappe.db.get_single_value('mp Abo Settings', abo_type)
         qty = recipient.magazines_qty_mr
         if cint(recipient.digital) == 1:
-            qty += 1
+            if qty == 0:
+                qty = 1
         items.append({
             "item_code": item_code,
             "qty": qty,
