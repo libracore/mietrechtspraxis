@@ -16,6 +16,11 @@ app_license = "MIT"
 website_route_rules = [
     {"from_route": "/login#forgot", "to_route": "/pwd-reset"}
 ]
+website_redirects = [
+    # absolute location
+    {"source": "/me", "target": "https://www.mietrecht.ch/"}
+]
+
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/mietrechtspraxis/css/mietrechtspraxis.css"
