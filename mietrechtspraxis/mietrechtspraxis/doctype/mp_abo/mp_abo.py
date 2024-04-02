@@ -301,27 +301,26 @@ def valid_mp_web_user_abo(abo=None, user=None):
         user = get_user_from_contact(abo.recipient_contact)
         if user:
             contacts = get_contacts_from_user(user)
-            check_mp_web_user_based_on_contacts(contacts)
+            check_mp_web_user_based_on_contacts(contacts, user)
 
         for recipient_contact in abo.recipient:
             user = get_user_from_contact(recipient_contact.recipient_contact)
             if user:
                 contacts = get_contacts_from_user(user)
-                check_mp_web_user_based_on_contacts(contacts)
+                check_mp_web_user_based_on_contacts(contacts, user)
         return
     
     if user:
         contacts = get_contacts_from_user(user)
-        check_mp_web_user_based_on_contacts(contacts)
+        check_mp_web_user_based_on_contacts(contacts, user)
         return
 
 
-def check_mp_web_user_based_on_contacts(contacts):
+def check_mp_web_user_based_on_contacts(contacts, username):
     has_activ_abo = False
     for contact in contacts:
         c = frappe.get_doc("Contact", contact[0])
         if c.mp_web_user:
-            user = frappe.get_doc("User", c.mp_web_user)
             activ_recipient = frappe.db.sql("""
                                             SELECT COUNT(`mar`.`name`) AS `qty`
                                             FROM `tabmp Abo Recipient` AS `mar`
@@ -333,6 +332,7 @@ def check_mp_web_user_based_on_contacts(contacts):
             
             if activ_recipient[0].qty > 0:
                 has_activ_abo = True
+    user = frappe.get_doc("User", username)
     if has_activ_abo:
         if cint(user.enabled) != 1:
             enable_disable_user(user, 1)

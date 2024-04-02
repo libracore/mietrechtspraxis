@@ -1,6 +1,8 @@
 ## mietrechtspraxis
 
 ### Version Log
+#### 1.13.1
+#84 Bugfix in daily_jobs.validate_mp_web_user
 #### 1.13.0
 Remote App Deployment only for Testsystem
 #### 1.12.0
