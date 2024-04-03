@@ -1,6 +1,8 @@
 ## mietrechtspraxis
 
 ### Version Log
+#### 1.13.2
+#86; neues get_query für MP Web User Link-Field
 #### 1.13.1
 #84 Bugfix in daily_jobs.validate_mp_web_user
 #### 1.13.0
