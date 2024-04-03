@@ -41,7 +41,8 @@ welcome_email_template = "welcome_mail"
 doctype_js = {
     "Customer" : "public/js/custom_scripts/customer.js",
     "Address" : "public/js/custom_scripts/address.js",
-    "Sales Invoice" : "public/js/custom_scripts/sales_invoice.js"
+    "Sales Invoice" : "public/js/custom_scripts/sales_invoice.js",
+    "Contact" : "public/js/custom_scripts/contact.js"
 }
 doctype_list_js = {
     "Payment Reminder" : "/public/js/custom_scripts/mahnungen_list.js",
