@@ -1,6 +1,8 @@
 ## mietrechtspraxis
 
 ### Version Log
+#### 1.14.0
+#87; Neue PWD-Update Site inkl. Redirect nach mietrecht.ch
 #### 1.13.2
 #86; neues get_query für MP Web User Link-Field
 #### 1.13.1

@@ -13,9 +13,10 @@ app_license = "MIT"
 
 # Includes in <head>
 # ------------------
-website_route_rules = [
-    {"from_route": "/login#forgot", "to_route": "/pwd-reset"}
-]
+# website_route_rules = [
+#     {"from_route": "/login#forgot", "to_route": "/pwd-reset"},
+#     {"from_route": "/#forgot", "to_route": "/pwd-reset"}
+# ]
 website_redirects = [
     # absolute location
     {"source": "/me", "target": "https://www.mietrecht.ch/"}
