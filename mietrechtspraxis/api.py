@@ -170,7 +170,7 @@ def reset_password(user):
     key = random_string(32)
     frappe.db.set_value("User", user, 'reset_password_key', key)
 
-    url = "/update-password?key=" + key
+    url = "/pwd-update?key=" + key
 
     link = get_url(url)
     
@@ -205,3 +205,9 @@ def send_login_mail(username, subject, template, add_args, now=None):
     frappe.sendmail(recipients=user.email, sender=sender, subject=subject,
         template=template, args=args, header=[subject, "green"],
         delayed=(not now) if now!=None else user.flags.delay_emails, retry=3)
+
+@frappe.whitelist(allow_guest=True)
+def _update_password(new_password, logout_all_sessions=0, key=None, old_password=None):
+    from frappe.core.doctype.user.user import update_password
+    finish = update_password(new_password, logout_all_sessions, key, old_password)
+    return 'https://www.mietrecht.ch/'
