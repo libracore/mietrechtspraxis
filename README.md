@@ -1,6 +1,8 @@
 ## mietrechtspraxis
 
 ### Version Log
+#### 1.15.0
+#85; Hook für password_reset_subject & password_reset_template
 #### 1.14.0
 #87; Neue PWD-Update Site inkl. Redirect nach mietrecht.ch
 #### 1.13.2
