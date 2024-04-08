@@ -10,5 +10,7 @@ frappe.ui.form.on('Contact', {
             }
         }
         frm.refresh_field("mp_web_user");
+
+        cur_frm.fields_dict.mp_login.collapse();
 	}
 });
