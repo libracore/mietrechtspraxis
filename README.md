@@ -1,6 +1,8 @@
 ## mietrechtspraxis
 
 ### Version Log
+#### 1.15.1
+#88
 #### 1.15.0
 #85; Hook für password_reset_subject & password_reset_template
 #### 1.14.0
