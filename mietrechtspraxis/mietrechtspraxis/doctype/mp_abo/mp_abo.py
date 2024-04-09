@@ -45,8 +45,6 @@ class mpAbo(Document):
         
         #check for not allowed combination
         for recipient in self.recipient:
-            if recipient.abo_type == 'Probe-Abo' and cint(recipient.digital) == 1:
-                frappe.throw("Zeile {0}: Ungültige Kombination (Probe-Abo & Digital)".format(recipient.idx))
             if recipient.magazines_qty_mr < 1 and cint(recipient.digital) == 0:
                 frappe.throw("Zeile {0}: Ungültige Kombination (Anz. Magazine 0 & Nicht Digital)".format(recipient.idx))
     
