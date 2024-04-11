@@ -1,6 +1,8 @@
 ## mietrechtspraxis
 
 ### Version Log
+#### 1.15.2
+#90; Druckformat Begleitschreiben Probe-Abo
 #### 1.15.1
 #88
 #### 1.15.0
