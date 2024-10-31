@@ -52,9 +52,9 @@ def get_abos_for_invoicing(selected_type, year, qty=False, limit=False):
                                     LEFT JOIN `tabmp Abo Recipient` AS `r` ON `a`.`invoice_recipient` = `r`.`magazines_recipient`
                                     WHERE
                                         `r`.`magazines_qty_mr` > 0
-                                        AND `a`.`status` = 'Active'
                             )
                             AND `a`.`name` NOT IN ({filter_keine_doppel_rechnung})
+                            AND `a`.`status` = 'Active'
                             ORDER BY `qty_total` DESC
                             {limit_filter}
                             """.format(filter_keine_doppel_rechnung=filter_keine_doppel_rechnung, limit_filter=limit_filter), as_dict=True)
