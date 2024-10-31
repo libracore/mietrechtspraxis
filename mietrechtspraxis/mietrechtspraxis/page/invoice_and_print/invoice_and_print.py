@@ -11,6 +11,7 @@ from PyPDF2 import PdfFileWriter
 from frappe.utils.background_jobs import enqueue
 import math
 from mietrechtspraxis.mietrechtspraxis.utils.qrr_reference import get_qrr_reference
+from mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.utils import get_abos_for_invoicing
 
 @frappe.whitelist()
 def get_show_data(sel_type):
@@ -110,71 +111,15 @@ def create_invoices(date, year, selected_type, limit=False):
     enqueue("mietrechtspraxis.mietrechtspraxis.page.invoice_and_print.invoice_and_print._create_invoices", queue='long', job_name='Generierung Sammel-PDF (Rechnungslauf)', timeout=5000, **args)
 
 def _create_invoices(date, year, selected_type, limit=500):
-    # berechne batch anzahl auf basis von Limit
-    filter_keine_doppel_rechnung = """SELECT `parent` FROM `tabmp Abo Invoice` WHERE `year` = '{year}'""".format(year=year)
-    if selected_type == 'invoice_inkl':
-        filter_invoice_typ = """`magazines_qty_ir` > 0"""
-    else:
-        filter_invoice_typ = """`magazines_qty_ir` = 0"""
-    filter_ausland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` != 'Schweiz')"""
-    filter_inland_adressen = """ AND `recipient_address` IN (SELECT `name` FROM `tabAddress` WHERE `country` = 'Schweiz')"""
-    
-    ausland_abos_qty = frappe.db.sql("""SELECT
-                                            COUNT(`name`) AS `qty`
-                                        FROM `tabmp Abo`
-                                        WHERE `type` = 'Jahres-Abo'
-                                        AND `status` = 'Active'
-                                        AND {filter_invoice_typ}
-                                        AND `name` NOT IN ({filter_keine_doppel_rechnung})
-                                        {filter_ausland_adressen} ORDER BY `magazines_qty_ir` ASC""".format(filter_invoice_typ=filter_invoice_typ,
-                                                                                                            filter_keine_doppel_rechnung=filter_keine_doppel_rechnung,
-                                                                                                            filter_ausland_adressen=filter_ausland_adressen), as_dict=True)[0].qty
-    inland_abos_qty = frappe.db.sql("""SELECT
-                                        COUNT(`name`) AS `qty`
-                                    FROM `tabmp Abo`
-                                    WHERE `type` = 'Jahres-Abo'
-                                    AND `status` = 'Active'
-                                    AND {filter_invoice_typ}
-                                    AND `name` NOT IN ({filter_keine_doppel_rechnung})
-                                    {filter_inland_adressen} ORDER BY `magazines_qty_ir` ASC""".format(filter_invoice_typ=filter_invoice_typ,
-                                                                                                        filter_keine_doppel_rechnung=filter_keine_doppel_rechnung,
-                                                                                                        filter_inland_adressen=filter_inland_adressen), as_dict=True)[0].qty
-    total_qty = ausland_abos_qty + inland_abos_qty
+    total_qty = get_abos_for_invoicing(selected_type, year, qty=True)
     batch_anz = math.ceil((total_qty / limit))
     
     # batch verarbeitung
     for batch in range(batch_anz):
-        # reset doppel-rechnungs-filter
-        filter_keine_doppel_rechnung = """SELECT `parent` FROM `tabmp Abo Invoice` WHERE `year` = '{year}'""".format(year=year)
         qty_one = 0
         qty_multi = 0
-        abos = []
         
-        if limit:
-            limit_filter = ' LIMIT {limit}'.format(limit=limit)
-        else:
-            limit_filter = ''
-        
-        ausland_abos = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabmp Abo`
-                                        WHERE `type` = 'Jahres-Abo'
-                                        AND `status` = 'Active'
-                                        AND {filter_invoice_typ}
-                                        AND `name` NOT IN ({filter_keine_doppel_rechnung}){filter_ausland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_invoice_typ=filter_invoice_typ, filter_keine_doppel_rechnung=filter_keine_doppel_rechnung, filter_ausland_adressen=filter_ausland_adressen, limit_filter=limit_filter), as_dict=True)
-        for ausland_abo in ausland_abos:
-            abos.append(ausland_abo)
-        
-        inland_abos = frappe.db.sql("""SELECT
-                                            `name`
-                                        FROM `tabmp Abo`
-                                        WHERE `type` = 'Jahres-Abo'
-                                        AND `status` = 'Active'
-                                        AND {filter_invoice_typ}
-                                        AND `name` NOT IN ({filter_keine_doppel_rechnung}){filter_inland_adressen} ORDER BY `magazines_qty_ir` ASC{limit_filter}""".format(filter_invoice_typ=filter_invoice_typ, filter_keine_doppel_rechnung=filter_keine_doppel_rechnung, filter_inland_adressen=filter_inland_adressen, limit_filter=limit_filter), as_dict=True)
-        for inland_abo in inland_abos:
-            abos.append(inland_abo)
-        
+        abos = get_abos_for_invoicing(selected_type, year, limit=limit)
         # create log file
         rm_log = frappe.get_doc({
             "doctype": "RM Log",
@@ -205,14 +150,14 @@ def _create_invoices(date, year, selected_type, limit=500):
                 else:
                     sinv_row.e_mail = 1
                 sinv_row.abo = abo.name
-                sinv_row.anz = abo.magazines_qty_ir
+                sinv_row.anz = _abo.inhaber_exemplar
                 sinv_row.recipient_name = abo.recipient_name
                 rm_log.save(ignore_permissions=True)
                 frappe.db.commit()
                 
                 if not sinv['send_as_mail']:
                     if selected_type == 'invoice_inkl':
-                        if abo.magazines_qty_ir == 1:
+                        if _abo.inhaber_exemplar == 1:
                             qty_one += 1
                         else:
                             qty_multi += 1
@@ -232,6 +177,23 @@ def create_invoice(abo, date):
     from mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo import get_price
     abo = frappe.get_doc("mp Abo", abo)
     try:
+        items = []
+        if abo.magazines_qty_total > 0:
+            items.append(
+                {
+                    "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
+                    "qty": abo.magazines_qty_total,
+                    "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'), abo.invoice_recipient)
+                }
+            )
+        if abo.digital_qty > 0:
+            items.append(
+                {
+                    "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo_digital'),
+                    "qty": abo.digital_qty,
+                    "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo_digital'), abo.invoice_recipient)
+                }
+            )
         new_sinv = frappe.get_doc({
             "doctype": "Sales Invoice",
             "set_posting_time": 1,
@@ -240,13 +202,7 @@ def create_invoice(abo, date):
             "customer": abo.invoice_recipient,
             "customer_address": abo.recipient_address,
             "contact_person": abo.recipient_contact,
-            "items": [
-                {
-                    "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
-                    "qty": abo.qty_next_invoice,
-                    "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'), abo.invoice_recipient)
-                }
-            ]
+            "items": items
         })
         new_sinv.insert()
         new_sinv.esr_reference = get_qrr_reference(sales_invoice=new_sinv.name, customer=abo.invoice_recipient)

@@ -21,7 +21,7 @@ class mpAbo(Document):
         total_digital = 0
         for recipient in self.recipient:
             total_qty += recipient.magazines_qty_mr
-            if recipient.digital:
+            if recipient.digital and recipient.magazines_qty_mr == 0:
                 total_digital += 1
         self.magazines_qty_total = total_qty
         self.digital_qty = total_digital
