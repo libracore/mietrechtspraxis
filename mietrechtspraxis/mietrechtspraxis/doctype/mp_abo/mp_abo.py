@@ -245,6 +245,8 @@ def get_price(item_code, customer):
                                 AND `selling` = 1
                                 AND customer_group = '{customer_group}'
                                 AND `rate_or_discount` = 'Rate'
+                                AND `valid_from` <= CURDATE()
+                                AND (`valid_upto` >= CURDATE() OR `valid_upto` IS NULL)
                                 AND `name` IN (SELECT `parent` FROM `tabPricing Rule Item Code` WHERE `item_code` = '{item_code}')""".format(customer_group=customer_group, item_code=item_code), as_dict=True)
     if prices:
         return prices[0].rate
