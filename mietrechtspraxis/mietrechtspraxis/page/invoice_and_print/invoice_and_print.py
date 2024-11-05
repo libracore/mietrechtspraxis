@@ -178,7 +178,7 @@ def create_invoice(abo, date, inhaber_exemplar=0):
     abo = frappe.get_doc("mp Abo", abo)
     try:
         items = []
-        if abo.print_jahr_qty > 0:
+        if abo.magazines_qty_total > 0:
             items.append(
                 {
                     "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'),
@@ -186,7 +186,7 @@ def create_invoice(abo, date, inhaber_exemplar=0):
                     "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo'), abo.invoice_recipient)
                 }
             )
-        if abo.digital_jahr_qty > 0:
+        if abo.digital_qty > 0:
             items.append(
                 {
                     "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_abo_digital'),
@@ -194,35 +194,35 @@ def create_invoice(abo, date, inhaber_exemplar=0):
                     "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_abo_digital'), abo.invoice_recipient)
                 }
             )
-        if abo.print_gratis_qty > 0:
+        if abo.gratis_print_qty > 0:
             items.append(
                 {
                     "item_code": frappe.db.get_single_value('mp Abo Settings', 'gratis_abo'),
-                    "qty": abo.digital_qty,
+                    "qty": abo.gratis_print_qty,
                     "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'gratis_abo'), abo.invoice_recipient)
                 }
             )
-        if abo.digital_gratis_qty > 0:
+        if abo.gratis_digital_qty > 0:
             items.append(
                 {
                     "item_code": frappe.db.get_single_value('mp Abo Settings', 'gratis_abo_digital'),
-                    "qty": abo.digital_qty,
+                    "qty": abo.gratis_digital_qty,
                     "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'gratis_abo_digital'), abo.invoice_recipient)
                 }
             )
-        if abo.print_legi_qty > 0:
+        if abo.legi_print_qty > 0:
             items.append(
                 {
                     "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_legi_abo'),
-                    "qty": abo.digital_qty,
+                    "qty": abo.legi_print_qty,
                     "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_legi_abo'), abo.invoice_recipient)
                 }
             )
-        if abo.digital_legi_qty > 0:
+        if abo.legi_digital_qty > 0:
             items.append(
                 {
                     "item_code": frappe.db.get_single_value('mp Abo Settings', 'jahres_legi_abo_digital'),
-                    "qty": abo.digital_qty,
+                    "qty": abo.legi_digital_qty,
                     "rate": get_price(frappe.db.get_single_value('mp Abo Settings', 'jahres_legi_abo_digital'), abo.invoice_recipient)
                 }
             )
