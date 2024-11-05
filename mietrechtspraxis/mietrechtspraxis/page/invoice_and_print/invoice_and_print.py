@@ -132,7 +132,7 @@ def _create_invoices(date, year, selected_type, limit=500):
         
         for _abo in abos:
             abo = frappe.get_doc("mp Abo", _abo.name)
-            sinv = create_invoice(abo.name, date)
+            sinv = create_invoice(abo.name, date, inhaber_exemplar=_abo.inhaber_exemplar)
             
             if sinv:
                 # update abo
@@ -173,7 +173,7 @@ def _create_invoices(date, year, selected_type, limit=500):
         rm_log.save(ignore_permissions=True)
         frappe.db.commit()
         
-def create_invoice(abo, date):
+def create_invoice(abo, date, inhaber_exemplar=0):
     from mietrechtspraxis.mietrechtspraxis.doctype.mp_abo.mp_abo import get_price
     abo = frappe.get_doc("mp Abo", abo)
     try:
@@ -202,7 +202,8 @@ def create_invoice(abo, date):
             "customer": abo.invoice_recipient,
             "customer_address": abo.recipient_address,
             "contact_person": abo.recipient_contact,
-            "items": items
+            "items": items,
+            "inhaber_exemplar": inhaber_exemplar
         })
         new_sinv.insert()
         new_sinv.esr_reference = get_qrr_reference(sales_invoice=new_sinv.name, customer=abo.invoice_recipient)
