@@ -17,14 +17,32 @@ class mpAbo(Document):
         
     def validate(self):
         # calc qty
-        total_qty = 0
-        total_digital = 0
+        qty_jahresabo = 0
+        qty_jahresabo_digital = 0
+        qty_legiabo = 0
+        qty_legiabo_digital = 0
+        qty_gratisabo = 0
+        qty_gratisabo_digital = 0
         for recipient in self.recipient:
-            total_qty += recipient.magazines_qty_mr
-            if recipient.digital and recipient.magazines_qty_mr == 0:
-                total_digital += 1
-        self.magazines_qty_total = total_qty
-        self.digital_qty = total_digital
+            if recipient.abo_type == 'Jahres-Abo':
+                qty_jahresabo += recipient.magazines_qty_mr
+                if recipient.digital and recipient.magazines_qty_mr == 0:
+                    qty_jahresabo_digital += 1
+            elif recipient.abo_type == 'Jahres-Legi-Abo':
+                qty_legiabo += recipient.magazines_qty_mr
+                if recipient.digital and recipient.magazines_qty_mr == 0:
+                    qty_legiabo_digital += 1
+            elif recipient.abo_type == 'Gratis-Abo':
+                qty_gratisabo += recipient.magazines_qty_mr
+                if recipient.digital and recipient.magazines_qty_mr == 0:
+                    qty_gratisabo_digital += 1
+        
+        self.magazines_qty_total = qty_jahresabo
+        self.digital_qty = qty_jahresabo_digital
+        self.gratis_print_qty = qty_gratisabo
+        self.gratis_digital_qty = qty_gratisabo_digital
+        self.legi_print_qty = qty_legiabo
+        self.legi_digital_qty = qty_legiabo_digital
         
         # check status
         if self.end_date:

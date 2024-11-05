@@ -18,9 +18,12 @@ def get_abos_for_invoicing(selected_type, year, qty=False, limit=False):
         abos_inkl = frappe.db.sql("""
                             SELECT
                                 `a`.`name` AS `name`,
-                                `a`.`magazines_qty_total` AS `print_qty`,
-                                `a`.`digital_qty`,
-                                `a`.`magazines_qty_total` + `a`.`digital_qty` AS `qty_total`,
+                                `a`.`magazines_qty_total` AS `print_jahr_qty`,
+                                `a`.`digital_qty` AS `digital_jahr_qty`,
+                                `a`.`gratis_print_qty` AS `print_gratis_qty`,
+                                `a`.`gratis_digital_qty` AS `digital_gratis_qty`,
+                                `a`.`legi_print_qty` AS `print_legi_qty`,
+                                `a`.`legi_digital_qty` AS `digital_legi_qty`,
                                 `r`.`magazines_qty_mr` AS `inhaber_exemplar`
                             FROM `tabmp Abo` AS `a`
                             LEFT JOIN `tabmp Abo Recipient` AS `r` ON `a`.`invoice_recipient` = `r`.`magazines_recipient`
@@ -40,9 +43,12 @@ def get_abos_for_invoicing(selected_type, year, qty=False, limit=False):
         abos_exkl = frappe.db.sql("""
                             SELECT
                                 `a`.`name` AS `name`,
-                                `a`.`magazines_qty_total` AS `print_qty`,
-                                `a`.`digital_qty`,
-                                `a`.`magazines_qty_total` + `a`.`digital_qty` AS `qty_total`,
+                                `a`.`magazines_qty_total` AS `print_jahr_qty`,
+                                `a`.`digital_qty` AS `digital_jahr_qty`,
+                                `a`.`gratis_print_qty` AS `print_gratis_qty`,
+                                `a`.`gratis_digital_qty` AS `digital_gratis_qty`,
+                                `a`.`legi_print_qty` AS `print_legi_qty`,
+                                `a`.`legi_digital_qty` AS `digital_legi_qty`,
                                 0 AS `inhaber_exemplar`
                             FROM `tabmp Abo` AS `a`
                             WHERE `a`.`name` NOT IN (

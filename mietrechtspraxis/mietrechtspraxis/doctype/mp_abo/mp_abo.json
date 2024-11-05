@@ -10,6 +10,10 @@
   "status",
   "magazines_qty_total",
   "digital_qty",
+  "gratis_print_qty",
+  "gratis_digital_qty",
+  "legi_print_qty",
+  "legi_digital_qty",
   "qty_next_invoice",
   "user_login_createt",
   "cb_1",
@@ -202,9 +206,33 @@
    "fieldtype": "Int",
    "label": "Anzahl Digital",
    "read_only": 1
+  },
+  {
+   "fieldname": "gratis_print_qty",
+   "fieldtype": "Int",
+   "label": "Anzahl Gedruckt Gratis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gratis_digital_qty",
+   "fieldtype": "Int",
+   "label": "Anzahl Digital Gratis",
+   "read_only": 1
+  },
+  {
+   "fieldname": "legi_print_qty",
+   "fieldtype": "Int",
+   "label": "Anzahl Gedruckt Legi",
+   "read_only": 1
+  },
+  {
+   "fieldname": "legi_digital_qty",
+   "fieldtype": "Int",
+   "label": "Anzahl Digital Legi",
+   "read_only": 1
   }
  ],
- "modified": "2024-03-18 13:50:11.808971",
+ "modified": "2024-11-05 20:32:32.622630",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "mp Abo",
