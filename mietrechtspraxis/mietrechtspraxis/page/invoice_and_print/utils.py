@@ -60,7 +60,6 @@ def get_abos_for_invoicing(selected_type, year, qty=False, limit=False):
                             )
                             AND `a`.`name` NOT IN ({filter_keine_doppel_rechnung})
                             AND `a`.`status` = 'Active'
-                            ORDER BY `qty_total` DESC
                             {limit_filter}
                             """.format(filter_keine_doppel_rechnung=filter_keine_doppel_rechnung, limit_filter=limit_filter), as_dict=True)
         if qty:
