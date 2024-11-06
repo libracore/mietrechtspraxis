@@ -134,7 +134,6 @@ def get_abos_for_begleitschreiben(typ, ausland=False):
                                 FROM `tabmp Abo Recipient` AS `r`
                                 LEFT JOIN `tabmp Abo` AS `a` ON `r`.`parent` = `a`.`name`
                                 WHERE `a`.`status` = 'Active'
-                                AND `r`.`magazines_recipient` != `a`.`invoice_recipient`
                                 {typ_filter}
                                 {land_filter}
                                 ORDER BY `r`.`magazines_qty_mr` DESC
