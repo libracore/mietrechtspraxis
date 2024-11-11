@@ -5,7 +5,17 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "title"
+  "title",
+  "email",
+  "strasse",
+  "plz",
+  "ort",
+  "telefon",
+  "website",
+  "mzr_section",
+  "beratung",
+  "neutral",
+  "age_unsure_special"
  ],
  "fields": [
   {
@@ -15,9 +25,62 @@
    "label": "Titel",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "E-Mail"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort"
+  },
+  {
+   "fieldname": "telefon",
+   "fieldtype": "Data",
+   "label": "Telefon"
+  },
+  {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website"
+  },
+  {
+   "fieldname": "mzr_section",
+   "fieldtype": "Section Break",
+   "label": "MZR"
+  },
+  {
+   "default": "0",
+   "fieldname": "beratung",
+   "fieldtype": "Check",
+   "label": "Beratung"
+  },
+  {
+   "default": "0",
+   "fieldname": "neutral",
+   "fieldtype": "Check",
+   "label": "Neutral"
+  },
+  {
+   "default": "0",
+   "fieldname": "age_unsure_special",
+   "fieldtype": "Check",
+   "label": "Alter unsicher speziell"
   }
  ],
- "modified": "2021-08-26 13:39:03.647754",
+ "modified": "2024-11-11 20:22:26.285355",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Sektion",

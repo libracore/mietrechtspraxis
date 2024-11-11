@@ -30,7 +30,21 @@
   "section_zustaendigkeiten",
   "kanton",
   "sb_sitz",
-  "gemeinden"
+  "gemeinden",
+  "mzr_daten",
+  "kostensteigerung_type",
+  "kostensteigerung_allgemein",
+  "kostensteigerung_10",
+  "kostensteigerung_25",
+  "kostensteigerung_unsicher",
+  "vermieter_benoetigt",
+  "strasse",
+  "plz",
+  "ort",
+  "name_mzr",
+  "sektion",
+  "min_raise",
+  "min_reduction"
  ],
  "fields": [
   {
@@ -170,9 +184,84 @@
    "fieldname": "svit_kommentar",
    "fieldtype": "Data",
    "label": "SVIT Kommentar"
+  },
+  {
+   "fieldname": "mzr_daten",
+   "fieldtype": "Section Break",
+   "label": "Mietzinsrechner-Daten"
+  },
+  {
+   "fieldname": "kostensteigerung_type",
+   "fieldtype": "Select",
+   "label": "Allgemeine Kostensteigerung",
+   "options": "rechner\nrechner-neu\npauschal-inflation\npauschal-kostensteigerung\nkeine-pauschale\nalter"
+  },
+  {
+   "fieldname": "kostensteigerung_allgemein",
+   "fieldtype": "Float",
+   "label": "Kostensteigerung"
+  },
+  {
+   "fieldname": "kostensteigerung_10",
+   "fieldtype": "Float",
+   "label": "Kostensteigerung 10"
+  },
+  {
+   "fieldname": "kostensteigerung_25",
+   "fieldtype": "Float",
+   "label": "Kostensteigerung 25"
+  },
+  {
+   "fieldname": "kostensteigerung_unsicher",
+   "fieldtype": "Float",
+   "label": "Kostensteigerung Unsicher"
+  },
+  {
+   "default": "0",
+   "fieldname": "vermieter_benoetigt",
+   "fieldtype": "Check",
+   "label": "Vermieter ben\u00f6tigt"
+  },
+  {
+   "fieldname": "strasse",
+   "fieldtype": "Data",
+   "label": "Strasse"
+  },
+  {
+   "fieldname": "plz",
+   "fieldtype": "Data",
+   "label": "PLZ"
+  },
+  {
+   "fieldname": "ort",
+   "fieldtype": "Data",
+   "label": "Ort"
+  },
+  {
+   "fieldname": "name_mzr",
+   "fieldtype": "Data",
+   "label": "Name MZR"
+  },
+  {
+   "fieldname": "sektion",
+   "fieldtype": "Link",
+   "label": "Sektion",
+   "options": "Sektion"
+  },
+  {
+   "default": "0",
+   "fieldname": "min_raise",
+   "fieldtype": "Float",
+   "label": "Min Erh\u00f6hung"
+  },
+  {
+   "default": "0",
+   "fieldname": "min_reduction",
+   "fieldtype": "Float",
+   "label": "Min Senkung"
   }
  ],
- "modified": "2021-11-30 08:23:16.370388",
+ "modified": "2024-11-11 20:39:27.627389",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Arbitration Authority",
