@@ -102,6 +102,18 @@ def get_data():
                        "name": "Kantonsinformationen",
                        "label": _("Kantonsinformationen"),
                        "description": _("Kantonsinformationen")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Mapping Schlichtungsstellen",
+                       "label": _("Mapping Schlichtungsstellen"),
+                       "description": _("Mapping Schlichtungsstellen")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Sektion",
+                       "label": _("Sektion"),
+                       "description": _("Sektion")
                    }
             ]
         },
