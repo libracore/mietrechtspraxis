@@ -214,7 +214,7 @@ def _get_sammel_pdf(no_letterhead=1):
 
 @frappe.whitelist()
 def get_by_plz_ort(plz: str, ort: str):
-    """Searches the arbitration authority by the BFS number of the municipality"""
+    """Searches the arbitration authority by plz and ort, used by the mzr"""
     # Get the municipality by BFS number
     mapping = frappe.get_all(
         "Mapping Schlichtungsstellen",
