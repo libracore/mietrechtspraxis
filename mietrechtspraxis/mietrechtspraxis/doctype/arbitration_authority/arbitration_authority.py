@@ -212,7 +212,7 @@ def _get_sammel_pdf(no_letterhead=1):
     return
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_by_plz_ort(plz: str, ort: str):
     """Searches the arbitration authority by plz and ort, used by the mzr"""
     # Get the municipality by BFS number
