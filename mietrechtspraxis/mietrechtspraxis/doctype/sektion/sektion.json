@@ -12,18 +12,17 @@
   "ort",
   "telefon",
   "website",
+  "mzr_bezeichnung",
   "mzr_section",
-  "beratung",
-  "neutral",
-  "age_unsure_special"
+  "mzr_beratung",
+  "mzr_neutral",
+  "mzr_age_unsure_special"
  ],
  "fields": [
   {
    "fieldname": "title",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Titel",
-   "reqd": 1,
    "unique": 1
   },
   {
@@ -63,24 +62,29 @@
   },
   {
    "default": "0",
-   "fieldname": "beratung",
+   "fieldname": "mzr_beratung",
    "fieldtype": "Check",
    "label": "Beratung"
   },
   {
    "default": "0",
-   "fieldname": "neutral",
+   "fieldname": "mzr_neutral",
    "fieldtype": "Check",
    "label": "Neutral"
   },
   {
    "default": "0",
-   "fieldname": "age_unsure_special",
+   "fieldname": "mzr_age_unsure_special",
    "fieldtype": "Check",
    "label": "Alter unsicher speziell"
+  },
+  {
+   "fieldname": "mzr_bezeichnung",
+   "fieldtype": "Data",
+   "label": "Bezeichnung"
   }
  ],
- "modified": "2024-11-11 20:22:26.285355",
+ "modified": "2024-11-19 21:12:58.069783",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Sektion",

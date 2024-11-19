@@ -264,9 +264,10 @@ def get_by_plz_ort(plz: str, ort: str):
             "ort",
             "telefon",
             "website",
-            "beratung",
-            "neutral",
-            "age_unsure_special",
+            "mzr_bezeichnung",
+            "mzr_beratung",
+            "mzr_neutral",
+            "mzr_age_unsure_special",
         ],
         as_dict=True,
     )
