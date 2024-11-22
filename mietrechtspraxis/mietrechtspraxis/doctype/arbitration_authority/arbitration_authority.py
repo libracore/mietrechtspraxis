@@ -273,3 +273,41 @@ def get_by_plz_ort(plz: str, ort: str):
     )
 
     return {"schlichtungsstelle": stelle, "sektion": sektion}
+
+@frappe.whitelist()
+def get_schlichtungsbehoerden_mapping(aa_id):
+    ortschaften = frappe.db.sql("""SELECT `plz`, `ortschaft` , `name`
+                                            FROM `tabMapping Schlichtungsstellen` 
+                                            WHERE `schlichtungsstelle` = '{aa_id}'
+                                            ORDER BY `ortschaft` ;
+                                        """.format(aa_id=aa_id), as_dict=True)
+    if len(ortschaften) > 0 :
+        table = """<table style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="color:grey">No.</th>
+                                <th>PLZ</th>
+                                <th>Ort</th>
+                                <th>id</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody>"""
+        
+        i = 0
+        for ortschaft in ortschaften:
+            i = i+1
+            table += """<tr>
+                            <td style="color:grey; width:3em;">{0}</td>
+                            <td>{1}</td>
+                            <td>{2}</td>
+                            <td><a href="/desk#Form/Mapping%20Schlichtungsstellen/{3}">{3}<a></td>
+                            <!--<td style="text-align: center;"><i class="fa fa-external-link ortschaft_jump" data-jump="{3}" style="cursor: pointer;"></i></td>-->
+                        </tr>""".format(i,ortschaft.plz, ortschaft.ortschaft, ortschaft.name)
+        table += """</tbody>
+                    </table>"""
+    else:
+        table = """<p>Keine Verknüpfungen vorhanden</p>"""
+    
+    
+    return table
