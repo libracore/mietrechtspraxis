@@ -18,7 +18,7 @@ def _get_sb(**kwargs):
     """
     call on [IP]/api/method/mietrechtspraxis.api.get_sb
     Mandatory Parameter:
-        - plz
+        - plz or city
     """
 
     # check that plz_city is present
@@ -91,12 +91,13 @@ def _get_sb(**kwargs):
                                                                     `address`.`zusatz` AS `adressen_zusatz`,
                                                                     NULL AS `zustaendig_fuer_gemeinden`
                                                                 FROM `tabArbitration Authority` AS `schlichtungsbehoerde`
-                                                                LEFT JOIN `tabMunicipality Table` AS `geminendentbl` ON `schlichtungsbehoerde`.`name`=`geminendentbl`.`parent`
+                                                                LEFT JOIN `tabMapping Schlichtungsstellen` AS `aa_map` ON `schlichtungsbehoerde`.`name`=`aa_map`.`schlichtungsstelle` -- new mapping
                                                                 LEFT JOIN `tabContact` AS `contact` ON `schlichtungsbehoerde`.`kontakt`=`contact`.`name`
                                                                 LEFT JOIN `tabAddress` AS `address` ON `schlichtungsbehoerde`.`adresse`=`address`.`name`
-                                                                WHERE `geminendentbl`.`municipality` = '{municipality}'
+                                                                WHERE `aa_map`.`ortschaft` = '{city}' AND `aa_map`.`plz` = '{plz}'
                                                                 """.format(
-                    municipality=city.municipality
+                    city=city.city,
+                    plz=city.plz
                 ),
                 as_dict=True,
             )
@@ -104,10 +105,10 @@ def _get_sb(**kwargs):
             for schlichtungsbehoerde in schlichtungsbehoerden:
                 zustaendig_fuer_gemeinden = frappe.db.sql(
                     """
-                                                            SELECT
-                                                                group_concat(`municipality` ORDER BY `municipality` ASC) `geminendentbl`
-                                                            FROM `tabMunicipality Table` AS `geminendentbl`
-                                                            WHERE `parent` = '{schlichtungsbehoerde_id}'
+                                                            SELECT group_concat(DISTINCT `municipality` ORDER BY `municipality` ASC) `geminendentbl`
+                                                            FROM `tabMapping Schlichtungsstellen` AS `tms`
+                                                            LEFT JOIN tabPincode `tp` ON `tp`.`name` = CONCAT(`tms`.`plz`, '-', `tms`.`ortschaft`)
+                                                            WHERE `schlichtungsstelle` = '{schlichtungsbehoerde_id}'
                                                             """.format(
                         schlichtungsbehoerde_id=schlichtungsbehoerde.schlichtungsbehoerde_id
                     ),
@@ -276,6 +277,7 @@ def get_by_plz_ort(plz: str, ort: str):
 
 @frappe.whitelist()
 def get_schlichtungsbehoerden_mapping(aa_id):
+    """Erstellt eine Liste von Ortschaften zur einer Schlichtungsbehörde"""
     ortschaften = frappe.db.sql("""SELECT `plz`, `ortschaft` , `name`
                                             FROM `tabMapping Schlichtungsstellen` 
                                             WHERE `schlichtungsstelle` = '{aa_id}'
