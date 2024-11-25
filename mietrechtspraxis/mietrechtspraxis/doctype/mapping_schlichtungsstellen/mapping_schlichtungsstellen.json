@@ -5,38 +5,42 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "ortschaft",
+  "id",
   "plz",
-  "schlichtungsstelle",
-  "id"
+  "ortschaft",
+  "schlichtungsstelle"
  ],
  "fields": [
   {
+   "bold": 1,
    "fieldname": "plz",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "PLZ"
   },
   {
    "fieldname": "schlichtungsstelle",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Schlichtungsstelle",
    "options": "Arbitration Authority"
   },
   {
+   "bold": 1,
    "fieldname": "ortschaft",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Ortschaft"
   },
   {
    "fieldname": "id",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "ID",
    "reqd": 1,
    "unique": 1
   }
  ],
- "modified": "2024-11-18 09:32:01.253926",
+ "modified": "2024-11-22 12:20:57.451797",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Mapping Schlichtungsstellen",
@@ -55,7 +59,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

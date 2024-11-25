@@ -31,6 +31,9 @@
   "kanton",
   "sb_sitz",
   "gemeinden",
+  "zuordnung_mzr_section",
+  "mapping_liste",
+  "aa_mapping_html",
   "mzr_daten",
   "kostensteigerung_type",
   "kostensteigerung_allgemein",
@@ -223,6 +226,7 @@
    "label": "Vermieter ben\u00f6tigt"
   },
   {
+   "description": "Bei mehreren Zeilen: Umbruch mit Strichpunkt (;)",
    "fieldname": "strasse",
    "fieldtype": "Data",
    "label": "Strasse"
@@ -259,9 +263,25 @@
    "fieldname": "min_reduction",
    "fieldtype": "Float",
    "label": "Min Senkung"
+  },
+  {
+   "fieldname": "zuordnung_mzr_section",
+   "fieldtype": "Section Break",
+   "label": "Zuordnung (MZR)"
+  },
+  {
+   "fieldname": "mapping_liste",
+   "fieldtype": "Button",
+   "label": "Liste aufrufen"
+  },
+  {
+   "fieldname": "aa_mapping_html",
+   "fieldtype": "HTML",
+   "label": "Mapping Schlichtungsbeh\u00f6rden",
+   "options": "hier kommen die Ortschaften etc."
   }
  ],
- "modified": "2024-11-19 20:55:02.352480",
+ "modified": "2024-11-22 12:09:05.777065",
  "modified_by": "Administrator",
  "module": "mietrechtspraxis",
  "name": "Arbitration Authority",
