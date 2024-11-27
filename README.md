@@ -1,6 +1,8 @@
 ## mietrechtspraxis
 
 ### Version Log
+#### 1.16.1
+#101
 #### 1.16.0
 Umstellung Jahresversand inkl. Begleitschreiben
 #### 1.15.2
