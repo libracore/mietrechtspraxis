@@ -105,7 +105,7 @@ def _get_sb(**kwargs):
             for schlichtungsbehoerde in schlichtungsbehoerden:
                 zustaendig_fuer_gemeinden = frappe.db.sql(
                     """
-                                                            SELECT group_concat(DISTINCT `municipality` ORDER BY `municipality` ASC) `geminendentbl`
+                                                            SELECT group_concat(DISTINCT CONCAT(`tms`.`ortschaft`, ' (' , `tp`.`municipality`,')') ORDER BY `tms`.`ortschaft` ASC) as `geminendentbl`
                                                             FROM `tabMapping Schlichtungsstellen` AS `tms`
                                                             LEFT JOIN tabPincode `tp` ON `tp`.`name` = CONCAT(`tms`.`plz`, '-', `tms`.`ortschaft`)
                                                             WHERE `schlichtungsstelle` = '{schlichtungsbehoerde_id}'
@@ -278,7 +278,7 @@ def get_by_plz_ort(plz: str, ort: str):
 @frappe.whitelist()
 def get_schlichtungsbehoerden_mapping(aa_id):
     """Erstellt eine Liste von Ortschaften zur einer Schlichtungsbehörde"""
-    ortschaften = frappe.db.sql("""SELECT `plz`, `ortschaft` , `name`
+    ortschaften = frappe.db.sql("""SELECT `plz`, `ortschaft` , `name`, (SELECT `tabPincode`.`name` from `tabPincode` WHERE `tabPincode`.`name` = CONCAT(`plz`, '-', `ortschaft`)) as `pincode`
                                             FROM `tabMapping Schlichtungsstellen` 
                                             WHERE `schlichtungsstelle` = '{aa_id}'
                                             ORDER BY `ortschaft` ;
@@ -291,6 +291,7 @@ def get_schlichtungsbehoerden_mapping(aa_id):
                                 <th>PLZ</th>
                                 <th>Ort</th>
                                 <th>id</th>
+                                <th>Pincode</th>
                                 <th>&nbsp;</th>
                             </tr>
                         </thead>
@@ -304,8 +305,9 @@ def get_schlichtungsbehoerden_mapping(aa_id):
                             <td>{1}</td>
                             <td>{2}</td>
                             <td><a href="/desk#Form/Mapping%20Schlichtungsstellen/{3}">{3}<a></td>
+                            <td><a href="/desk#Form/Pincode/{4}">{4}<a></td>
                             <!--<td style="text-align: center;"><i class="fa fa-external-link ortschaft_jump" data-jump="{3}" style="cursor: pointer;"></i></td>-->
-                        </tr>""".format(i,ortschaft.plz, ortschaft.ortschaft, ortschaft.name)
+                        </tr>""".format(i,ortschaft.plz, ortschaft.ortschaft, ortschaft.name, ortschaft.pincode)
         table += """</tbody>
                     </table>"""
     else:
