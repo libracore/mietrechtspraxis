@@ -91,13 +91,12 @@ def _get_sb(**kwargs):
                                                                     `address`.`zusatz` AS `adressen_zusatz`,
                                                                     NULL AS `zustaendig_fuer_gemeinden`
                                                                 FROM `tabArbitration Authority` AS `schlichtungsbehoerde`
-                                                                LEFT JOIN `tabMapping Schlichtungsstellen` AS `aa_map` ON `schlichtungsbehoerde`.`name`=`aa_map`.`schlichtungsstelle` -- new mapping
+                                                                LEFT JOIN `tabMunicipality Table` AS `geminendentbl` ON `schlichtungsbehoerde`.`name`=`geminendentbl`.`parent`
                                                                 LEFT JOIN `tabContact` AS `contact` ON `schlichtungsbehoerde`.`kontakt`=`contact`.`name`
                                                                 LEFT JOIN `tabAddress` AS `address` ON `schlichtungsbehoerde`.`adresse`=`address`.`name`
-                                                                WHERE `aa_map`.`ortschaft` = '{city}' AND `aa_map`.`plz` = '{plz}'
+                                                                WHERE `geminendentbl`.`municipality` = '{municipality}'
                                                                 """.format(
-                    city=city.city,
-                    plz=city.plz
+                    municipality=city.municipality
                 ),
                 as_dict=True,
             )
